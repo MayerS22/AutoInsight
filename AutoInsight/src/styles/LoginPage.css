@@ -1,0 +1,201 @@
+/* General container styling */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    display: flex;
+    width: 80%;
+    width: 1400px;
+    height: 1024px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Side: Form Section */
+.login-form {
+    width: 50%;
+    /* Ensures 50% width */
+    padding: 50px;
+    /* More padding for balance */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+    /* White background */
+}
+.welcome-text{
+    margin-bottom: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.welcome-text h2 {
+    color: #351B4B;
+    margin-bottom: 0;
+    font-size: 29px;
+    text-align: center;
+    font-weight: 400;
+}
+
+.welcome-text h1 {
+    color: #693696;
+    font-size: 69px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: bold;
+    width: 544px;
+}
+
+.input-field {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 520px;
+    height: 57px;
+}
+
+.input-field label {
+    font-size: 13px;
+    color: #351B4B;
+    font-weight:800;
+    margin-bottom: 5px;
+    line-height: 16.9px;
+}
+
+.input-field input {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.login-button {
+    background-color: #693696;
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 392px;
+    /* Full-width button */
+    height: 53px;
+    margin-top: 40px;
+    margin-left: 67px;
+    font-weight: bold;
+}
+
+.login-button:hover {
+    background-color: #5e36b0;
+}
+
+/* Divider for social login */
+
+.divider {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center the items vertically */
+    margin: 20px 0; /* Spacing above and below */
+    width: 333px;
+    margin-left: 90px;
+    font-size: 12px;
+    color:#B3B3B3 ;
+}
+
+.divider .line {
+    flex-grow: 1; /* Allow the lines to grow and fill space */
+    height: 1px; /* Set the height of the line */
+    background-color: #ddd; /* Line color */
+    margin: 0 10px; /* Space between the line and the text */
+}
+
+
+/* Social login buttons */
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 393px;
+    /* Full-width button */
+    margin-left: 67px;
+
+}
+
+.social-button {
+    padding: 12px;
+    font-size: 20px;
+    border-radius: 8px;
+    border: 1px solid #693696;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: #693696;
+    font-family: "Roboto";
+    font-weight: bold;
+
+    /* Space between icon and text */
+}
+
+
+
+
+
+.signup-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.signup-text span {
+
+    font-family: "Poppins";
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    text-align: left;
+    color:#1A0D26;
+
+}
+
+.signup-text a {
+    color: #693696;
+    text-decoration:underline;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 20.8px;
+    
+}
+
+.signup-text a:hover {
+    text-decoration: underline;
+}
+
+/* Right Side: Image Section */
+.login-image {
+    width: 50%;
+    /* Ensures 50% width */
+    background-color: #f1eafa;
+    /* Light background color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+}
+
+.login-image img {
+    width: 100%;
+    height: auto;
+    max-width: 400px;
+    object-fit: contain;
+}

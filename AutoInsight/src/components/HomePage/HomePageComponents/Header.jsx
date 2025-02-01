@@ -1,52 +1,56 @@
-import RobotImg from "../../../assets/Robot.svg";
-export default function Header(){
-    return(
-        <header className="w-full py-4 px-8 flex justify-between items-center fixed top-0 left-0 bg-purple-50 shadow-md z-50">
-        <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center">
-            <img
-              src={RobotImg}
-              alt="Robot Icon"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <h1 className="px-2 font-bold text-purple-900 text-2xl">
-            Auto Insight
-          </h1>
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import RobotImg from "../../../assets/Robot.svg"; // Update your path if necessary
+
+export default function Header() {
+  const navigate = useNavigate();
+
+  return (
+    <header className="w-full py-4 px-8 flex justify-between items-center fixed top-0 left-0 bg-purple-50 shadow-md z-50">
+      <div className="flex items-center space-x-2">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center">
+          <img src={RobotImg} alt="Robot Icon" className="w-full h-full object-cover" />
         </div>
+        <h1 className="px-2 font-bold text-purple-900 text-2xl">Auto Insight</h1>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex items-center space-x-6">
-          <a
-            href="#home"
-            className="text-purple-900 hover:text-purple-700 hover:underline"
-          >
-            Home
-          </a>
-          <a
-            href="#aboutUs"
-            className="text-purple-900 hover:text-purple-700 hover:underline"
-          >
-            About Us
-          </a>
-          <a
-            href="#contact"
-            className="text-purple-900 hover:text-purple-700 hover:underline"
-          >
-            Contact
-          </a>
+      {/* Navigation */}
+      <nav className="flex items-center space-x-6">
+        <button
+          onClick={() => navigate("/home")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          Home
+        </button>
+        <button
+          onClick={() => navigate("/how-it-works")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          How It Works
+        </button>
+        <button
+          onClick={() => navigate("/about-us")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          About Us
+        </button>
 
-          {/* Buttons */}
-          <div className="flex space-x-2">
-            <button className="bg-purple-900 text-white px-4 py-2 hover:bg-purple-600 rounded-lg">
-              Login
-            </button>
-            <button className="text-purple-900 px-4 py-2 rounded-lg hover:bg-purple-600 hover:text-white border-2 border-purple-800 hover:border-purple-600">
-              Sign Up
-            </button>
-          </div>
-        </nav>
-      </header>
-
-    )
+        {/* Sign In and Sign Up buttons with specific styles */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate("/LogIn")}
+            className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
+          >
+            LogIn
+          </button>
+          <button
+            onClick={() => navigate("/signup")}
+            className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300"
+          >
+            SignUp
+          </button>
+        </div>
+      </nav>
+    </header>
+  );
 }

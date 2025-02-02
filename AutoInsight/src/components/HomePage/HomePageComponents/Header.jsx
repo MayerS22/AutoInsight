@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RobotImg from "../../../assets/Robot.svg"; // Update your path if necessary
 
-export default function Header() {
+export default function Header({ isLoggedIn, setIsLoggedIn }) {
   const navigate = useNavigate();
+
+  function handleLoginClick() {
+    navigate("/login", { state: { isSignUp: false } });
+  }
+
+  function handleSignUpClick() {
+    navigate("/signup", { state: { isSignUp: true } });
+  }
 
   return (
     <header className="w-full py-4 px-8 flex justify-between items-center fixed top-0 left-0 bg-purple-50 shadow-md z-50">
@@ -36,20 +44,22 @@ export default function Header() {
         </button>
 
         {/* Sign In and Sign Up buttons with specific styles */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate("/LogIn")}
-            className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
-          >
-            LogIn
-          </button>
-          <button
-            onClick={() => navigate("/signup")}
-            className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300"
-          >
-            SignUp
-          </button>
-        </div>
+        {!isLoggedIn && (
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleLoginClick}
+              className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
+            >
+              Login
+            </button>
+            <button
+              onClick={handleSignUpClick}
+              className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300"
+            >
+              SignUp
+            </button>
+          </div>
+        )}
       </nav>
     </header>
   );

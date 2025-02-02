@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+/* eslint-disable react/prop-types */
 import { useNavigate } from "react-router-dom";
 import RobotImg from "../../../assets/Robot.svg"; // Update your path if necessary
 
@@ -12,7 +12,10 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
   function handleSignUpClick() {
     navigate("/signup", { state: { isSignUp: true } });
   }
-
+  function handleLogout() {
+    setIsLoggedIn(false);
+    navigate("/home");
+  }
   return (
     <header className="w-full py-4 px-8 flex justify-between items-center fixed top-0 left-0 bg-purple-50 shadow-md z-50">
       <div className="flex items-center space-x-2">
@@ -44,7 +47,14 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
         </button>
 
         {/* Sign In and Sign Up buttons with specific styles */}
-        {!isLoggedIn && (
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
+          >
+            Logout
+          </button>
+        ) : (
           <div className="flex items-center space-x-4">
             <button
               onClick={handleLoginClick}

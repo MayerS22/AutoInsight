@@ -2,12 +2,10 @@
 
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
-import Header from "./HomePageComponents/Header";
 export default function Home() {
   return (
     <div>
       {/* Header */}
-      <Header/>
       {/* Main Content */}
       <div id="home" className="pt-[30px]">
         {/* Hero Section */}

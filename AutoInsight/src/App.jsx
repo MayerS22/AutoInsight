@@ -16,7 +16,9 @@ function App() {
       element: <RootLayout isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />,
       children: [
         { path: "", element: <HomePage /> },
-        { path: "home", element: <HomePage /> }, 
+        { path: "home", element: <HomePage /> },
+        { path: "how-it-works", element: <HomePage /> },
+        { path: "about-us", element: <HomePage /> },
       ],
     },
     {
@@ -28,6 +30,7 @@ function App() {
       element: <Authentication />, 
     },
   ]);
+  
 
   return (
     <>

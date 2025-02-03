@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
+import AddReview from "./AddReview";
 
 const reviewsData = [
   {
@@ -17,37 +18,23 @@ const reviewsData = [
     review: "Very useful tool! It improved my workflow a lot.",
     image: "https://randomuser.me/api/portraits/women/11.jpg",
   },
-  {
-    id: 3,
-    name: "Omar",
-    rating: 2,
-    review: "Highly recommended! The AI suggestions are on point.",
-    image: "https://randomuser.me/api/portraits/men/12.jpg",
-  },
-  {
-    id: 4,
-    name: "Mayer",
-    rating: 3,
-    review: "Great experience! The AI responses are really helpful.",
-    image: "https://randomuser.me/api/portraits/men/13.jpg",
-  },
-  {
-    id: 5,
-    name: "Lina",
-    rating: 5,
-    review: "Amazing service! Highly recommend using it.",
-    image: "https://randomuser.me/api/portraits/women/14.jpg",
-  },
+  // More reviews...
 ];
 
-const Reviews = ({ isLoggedIn }) => {
+const Reviews = () => {
+  const { isLoggedIn, setIsLoggedIn } = useOutletContext(); // Access context
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reviews, setReviews] = useState(reviewsData);
   const containerRef = useRef(null);
   const navigate = useNavigate();
 
+  console.log("Reviews isLoggedIn:", isLoggedIn); // Debugging
+
   const handleAddReview = () => {
     if (isLoggedIn) {
-      navigate("/add-review");
+      setIsModalOpen(true);
     } else {
+      alert("You are not logged in! Redirecting to login page...");
       navigate("/login");
     }
   };
@@ -74,17 +61,21 @@ const Reviews = ({ isLoggedIn }) => {
     }
   };
 
+  const handleReviewSubmit = (newReview) => {
+    setReviews((prevReviews) => [
+      ...prevReviews,
+      { id: prevReviews.length + 1, ...newReview },
+    ]);
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-14">
-      {/* Header Section */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-purple-900">
             Here Are Few Words From Our Customers
           </h2>
-          <p className="text-lg text-purple-700 mt-2">
-            We Want To Hear From You Too
-          </p>
+          <p className="text-lg text-purple-700 mt-2">We Want To Hear From You Too</p>
         </div>
         <button
           onClick={handleAddReview}
@@ -94,28 +85,23 @@ const Reviews = ({ isLoggedIn }) => {
         </button>
       </div>
 
-      {/* Reviews Section */}
       <div
         ref={containerRef}
         className="flex overflow-x-auto mt-8 gap-6 transition-all duration-500"
         style={{
-          scrollbarWidth: "none", /* Firefox */
-          msOverflowStyle: "none", /* Internet Explorer 10+ */
-          height: "auto", /* Ensures div height adjusts based on its children */
-          marginBottom: "0", /* Ensure no extra space at the bottom */
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          height: "auto",
+          marginBottom: "0",
         }}
       >
-        {reviewsData.map((review) => (
+        {reviews.map((review) => (
           <div
             key={review.id}
             className="bg-purple-100 rounded-lg shadow-md p-4 transform transition-all duration-500 scale-95 hover:scale-100 min-w-[300px]"
           >
             <div className="flex items-center space-x-2">
-              <img
-                src={review.image}
-                alt={review.name}
-                className="w-10 h-10 rounded-full"
-              />
+              <img src={review.image} alt={review.name} className="w-10 h-10 rounded-full" />
               <h4 className="font-semibold">{review.name}</h4>
             </div>
             <div className="flex mt-2">
@@ -128,7 +114,6 @@ const Reviews = ({ isLoggedIn }) => {
         ))}
       </div>
 
-      {/* Scroll Buttons */}
       <div className="flex justify-between mt-4 mb-0">
         <button
           onClick={handleScrollLeft}
@@ -143,6 +128,14 @@ const Reviews = ({ isLoggedIn }) => {
           <FaChevronRight />
         </button>
       </div>
+
+      {isModalOpen && (
+        <AddReview
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleReviewSubmit}
+        />
+      )}
     </div>
   );
 };

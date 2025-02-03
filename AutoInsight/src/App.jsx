@@ -8,8 +8,14 @@ import Reviews from "./components/HomePage/Reviews.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   console.log("App isLoggedIn:", isLoggedIn); // Debugging
+
+  const handleLoginSuccess = (userDetails) => {
+    setIsLoggedIn(true);
+    setUser(userDetails);
+  };
 
   const router = createBrowserRouter([
     {
@@ -21,19 +27,18 @@ function App() {
         { path: "how-it-works", element: <HomePage /> },
         { path: "about-us", element: <HomePage /> },
         { path: "contact", element: <HomePage /> },
-        // { path: "reviews", element: <Reviews isLoggedIn={isLoggedIn} /> }
+        { path: "reviews", element: <Reviews /> }, // Reviews is a child of RootLayout
       ],
     },
     {
       path: "/login",
-      element: <Authentication setIsLoggedIn={setIsLoggedIn} />, 
+      element: <Authentication setIsLoggedIn={setIsLoggedIn} setUser={setUser} />,
     },
     {
       path: "/signup",
-      element: <Authentication />, 
+      element: <Authentication setIsLoggedIn={setIsLoggedIn} setUser={setUser} />,
     },
   ]);
-  
 
   return (
     <>

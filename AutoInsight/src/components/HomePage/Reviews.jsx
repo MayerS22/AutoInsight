@@ -101,6 +101,8 @@ const Reviews = ({ isLoggedIn }) => {
         style={{
           scrollbarWidth: "none", /* Firefox */
           msOverflowStyle: "none", /* Internet Explorer 10+ */
+          height: "auto", /* Ensures div height adjusts based on its children */
+          marginBottom: "0", /* Ensure no extra space at the bottom */
         }}
       >
         {reviewsData.map((review) => (
@@ -127,7 +129,7 @@ const Reviews = ({ isLoggedIn }) => {
       </div>
 
       {/* Scroll Buttons */}
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between mt-4 mb-0">
         <button
           onClick={handleScrollLeft}
           className="bg-purple-900 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 transition duration-500 transform hover:scale-110"

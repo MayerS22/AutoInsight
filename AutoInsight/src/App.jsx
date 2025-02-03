@@ -20,6 +20,7 @@ function App() {
         { path: "home", element: <HomePage /> },
         { path: "how-it-works", element: <HomePage /> },
         { path: "about-us", element: <HomePage /> },
+        { path: "contact", element: <HomePage /> },
         // { path: "reviews", element: <Reviews isLoggedIn={isLoggedIn} /> }
       ],
     },

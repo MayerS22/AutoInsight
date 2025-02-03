@@ -39,17 +39,18 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
         >
           Home
         </button>
-        <button
-          onClick={() => navigate("/how-it-works")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
-        >
-          How It Works
-        </button>
+        
         <button
           onClick={() => navigate("/about-us")}
           className="text-purple-900 hover:text-purple-700 hover:underline"
         >
           About Us
+        </button>
+        <button
+          onClick={() => navigate("/contact")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          Contact
         </button>
         
 

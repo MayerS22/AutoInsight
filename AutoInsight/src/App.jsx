@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import RootLayout from "./components/RootLayout.jsx";
 import HomePage from "./components/HomePage/HomePage";
 import Authentication from "./components/Authentication/Authentication.jsx";
+import Reviews from "./components/HomePage/Reviews.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,6 +20,7 @@ function App() {
         { path: "home", element: <HomePage /> },
         { path: "how-it-works", element: <HomePage /> },
         { path: "about-us", element: <HomePage /> },
+        // { path: "reviews", element: <Reviews isLoggedIn={isLoggedIn} /> }
       ],
     },
     {

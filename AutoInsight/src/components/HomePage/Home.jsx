@@ -1,8 +1,32 @@
-
-
+import React, { useRef } from "react";
+import { useOutletContext } from "react-router-dom";
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
+
 export default function Home() {
+  const { isLoggedIn } = useOutletContext(); // Access isLoggedIn from context
+  const fileInputRef = useRef(null); // Ref for the file input
+
+  const handleLoadDataset = () => {
+    if (!isLoggedIn) {
+      alert("You must be logged in to upload a file. Redirecting to login page...");
+      // Redirect to login page (you can use `navigate` if needed)
+      return;
+    }
+
+    // Trigger the file input dialog
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log("File selected:", file.name);
+      // Add your file upload logic here (e.g., send to backend)
+      alert(`File "${file.name}" uploaded successfully!`);
+    }
+  };
+
   return (
     <div>
       {/* Header */}
@@ -19,9 +43,19 @@ export default function Home() {
               Advanced analytics made simple for everyone—from data analysts to
               non-technical users.
             </p>
-            <button className="mt-6 bg-purple-900 text-white px-6 py-3 rounded hover:bg-purple-600">
+            <button
+              onClick={handleLoadDataset}
+              className="mt-6 bg-purple-900 text-white px-6 py-3 rounded hover:bg-purple-600"
+            >
               Load Dataset
             </button>
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileUpload}
+            />
           </div>
 
           {/* Right Illustration */}

@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 
 export default function Step({ stepNumber, title, description, imageSrc, imageAlt, reverse }) {
   return (

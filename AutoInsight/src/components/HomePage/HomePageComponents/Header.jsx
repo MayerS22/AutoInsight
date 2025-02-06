@@ -1,10 +1,12 @@
-/* eslint-disable react/prop-types */
 import { useNavigate } from "react-router-dom";
 import RobotImg from "../../../assets/Robot.svg"; // Update your path if necessary
+import { useSelector, useDispatch } from "react-redux";
+import { authActions } from "../../../store/index"
 
-export default function Header({ isLoggedIn, setIsLoggedIn }) {
+export default function Header() {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
   function handleLoginClick() {
     navigate("/login", { state: { isSignUp: false } });
   }
@@ -13,8 +15,8 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
     navigate("/signup", { state: { isSignUp: true } });
   }
   function handleLogout() {
-    setIsLoggedIn(false);
-    navigate("/home");
+    dispatch(authActions.logout())
+    navigate("/login");
   }
   return (
     <header className="w-full py-4 px-8 flex justify-between items-center fixed top-0 left-0 bg-purple-50 shadow-md z-50">
@@ -39,7 +41,7 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
         >
           Home
         </button>
-        
+
         <button
           onClick={() => navigate("/about-us")}
           className="text-purple-900 hover:text-purple-700 hover:underline"
@@ -47,12 +49,19 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
           About Us
         </button>
         <button
+          onClick={() => navigate("/reviews")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          Reviews
+        </button>
+        <button
           onClick={() => navigate("/contact")}
           className="text-purple-900 hover:text-purple-700 hover:underline"
         >
           Contact
         </button>
-        
+
+
 
         {/* Sign In and Sign Up buttons with specific styles */}
         {isLoggedIn ? (

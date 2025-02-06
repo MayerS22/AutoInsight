@@ -10,16 +10,18 @@ import Robot from "../../assets/Robot.svg";
 import AppleLogo from "../../assets/Apple.svg";
 import GoogleLogo from "../../assets/Google.svg";
 import FacebookLogo from "../../assets/Facebook.svg";
-import HideLogo from"../../assets/Hide.svg";
+import HideLogo from "../../assets/Hide.svg";
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { authActions } from "../../store/index"
 
-const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
+const Login = ({ toggleForm}) => {
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
-  
+
   const [errors, setErrors] = useState({
     email: "",
     password: "",
@@ -31,9 +33,10 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
     password: false
   });
 
-  
+
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleInputChange = (identifier, value) => {
     setErrors(prev => ({ ...prev, [identifier]: "", loginError: "" }));
@@ -47,7 +50,7 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    
+
     const isValidUser = userCredentials.some(
       user => user.email === formData.email && user.password === formData.password
     );
@@ -61,11 +64,13 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
 
     if (isValidUser) {
       toast.success("Login successful");
-      navigate('/');
+      const redirectUrl = localStorage.getItem('redirectUrl') || '/';
+      localStorage.removeItem('redirectUrl'); 
+      navigate( redirectUrl);
       setErrors({ loginError: "" });
-      setIsLoggedIn(true);
+      dispatch(authActions.login());
       // console.log("Login form isLoggedIn : "+isLoggedIn);
-      
+
     } else {
       setErrors({
         loginError: "Invalid email or password. Please try again."
@@ -75,7 +80,7 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
 
   return (
     <>
-     <div className='flex flex-col '></div>
+      <div className='flex flex-col '></div>
       <div className="text-center relative bottom-32">
         <img src={Robot} alt="Logo" className="mx-auto mb-6 w-1/6 " />
         <h2 className="text-2xl  text-purple-900">
@@ -95,7 +100,7 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
           value={formData.email}
           error={edited.email && !isEmailValid(formData.email) ? "Please enter a valid email" : ""}
         />
-        
+
         <InputField
           label="Password"
           type="password"
@@ -103,7 +108,7 @@ const Login = ({ toggleForm,setIsLoggedIn,isLoggedIn}) => {
           onChange={(e) => handleInputChange("password", e.target.value)}
           onBlur={() => handleBlur("password")}
           value={formData.password}
-          error={edited.password && !hasMinLength(formData.password, 8) ? 
+          error={edited.password && !hasMinLength(formData.password, 8) ?
             "Password must be at least 8 characters long." : ""}
           icon={HideLogo}
         />

@@ -1,7 +1,12 @@
-import React, { useState, useRef } from "react";
+/* eslint-disable no-unused-vars */
+import { useState, useRef } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import AddReview from "./AddReview";
+import { useSelector } from "react-redux";
+import Swal from 'sweetalert2'; // Import SweetAlert
+
+
 
 const reviewsData = [
   {
@@ -22,7 +27,8 @@ const reviewsData = [
 ];
 
 const Reviews = () => {
-  const { isLoggedIn, setIsLoggedIn } = useOutletContext(); // Access context
+  // const { isLoggedIn, setIsLoggedIn } = useOutletContext(); // Access context
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviews, setReviews] = useState(reviewsData);
   const containerRef = useRef(null);
@@ -30,14 +36,25 @@ const Reviews = () => {
 
   console.log("Reviews isLoggedIn:", isLoggedIn); // Debugging
 
+
+
   const handleAddReview = () => {
     if (isLoggedIn) {
       setIsModalOpen(true);
     } else {
-      alert("You are not logged in! Redirecting to login page...");
-      navigate("/login");
+      Swal.fire({
+        title: "You are not logged in!",
+        text: "Redirecting to login page...",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then(() => {
+        console.log("Redirecting to login from:", location.pathname);
+        localStorage.setItem('redirectUrl', window.location.pathname);
+        navigate("/login");
+      });
     }
   };
+
 
   const handleScrollRight = () => {
     const container = containerRef.current;

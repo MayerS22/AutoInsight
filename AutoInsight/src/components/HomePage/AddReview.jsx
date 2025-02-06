@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import  { useState } from "react";
 
 const AddReview = ({ isOpen, onClose, onSubmit }) => {
   const [name, setName] = useState(""); // Name is now input by the user

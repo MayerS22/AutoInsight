@@ -4,7 +4,7 @@ import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import Illustration from "../../assets/Illustration.svg";
 
-const AuthContainer = ({setIsLoggedIn,isLoggedIn}) => {
+const AuthContainer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(location.state?.isSignUp || false);
@@ -37,7 +37,7 @@ const AuthContainer = ({setIsLoggedIn,isLoggedIn}) => {
           {isSignUp ? (
             <SignUpForm toggleForm={toggleForm} />
           ) : (
-            <LoginForm setIsLoggedIn={setIsLoggedIn} isLoggedIn={isLoggedIn} toggleForm={toggleForm} />
+            <LoginForm  toggleForm={toggleForm} />
           )}
         </div>
 

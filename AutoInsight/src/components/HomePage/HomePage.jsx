@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Home from "./Home.jsx";
 import HowItWorks from "./HowWorks.jsx";
@@ -40,7 +40,7 @@ const HomePage = () => {
       <div ref={aboutUsRef} className="min-h-screen">
         <AboutUs />
       </div>
-      <div ref={reviewsRef} className="h-auto">
+      <div ref={reviewsRef} className="min-h-screen scroll-mt-24">
         <Reviews />
       </div>
       <div ref={contactRef} className="h-auto">

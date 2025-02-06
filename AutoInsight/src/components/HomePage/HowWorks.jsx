@@ -1,4 +1,3 @@
-import React from "react";
 import Step from "./HomePageComponents/StepComponent";
 import UploadImage from "../../assets/UploadImage.svg";
 import AutomatedImage from "../../assets/AutomatedImage.svg";

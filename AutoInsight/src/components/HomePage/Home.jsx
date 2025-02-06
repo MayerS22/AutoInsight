@@ -1,16 +1,32 @@
-import React, { useRef } from "react";
+/* eslint-disable no-unused-vars */
+import { useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
+import { toast } from 'react-toastify';
+import {authActions} from "../../store/index";
+import { useSelector} from "react-redux";
+import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2'; // Import SweetAlert
+
+
 
 export default function Home() {
-  const { isLoggedIn } = useOutletContext(); // Access isLoggedIn from context
+
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
   const fileInputRef = useRef(null); // Ref for the file input
+  const navigate = useNavigate();
 
   const handleLoadDataset = () => {
     if (!isLoggedIn) {
-      alert("You must be logged in to upload a file. Redirecting to login page...");
-      // Redirect to login page (you can use `navigate` if needed)
+      Swal.fire({
+        title: "You must be logged in to upload a file",
+        text: "Redirecting to login page...",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then(() => {
+        navigate("/login");
+      });
       return;
     }
 
@@ -22,8 +38,14 @@ export default function Home() {
     const file = event.target.files[0];
     if (file) {
       console.log("File selected:", file.name);
+      // Show SweetAlert on successful file upload
+      Swal.fire({
+        title: "File Upload Successful",
+        text: `File "${file.name}" uploaded successfully!`,
+        icon: "success",
+        confirmButtonText: "Great",
+      });
       // Add your file upload logic here (e.g., send to backend)
-      alert(`File "${file.name}" uploaded successfully!`);
     }
   };
 

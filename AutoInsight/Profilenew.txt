@@ -1,0 +1,121 @@
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+import DatasetLogo from "../../assets/Dataset.svg";
+import DownloadLogo from "../../assets/Download.svg";
+import TrashLogo from "../../assets/Trash.svg";
+import { useDispatch, useSelector } from "react-redux";
+import { marginActions } from "../../store/index";
+import { NotLoggedIn } from "../NotLoggedIn";
+
+const dashboards = [
+  { id: 1, name: "Marketing Analytics",datasetName:"cancer", time: "Feb 1, 2024" },
+  { id: 2, name: "Sales Report Q1", datasetName:"cancer",  time: "Jan 15, 2024" },
+  { id: 3, name: "Customer Insights", datasetName:"cancer",  time: "Dec 20, 2023" },
+  { id: 4, name: "Website Traffic", datasetName:"cancer",  time: "Nov 5, 2023" },
+  { id: 5, name: "Product Performance", datasetName:"cancer",  time: "Oct 10, 2023" },
+];
+
+const usersWithPermission = ["Mazen Refaat", "Mayer Salman", "Farah Moataz"];
+
+const DatasetPage = ({ userName = "Maya Mohamed" }) => {
+  const [clickedDashboardId, setClickedDashboardId] = useState(null);
+  const [hoveredDashboardId, setHoveredDashboardId] = useState(null);
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+  useEffect(() => {
+    dispatch(marginActions.setColor("bg-white"));
+    return () => {
+      dispatch(marginActions.setMargin(""));
+      dispatch(marginActions.setColor("bg-purple-50"));
+    };
+  }, [dispatch]);
+
+  if (!isLoggedIn) {
+    return <NotLoggedIn />;
+  }
+
+  const getInitials = (name) => {
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  const handlePermissionClick = (datasetId) => {
+    setClickedDashboardId(datasetId === clickedDashboardId ? null : datasetId);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen items-center pt-16 mt-[50px]">
+      {/* Profile Section */}
+      <div className="flex flex-col items-center mt-8">
+        <div className="w-32 h-32 bg-purple-600 text-white rounded-full flex items-center justify-center text-4xl font-bold">
+          {getInitials(userName)}
+        </div>
+        <h2 className="text-xl font-bold mt-3 text-purple-900">{userName}</h2>
+        <button className="mt-3 bg-purple-900 text-white px-4 py-2 rounded-md hover:bg-purple-700">
+          Upload Dataset
+        </button>
+      </div>
+
+      {/* Dashboard Section */}
+      <div className="w-full max-w-[1800px] mt-8 px-4">
+        <h2 className="text-2xl font-bold text-purple-900">My Dashboards</h2>
+        <h3 className="text-sm text-gray-600 mt-2">Recent dashboards</h3>
+        <ul>
+          {dashboards.map((dataset) => (
+            <li
+              key={dataset.id}
+              className="flex justify-between items-center p-3 bg-white rounded-lg mt-3 hover:drop-shadow-xl transition-all duration-200 relative"
+              onMouseEnter={() => setHoveredDashboardId(dataset.id)}
+              onMouseLeave={() => setHoveredDashboardId(null)}
+              style={{ zIndex: hoveredDashboardId === dataset.id || clickedDashboardId === dataset.id ? 10 : 1 }} // Adjust z-index dynamically
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-200 p-3 rounded-md flex items-center justify-center w-12 h-12">
+                  <img src={DatasetLogo} alt="Dataset logo" className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-medium">{dataset.name}</h4>
+                  <p className="text-xs text-gray-500">{dataset.time}</p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-center">
+                <button
+                  className="text-purple-800 underline relative"
+                  onClick={() => handlePermissionClick(dataset.id)}
+                >
+                  3 users have permission
+                  {clickedDashboardId === dataset.id && (
+                    <div className="absolute top-full left-0  bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full">
+                      <ul >
+                        {usersWithPermission.map((user, index) => (
+                          <li key={index} className="text-purple-900 font-medium py-1 mt-3">
+                            {user}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </button>
+                <button>
+                  <img src={DownloadLogo} alt="Download" className="w-6 h-6" />
+                </button>
+                <button>
+                  <img src={TrashLogo} alt="Trash" className="w-6 h-6" />
+                </button>
+                <button>
+                  <img src={TrashLogo} alt="Trash" className="w-6 h-6" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default DatasetPage;

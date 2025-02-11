@@ -1,10 +1,11 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import Illustration from "../../assets/Illustration.svg";
 
-const AuthContainer = () => {
+const AuthContainer = ({setUserName}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(location.state?.isSignUp || false);
@@ -37,7 +38,7 @@ const AuthContainer = () => {
           {isSignUp ? (
             <SignUpForm toggleForm={toggleForm} />
           ) : (
-            <LoginForm  toggleForm={toggleForm} />
+            <LoginForm  toggleForm={toggleForm} setUserName={setUserName}/>
           )}
         </div>
 

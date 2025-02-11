@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { authActions } from "../../store/index"
 
-const Login = ({ toggleForm}) => {
+const Login = ({ toggleForm,setUserName}) => {
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -54,6 +54,9 @@ const Login = ({ toggleForm}) => {
     const isValidUser = userCredentials.some(
       user => user.email === formData.email && user.password === formData.password
     );
+    const validUser = userCredentials.find(
+      user => user.email === formData.email && user.password === formData.password
+    );
 
     if (!isEmailValid(formData.email) || !hasMinLength(formData.password, 6)) {
       setErrors({
@@ -66,6 +69,9 @@ const Login = ({ toggleForm}) => {
       toast.success("Login successful");
       const redirectUrl = localStorage.getItem('redirectUrl') || '/';
       localStorage.removeItem('redirectUrl'); 
+      setUserName(validUser.username);
+      console.log(validUser.username);
+      
       navigate( redirectUrl);
       setErrors({ loginError: "" });
       dispatch(authActions.login());

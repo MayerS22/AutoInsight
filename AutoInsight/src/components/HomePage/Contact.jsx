@@ -2,75 +2,100 @@ import { Link } from "react-router-dom";
 
 export default function Contact() {
   return (
-    <div className="font-sans h-screen flex justify-center items-center">
+    <div className="font-sans h-screen flex justify-center items-center bg-gradient-to-br from-purple-50 to-blue-50">
       {/* Main container */}
-      <div className="container mx-auto md:px-12 rounded-lg">
-        <div className="flex flex-col md:flex-row justify-center text-center gap-12">
+      <div className="container mx-auto px-4 md:px-12">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 flex flex-col md:flex-row justify-between gap-8 md:gap-16">
           {/* Quick Action Column */}
           <div className="flex-1">
-            <h2 className="text-3xl font-semibold mb-4 text-black">
+            <h2 className="text-2xl font-bold mb-6 text-purple-900 border-b-2 border-purple-200 pb-2">
               Quick Actions
             </h2>
-            <Link to="/home" className="block text-purple-950 hover:underline">
-              Home
-            </Link>
-            <Link
-              to="/home"
-              className="block text-purple-950 hover:underline"
-            >
-              Upload Your Dataset
-            </Link>
-            <Link
-              to="/how-it-works"
-              className="block text-purple-950 hover:underline"
-            >
-              How It Works
-            </Link>
-            <Link
-              to="/home"
-              className="block text-purple-950 hover:underline"
-            >
-              Terms & Conditions
-            </Link>
-            <Link to="/about-us" className="block text-purple-950 hover:underline">
-              About Us
-            </Link>
+            <nav className="space-y-4">
+              <Link
+                to="/home"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                Home
+              </Link>
+              <Link
+                to="/home"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                Upload Your Dataset
+              </Link>
+              <Link
+                to="/how-it-works"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                How It Works
+              </Link>
+              <Link
+                to="/faq"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                FAQ
+              </Link>
+              <Link
+                to="/home"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                Terms & Conditions
+              </Link>
+              <Link
+                to="/about-us"
+                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
+              >
+                About Us
+              </Link>
+              
+            </nav>
           </div>
 
           {/* Center Column */}
-          <div className="flex-1">
-            <h2 className="text-5xl font-bold text-purple-900">Auto Insight</h2>
-            <p className="text-gray-400 text-lg mt-2">
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <h2 className="text-5xl font-bold text-purple-900 mb-4">
+              Auto Insight
+            </h2>
+            <p className="text-gray-600 text-lg">
               Join our website for all automated insights.
             </p>
+            <button className="mt-6 bg-purple-900 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-all duration-200">
+              Get Started
+            </button>
           </div>
 
           {/* Contact Us Column */}
           <div className="flex-1">
-            <h2 className="text-3xl font-semibold mb-4 text-purple-950">
+            <h2 className="text-2xl font-bold mb-6 text-purple-900 border-b-2 border-purple-200 pb-2">
               Contact Us
             </h2>
-
-            <div className="mb-2">
-              <h1 className="text-xl text-black font-bold">Helpline</h1>
-              <p className="text-gray-400">+200101234567</p>
-            </div>
-
-            <div className="mb-2">
-              <h1 className="text-xl text-black font-bold">Email</h1>
-              <p className="text-gray-400">
-                <a
-                  href="mailto:Autoinsight@gmail.com"
-                  className="text-gray-400 hover:underline"
-                >
-                  Autoinsight@gmail.com
-                </a>
-              </p>
-            </div>
-
-            <div>
-              <h1 className="text-xl text-black font-bold">Address</h1>
-              <p className="text-gray-400">23 Street, Hometown</p>
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-xl font-semibold text-purple-800 mb-1">
+                  Helpline
+                </h1>
+                <p className="text-gray-600">+200101234567</p>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-purple-800 mb-1">
+                  Email
+                </h1>
+                <p className="text-gray-600">
+                  <a
+                    href="mailto:Autoinsight@gmail.com"
+                    className="hover:text-purple-600 transition-all duration-200"
+                  >
+                    Autoinsight@gmail.com
+                  </a>
+                </p>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-purple-800 mb-1">
+                  Address
+                </h1>
+                <p className="text-gray-600">23 Street, Hometown</p>
+              </div>
             </div>
           </div>
         </div>

@@ -39,7 +39,7 @@ export default function FAQ() {
 
   return (
     <div
-      id="QA"
+      id="faq"
       className="bg-gradient-to-b from-purple-50 to-purple-100 min-h-screen py-12 pt-20"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">

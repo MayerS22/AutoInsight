@@ -73,11 +73,12 @@ export default function Home() {
             </button>
             {/* Hidden file input */}
             <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileUpload}
-            />
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileUpload}
+          accept=".csv, .xlsx"
+        />
           </div>
 
           {/* Right Illustration */}

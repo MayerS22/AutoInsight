@@ -23,6 +23,7 @@ function App() {
         { path: "about-us", element: <HomePage /> },
         { path: "contact", element: <HomePage /> },
         { path: "reviews", element: <HomePage /> }, // Reviews is a child of RootLayout
+        { path: "faq", element: <HomePage /> }, 
         { path: "profile", element: <Profile userName={userName}/> }, // DatasetPage is a child of RootLayout
       ],
     },

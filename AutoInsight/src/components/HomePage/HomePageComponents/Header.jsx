@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { authActions } from "../../../store/index";
@@ -12,15 +12,12 @@ export default function Header({ userName }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
-  const margin = useSelector(state => state.margin.margin);
-  const color = useSelector(state => state.margin.color);
-  const isRemoved = useSelector(state => state.margin.isRemoved);
-  const isAdded = useSelector(state => state.margin.isAdded);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const margin = useSelector((state) => state.margin.margin);
+  const color = useSelector((state) => state.margin.color);
+  const isRemoved = useSelector((state) => state.margin.isRemoved);
+  const isAdded = useSelector((state) => state.margin.isAdded);
 
-
-
-  
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
     navigate("/login", { state: { isSignUp: false } });
@@ -43,11 +40,17 @@ export default function Header({ userName }) {
   }
 
   return (
-    <header className={`w-full py-4 px-4 md:px-8 flex justify-between items-center fixed top-0 left-0 ${color} z-50`}>
+    <header
+      className={`w-full py-4 px-4 md:px-8 flex justify-between items-center fixed top-0 left-0 ${color} z-50`}
+    >
       {/* Logo and Title */}
       <div className={`flex items-center space-x-2 ${margin}`}>
         <div className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center mt-5">
-          <img src={RobotImg} alt="Robot Icon" className="w-full h-full object-cover mb-4" />
+          <img
+            src={RobotImg}
+            alt="Robot Icon"
+            className="w-full h-full object-cover mb-4"
+          />
         </div>
         <h1 className="px-2 font-bold text-purple-900 text-xl md:text-2xl">
           Auto Insight
@@ -55,7 +58,10 @@ export default function Header({ userName }) {
       </div>
 
       {/* Mobile Menu Button */}
-      <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-purple-900 p-2">
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="md:hidden text-purple-900 p-2"
+      >
         <div className="w-6 h-6 flex flex-col justify-center items-center">
           {isMobileMenuOpen ? (
             <div className="relative w-6 h-6">
@@ -74,31 +80,66 @@ export default function Header({ userName }) {
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center space-x-6">
-        <button onClick={() => handleNavigation("/home")} className="text-purple-900 hover:text-purple-700 hover:underline">
+        <button
+          onClick={() => handleNavigation("/home")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
           Home
         </button>
-        <button onClick={() => handleNavigation("/about-us")} className="text-purple-900 hover:text-purple-700 hover:underline">
+        <button
+          onClick={() => handleNavigation("/about-us")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
           About Us
         </button>
-        <button onClick={() => handleNavigation("/reviews")} className="text-purple-900 hover:text-purple-700 hover:underline">
+        <button
+          onClick={() => handleNavigation("/reviews")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
           Reviews
         </button>
-        <button onClick={() => handleNavigation("/contact")} className="text-purple-900 hover:text-purple-700 hover:underline">
+        <button
+          onClick={() => handleNavigation("/contact")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
           Contact
         </button>
 
         {isLoggedIn ? (
           <div className="flex items-center space-x-4">
-            <button onClick={() => { handleNavigation("/profile") }} className="flex items-center space-x-2">
-              <img src={ProfileLogo} alt="Profile Icon" className="w-8 h-8 cursor-pointer" />
-              {!isRemoved && <span className="text-purple-900 font-bold text-md">{userName}</span>}
+            <button
+              onClick={() => {
+                handleNavigation("/profile");
+              }}
+              className="flex items-center space-x-2"
+            >
+              <img
+                src={ProfileLogo}
+                alt="Profile Icon"
+                className="w-8 h-8 cursor-pointer"
+              />
+              {!isRemoved && (
+                <span className="text-purple-900 font-bold text-md">
+                  {userName}
+                </span>
+              )}
             </button>
-            {isAdded && <button onClick={handleLogout} className="flex items-center space-x-2">
-              <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
-            </button>}
-            {!isAdded && <button onClick={handleLogout} className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300">
-              Logout
-            </button>}
+            {isAdded && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2"
+              >
+                <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
+              </button>
+            )}
+            {!isAdded && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2"
+              >
+                <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex items-center space-x-4">
@@ -122,29 +163,56 @@ export default function Header({ userName }) {
       {isMobileMenuOpen && (
         <div className="absolute top-full left-0 right-0 bg-purple-50 shadow-lg md:hidden">
           <div className="flex flex-col p-4 space-y-4">
-            <button onClick={() => handleNavigation("/home")} className="text-purple-900 hover:text-purple-700 text-left">
+            <button
+              onClick={() => handleNavigation("/home")}
+              className="text-purple-900 hover:text-purple-700 text-left"
+            >
               Home
             </button>
-            <button onClick={() => handleNavigation("/about-us")} className="text-purple-900 hover:text-purple-700 text-left">
+            <button
+              onClick={() => handleNavigation("/about-us")}
+              className="text-purple-900 hover:text-purple-700 text-left"
+            >
               About Us
             </button>
-            <button onClick={() => handleNavigation("/reviews")} className="text-purple-900 hover:text-purple-700 text-left">
+            <button
+              onClick={() => handleNavigation("/reviews")}
+              className="text-purple-900 hover:text-purple-700 text-left"
+            >
               Reviews
             </button>
-            <button onClick={() => handleNavigation("/contact")} className="text-purple-900 hover:text-purple-700 text-left">
+            <button
+              onClick={() => handleNavigation("/contact")}
+              className="text-purple-900 hover:text-purple-700 text-left"
+            >
               Contact
             </button>
 
             {isLoggedIn ? (
-              <div >
-                <button onClick={() => { handleNavigation("/profile") }} className="flex items-center space-x-2">
-                  <img src={ProfileLogo} alt="Profile Icon" className="w-8 h-8 cursor-pointer" />
-                  <span className="text-purple-900 font-bold ">{userName}</span>
-                </button>
-                <button onClick={handleLogout} className="flex items-center space-x-2 mt-3">
-                  <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
-                  <span className="text-purple-900 font-bold text-xs">Logout</span>
+              <div>
+                <div className="relative group flex items-center space-x-2">
+                  <button onClick={() => handleNavigation("/profile")}>
+                    <img
+                      src={ProfileLogo}
+                      alt="Profile Icon"
+                      className="w-8 h-8 cursor-pointer"
+                    />
+                  </button>
 
+                  {/* Tooltip with full username */}
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 px-4 py-1 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    {userName}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 mt-3"
+                >
+                  <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
+                  <span className="text-purple-900 font-bold text-xs">
+                    Logout
+                  </span>
                 </button>
               </div>
             ) : (

@@ -5,6 +5,7 @@ import HowItWorks from "./HowWorks.jsx";
 import AboutUs from "./AboutUs.jsx";
 import Reviews from "./Reviews.jsx";
 import Contact from "./Contact.jsx";
+import FAQ from "./FAQ.jsx";
 
 const HomePage = () => {
   const homeRef = useRef(null);
@@ -12,7 +13,7 @@ const HomePage = () => {
   const aboutUsRef = useRef(null);
   const reviewsRef = useRef(null);
   const contactRef = useRef(null);
-
+  const faqRf = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -25,6 +26,8 @@ const HomePage = () => {
     } else if (location.pathname === "/reviews") {
       reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
     } else if (location.pathname === "/contact") {
+      contactRef.current?.scrollIntoView({ behavior: "smooth" });
+    }else if (location.pathname === "/faq") {
       contactRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [location.pathname]);
@@ -42,6 +45,9 @@ const HomePage = () => {
       </div>
       <div ref={reviewsRef} className="min-h-screen scroll-mt-24">
         <Reviews />
+      </div>
+      <div ref={faqRf} className="min-h-screen scroll-mt-24">
+        <FAQ />
       </div>
       <div ref={contactRef} className="h-auto">
         <Contact />

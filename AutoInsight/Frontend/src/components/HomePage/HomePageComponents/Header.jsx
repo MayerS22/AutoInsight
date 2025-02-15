@@ -12,40 +12,41 @@ import axios from "axios";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userName, setUserName] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const email = useSelector((state) => state.auth.email);
+  const [username,setUserName]=useState("");
   const margin = useSelector((state) => state.margin.margin);
   const color = useSelector((state) => state.margin.color);
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
   // const email = localStorage.getItem("email");
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const token = localStorage.getItem("token");
-  //     if (!token) return;
-  //     try {
-  //       const response = await axios.get(`http://localhost:3000/api/v1/users/user-id?email=${email}`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //       // setUserName(response.data);
-  //       console.log(response.data);
-  //       console.log(response.data.body);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // setUserName(response.data);
+      
+        setUserName(response.data.body.username);
+        
         
         
         
 
-  //     } catch (error) {
-  //       console.log("Error fetching user:",  error.message);
+      } catch (error) {
+        console.log("Error fetching user:",  error.message);
 
-  //     }
-  //   };
+      }
+    };
 
-  //   fetchUser();
-  // }, []);
+    fetchUser();
+  }, []);
 
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
@@ -151,7 +152,7 @@ export default function Header() {
               />
               {!isRemoved && (
                 <span className="text-purple-900 font-bold text-md">
-                  {email}
+                  {username}
                 </span>
               )}
             </button>
@@ -232,7 +233,7 @@ export default function Header() {
 
                   {/* Tooltip with full username */}
                   <span className="text-purple-900 font-bold text-md">
-                    {email}
+                    {username}
                   </span>
                 </div>
 

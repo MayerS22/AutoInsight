@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 import InputField from "../Authentication/AuthenticationComponents/InputField";
@@ -5,7 +6,6 @@ import SocialButton from '../Authentication/AuthenticationComponents/SocialButto
 import ToggleButton from '../Authentication/AuthenticationComponents/ToggleButton';
 import Divider from '../Authentication/AuthenticationComponents/Divider';
 import { isEmailValid, hasMinLength } from "../../util/validation";
-import { userCredentials } from "../../util/credentials";
 import Robot from "../../assets/Robot.svg";
 import AppleLogo from "../../assets/Apple.svg";
 import GoogleLogo from "../../assets/Google.svg";
@@ -15,6 +15,8 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { authActions } from "../../store/index"
+import axios from "axios";
+
 
 const Login = ({ toggleForm,setUserName}) => {
   const [formData, setFormData] = useState({
@@ -32,8 +34,9 @@ const Login = ({ toggleForm,setUserName}) => {
     email: false,
     password: false
   });
-
-
+  const token = localStorage.getItem("token");
+  console.log(token);
+  
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -48,39 +51,41 @@ const Login = ({ toggleForm,setUserName}) => {
     setEdited(prev => ({ ...prev, [identifier]: true }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
-    const isValidUser = userCredentials.some(
-      user => user.email === formData.email && user.password === formData.password
-    );
-    const validUser = userCredentials.find(
-      user => user.email === formData.email && user.password === formData.password
-    );
-
-    if (!isEmailValid(formData.email) || !hasMinLength(formData.password, 6)) {
+  
+    if (!isEmailValid(formData.email) || !hasMinLength(formData.password, 8)) {
       setErrors({
         loginError: "Please fix the form errors before submitting."
       });
       return;
     }
-
-    if (isValidUser) {
-      toast.success("Login successful");
-      const redirectUrl = localStorage.getItem('redirectUrl') || '/';
-      localStorage.removeItem('redirectUrl'); 
-      setUserName(validUser.username);
-      console.log(validUser.username);
-      
-      navigate( redirectUrl);
-      setErrors({ loginError: "" });
-      dispatch(authActions.login());
-      // console.log("Login form isLoggedIn : "+isLoggedIn);
-
-    } else {
-      setErrors({
-        loginError: "Invalid email or password. Please try again."
+  
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/auth/login", formData, {
+        headers: { "Content-Type": "application/json" },
       });
+  
+      const { token } = response.data.body; // ✅ Extract token from response
+     const email=formData.email;
+  
+      toast.success("Login successful");
+      const redirectUrl = localStorage.getItem("redirectUrl") || "/";
+      localStorage.removeItem("redirectUrl");
+  
+      navigate(redirectUrl);
+      dispatch(authActions.login({email,token}));
+      console.log("Login Form token"+token);
+      
+  
+    } catch (error) {
+      console.error("Login error:", error);
+      
+      if (error.response) {
+        setErrors({ loginError:"Invalid email or password. Please try again." });
+      } else {
+        setErrors({ loginError: "Something went wrong. Please try again later." });
+      }
     }
   };
 

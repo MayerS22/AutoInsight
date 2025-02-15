@@ -8,18 +8,20 @@ import OpenLogo from "../../assets/Open.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { marginActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
-import Swal from 'sweetalert2'; // Import SweetAlert
-import {dashboards} from "../../util/dashboard"
+import Swal from 'sweetalert2';
+import { dashboards } from "../../util/dashboard"
+import axios from "axios";
 
 
 const DatasetPage = ({ userName = "User 1" }) => {
   const [clickedDashboardId, setClickedDashboardId] = useState(null);
   const [hoveredDashboardId, setHoveredDashboardId] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [dashboardList, setDashboardList] = useState(() => [...dashboards]);
+  const [isLoading, setIsLoading] = useState(false);
   const allowedTypes = ["text/csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const email = useSelector((state) => state.auth.isLoggedIn);
   const fileInputRef = useRef(null);
   const popupRef = useRef(null);
 
@@ -60,33 +62,99 @@ const DatasetPage = ({ userName = "User 1" }) => {
       .toUpperCase();
   };
 
+  const token = localStorage.getItem("token");
+  // console.log("Profile loadded token "+token);
+  
   const handlePermissionClick = (datasetId) => {
     setClickedDashboardId(datasetId === clickedDashboardId ? null : datasetId);
   };
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
-
+  
     if (file) {
+      const allowedTypes = [
+        "text/csv",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+      const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+  
       if (allowedTypes.includes(file.type)) {
-        setSelectedFile(file);
-        setTimeout(() => {
+        if (file.size <= maxFileSize) {
+  
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("dataset_name", file.name); // Use the actual file name
+  
+          console.log("Uploading file:", file.name);
+          console.log("Token:", token);
+  
+          try {
+            setIsLoading(true);
+            const response = await axios.post(
+              "http://localhost:3000/api/v1/datasets/upload",
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+  
+            if (response.status===201) {
+              console.log("upload successful"+response.status);
+              
+              Swal.fire({
+                icon: "success",
+                title: "Upload Successful!",
+                text: `Your file "${file.name}" has been uploaded successfully.`,
+                confirmButtonColor: "#6B46C1",
+              });
+            }
+  
+            console.log("File name after upload:", file.name); // Fix: Use 'file' instead of 'selectedFile'
+            fileInputRef.current.value = ""; // Clear input field
+          } catch (error) {
+            const errorMessage =
+              error.response?.data?.message ||
+              error.message ||
+              "Something went wrong while uploading your file.";
+  
+            Swal.fire({
+              icon: "error",
+              title: "Upload Error",
+              text: errorMessage,
+              confirmButtonColor: "#E53E3E",
+            });
+  
+            console.error("Upload Error:", error);
+            if (error.response) {
+              console.error("Server Response:", error.response.data);
+            }
+          } finally {
+            setIsLoading(false);
+          }
+        } else {
           Swal.fire({
-            icon: "success",
-            title: "Upload Successful!",
-            text: `Your file "${file.name}" has been uploaded successfully.`,
-            confirmButtonColor: "#6B46C1",
+            icon: "error",
+            title: "File Too Large",
+            text: `The file "${file.name}" exceeds the maximum allowed size of 10MB.`,
+            confirmButtonColor: "#E53E3E",
           });
-        }, 500);
+        }
       } else {
         Swal.fire({
           icon: "error",
           title: "Invalid File Format",
-          text: "Please upload a CSV, Excel (.xlsx), or JSON file.",
+          text: "Please upload a CSV or Excel (.xlsx) file.",
           confirmButtonColor: "#E53E3E",
         });
       }
     }
+  
+    console.log("Is Loading:", isLoading);
   };
+  
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -121,8 +189,22 @@ const DatasetPage = ({ userName = "User 1" }) => {
           {getInitials(userName)}
         </div>
         <h2 className="text-xl font-bold mt-3 text-purple-900 text-center">{userName}</h2>
-        <button onClick={handleUploadClick} className="mt-3 bg-purple-900 h-[50px] text-white px-5 font-bold py-2 rounded-md hover:bg-purple-700 w-full md:w-auto">
-          Upload Dataset
+        <button
+          onClick={handleUploadClick}
+          className="mt-3 bg-purple-900 h-[50px] text-white px-5 font-bold py-2 rounded-md hover:bg-purple-700 w-full md:w-auto flex items-center justify-center"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center">
+              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              Uploading...
+            </div>
+          ) : (
+            "Upload Dataset"
+          )}
         </button>
         <input
           type="file"
@@ -170,7 +252,7 @@ const DatasetPage = ({ userName = "User 1" }) => {
                   className="text-purple-800 underline relative mt-2 md:mt-0 md:ml-48" // Adjust ml-10 for spacing
                   onClick={() => handlePermissionClick(dataset.id)}
                 >
-                 {dataset.usersWithPermission.length} users have permission
+                  {dataset.usersWithPermission.length} users have permission
                   {clickedDashboardId === dataset.id && (
                     <div ref={popupRef} className="absolute top-full left-0 bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full md:w-[173px]">
                       <ul>
@@ -199,7 +281,7 @@ const DatasetPage = ({ userName = "User 1" }) => {
                   </button>
                 </div>
                 <div className="relative group">
-                  <button onClick={()=>handleDelete(dataset.id)} className="p-2 rounded-lg hover:bg-red-200 transition">
+                  <button onClick={() => handleDelete(dataset.id)} className="p-2 rounded-lg hover:bg-red-200 transition">
                     <img src={TrashLogo} alt="Trash" className="w-6 h-6" />
                   </button>
                 </div>

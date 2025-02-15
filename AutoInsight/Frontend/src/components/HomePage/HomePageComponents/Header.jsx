@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
+ 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -7,16 +7,45 @@ import { authActions } from "../../../store/index";
 import RobotImg from "../../../assets/Robot.svg";
 import LogoutLogo from "../../../assets/Logout.svg";
 import ProfileLogo from "../../../assets/Profile.svg";
+import axios from "axios";
 
-export default function Header({ userName }) {
+
+export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const email = useSelector((state) => state.auth.email);
   const margin = useSelector((state) => state.margin.margin);
   const color = useSelector((state) => state.margin.color);
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
+  // const email = localStorage.getItem("email");
+
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) return;
+  //     try {
+  //       const response = await axios.get(`http://localhost:3000/api/v1/users/user-id?email=${email}`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //       // setUserName(response.data);
+  //       console.log(response.data);
+  //       console.log(response.data.body);
+        
+        
+        
+
+  //     } catch (error) {
+  //       console.log("Error fetching user:",  error.message);
+
+  //     }
+  //   };
+
+  //   fetchUser();
+  // }, []);
 
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
@@ -31,6 +60,8 @@ export default function Header({ userName }) {
   function handleLogout() {
     setIsMobileMenuOpen(false);
     dispatch(authActions.logout());
+    const token = localStorage.getItem('token');
+    console.log(token);
     navigate("/login");
   }
 
@@ -120,7 +151,7 @@ export default function Header({ userName }) {
               />
               {!isRemoved && (
                 <span className="text-purple-900 font-bold text-md">
-                  {userName}
+                  {email}
                 </span>
               )}
             </button>
@@ -200,8 +231,8 @@ export default function Header({ userName }) {
                   </button>
 
                   {/* Tooltip with full username */}
-                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 px-4 py-1 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {userName}
+                  <span className="text-purple-900 font-bold text-md">
+                    {email}
                   </span>
                 </div>
 

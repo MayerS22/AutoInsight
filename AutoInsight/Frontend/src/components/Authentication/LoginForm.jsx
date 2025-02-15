@@ -35,7 +35,7 @@ const Login = ({ toggleForm,setUserName}) => {
     password: false
   });
   const token = localStorage.getItem("token");
-  console.log(token);
+  // console.log(token);
   
 
   const navigate = useNavigate();

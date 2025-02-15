@@ -153,7 +153,6 @@ export default function Header() {
               {!isRemoved && (
                 <span className="text-purple-900 font-bold text-md">
                   {username}
-                  {username}
                 </span>
               )}
             </button>
@@ -234,7 +233,6 @@ export default function Header() {
 
                   {/* Tooltip with full username */}
                   <span className="text-purple-900 font-bold text-md">
-                    {username}
                     {username}
                   </span>
                 </div>

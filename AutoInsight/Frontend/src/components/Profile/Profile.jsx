@@ -1,28 +1,31 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import DashboardLogo from "../../assets/Dashboard.svg";
 import DownloadLogo from "../../assets/Download.svg";
 import TrashLogo from "../../assets/Trash.svg";
 import OpenLogo from "../../assets/Open.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { marginActions } from "../../store/index";
+import { marginActions,authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
 import Swal from 'sweetalert2';
 import { dashboards } from "../../util/dashboard"
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const DatasetPage = () => {
   const [clickedDashboardId, setClickedDashboardId] = useState(null);
   const [hoveredDashboardId, setHoveredDashboardId] = useState(null);
   const [dashboardList, setDashboardList] = useState(() => [...dashboards]);
   const [isLoading, setIsLoading] = useState(false);
-  const [profilePicture, setProfilePicture] = useState("");
-  const [username, setUsername] = useState("");
   const [isProfileLoading, setIsProfileLoading] = useState(false); // New state for profile loading
   const [isUploadingProfile, setIsUploadingProfile] = useState(false); // New state for profile upload
   const profileInputRef = useRef(null);
+  const navigate = useNavigate();
   // const allowedTypes = ["text/csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const profilePicture= useSelector((state)=>state.auth.profilePicture);
+  const username= useSelector((state)=>state.auth.username);
   // const email = useSelector((state) => state.auth.isLoggedIn);
   const fileInputRef = useRef(null);
   const popupRef = useRef(null);
@@ -48,8 +51,8 @@ const DatasetPage = () => {
       const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProfilePicture(response.data.body.profile_picture);
-      setUsername(response.data.body.username);
+      dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+      dispatch(authActions.addUsername(response.data.body.username));
       console.log("Profile picture:", response.data.body.profile_picture);
       console.log("Username:", response.data.body.username);
     } catch (error) {
@@ -239,7 +242,7 @@ const DatasetPage = () => {
         fetchUserProfile();
   
         if (profilePic) {
-          setProfilePicture(profilePic);
+          dispatch(authActions.addProfilePicture(profilePic));
         } else {
           console.warn("No profile picture returned from API:", response.data);
         }
@@ -423,7 +426,9 @@ const DatasetPage = () => {
                   </button>
                 </div>
                 <div className="relative group">
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition">
+                  <button onClick={()=>{
+                    navigate("/dashboard")
+                  }} className="p-2 rounded-lg hover:bg-gray-200 transition">
                     <img src={OpenLogo} alt="Open" className="w-6 h-6" />
                   </button>
                 </div>

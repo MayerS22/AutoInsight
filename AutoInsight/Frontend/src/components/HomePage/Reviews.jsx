@@ -5,104 +5,106 @@ import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import AddReview from "./AddReview";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
-
-const reviewsData = [
-  {
-    id: 1,
-    name: "Zain",
-    rating: 5,
-    review: "Really great insights; it helped me accelerate my work :)",
-    image: "https://randomuser.me/api/portraits/men/10.jpg",
-  },
-  {
-    id: 2,
-    name: "Aisha",
-    rating: 4,
-    review: "Very useful tool! It improved my workflow a lot.",
-    image: "https://randomuser.me/api/portraits/women/11.jpg",
-  },
-];
+import axios from "axios";
 
 const Reviews = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [reviews, setReviews] = useState(reviewsData);
+  const [reviews, setReviews] = useState([{
+    rating: 5,
+    content: "The restaurant was fantastic, and the ambiance was lovely.",
+    username: "John Doe",
+  }]);
+  const [username, setUserName] = useState("");
   const containerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedScrollPosition = localStorage.getItem("scrollPosition");
-    if (containerRef.current && savedScrollPosition) {
-      containerRef.current.scrollLeft = parseInt(savedScrollPosition, 10);
-      localStorage.removeItem("scrollPosition");
-    }
+    fetchReviews();
   }, []);
+
+
+  const fetchUserProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // setUserName(response.data);
+      setUserName(response.data.body.username);
+    } catch (error) {
+      console.log("Error fetching user:", error.message);
+
+    }
+  };
+  // Call fetchUserProfile inside useEffect when the component mounts or user logs in
+  useEffect(() => {
+    fetchUserProfile();
+  }, [isLoggedIn]);
+
+  const fetchReviews = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("❌ No token found, user is not authenticated");
+      return;
+    }
+
+    try {
+      const response = await axios.get("http://localhost:3000/api/v1/reviews", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const reviewsData = response.data.body;
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error("❌ Error fetching reviews:", error.message);
+    }
+  };
+
 
   const handleAddReview = () => {
     if (isLoggedIn) {
       setIsModalOpen(true);
     } else {
-      const scrollPosition = containerRef.current?.scrollLeft || 0;
-      localStorage.setItem("scrollPosition", scrollPosition);
-
       Swal.fire({
         title: "You are not logged in!",
         text: "Redirecting to login page...",
         icon: "warning",
         confirmButtonText: "OK",
       }).then(() => {
-        localStorage.setItem("redirectUrl", window.location.pathname);
         navigate("/login");
       });
     }
   };
 
-  const handleScrollRight = () => {
-    const container = containerRef.current;
-    if (container) {
-      const reviewWidth = container.firstChild.offsetWidth + 10;
-      container.scrollBy({ left: reviewWidth, behavior: "smooth" });
-    }
-  };
+  const handleReviewSubmit = async (newReview) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  const handleScrollLeft = () => {
-    const container = containerRef.current;
-    if (container) {
-      const reviewWidth = container.firstChild.offsetWidth + 10;
-      container.scrollBy({ left: -reviewWidth, behavior: "smooth" });
-    }
-  };
+    try {
+      const userResponse = await axios.get("http://localhost:3000/api/v1/users/user-data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  const getInitials = (fullName) => {
-    if (!fullName) return "U";
-    const words = fullName.trim().split(" ");
-    return words.length === 1
-      ? words[0][0].toUpperCase()
-      : `${words[0][0]}${words[1]?.[0] || ""}`.toUpperCase();
-  };
-
-  const handleReviewSubmit = (newReview) => {
-    const initials = getInitials(newReview.name);
-    setReviews((prevReviews) => [
-      ...prevReviews,
-      {
-        id: prevReviews.length + 1,
+      const user = userResponse.data.body;
+      const reviewWithUser = {
         ...newReview,
-        image: newReview.image || `https://via.placeholder.com/50/6B46C1/FFFFFF?text=${initials}`,
-      },
-    ]);
+        user: { username: user.username, profile_picture: user.profile_picture },
+      };
+
+      setReviews((prevReviews) => [reviewWithUser, ...prevReviews]);
+      fetchReviews();
+    } catch (error) {
+      console.error("Error fetching user data:", error.message);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto py-14">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-purple-900">
-            What Our Customers Say
-          </h2>
-          <p className="text-lg text-purple-700 mt-2">
-            We Want To Hear From You Too
-          </p>
+          <h2 className="text-3xl font-bold text-purple-900">What Our Customers Say</h2>
+          <p className="text-lg text-purple-700 mt-2">We Want To Hear From You Too</p>
         </div>
         <button
           onClick={handleAddReview}
@@ -114,66 +116,48 @@ const Reviews = () => {
 
       <div className="flex items-center mt-8">
         <button
-          onClick={handleScrollLeft}
+          onClick={() => containerRef.current.scrollBy({ left: -300, behavior: "smooth" })}
           className="bg-purple-900 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 transition duration-500 transform hover:scale-110 mr-4"
         >
           <FaChevronLeft />
         </button>
 
-        <div
-          ref={containerRef}
-          className="flex overflow-x-auto gap-6 transition-all duration-500 flex-1"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            height: "auto",
-            marginBottom: "0",
-          }}
-        >
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="bg-purple-100 rounded-lg shadow-md p-4 transform transition-all duration-500 scale-95 hover:scale-100 min-w-[300px]"
-            >
-              <div className="flex items-center space-x-2">
-                {review.image ? (
-                  <img
-                    src={review.image}
-                    alt={review.name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-lg">
-                    {getInitials(review.name)}
-                  </div>
-                )}
-                <h4 className="font-semibold">{review.name}</h4>
+        <div ref={containerRef} className="flex overflow-x-auto gap-6 transition-all duration-500 flex-1">
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <div key={review._id} className="bg-purple-100 rounded-lg shadow-md p-4 min-w-[300px]">
+                <div className="flex items-center space-x-2">
+                  {review.user?.profile_picture ? (
+                    <img src={review.user.profile_picture} alt={review.user.username} className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-lg">
+                      {review.user?.username ? review.user.username[0].toUpperCase() : "U"}
+                    </div>
+                  )}
+                  <h4 className="font-semibold">{review.user?.username || username}</h4>
+                </div>
+                <div className="flex mt-2">
+                  {Array.from({ length: review.rating }).map((_, index) => (
+                    <FaStar key={index} className="text-yellow-500" />
+                  ))}
+                </div>
+                <p className="mt-2 text-gray-700">{review.description}</p>
               </div>
-              <div className="flex mt-2">
-                {Array.from({ length: review.rating }).map((_, index) => (
-                  <FaStar key={index} className="text-yellow-500" />
-                ))}
-              </div>
-              <p className="mt-2 text-gray-700">{review.review}</p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600">No reviews yet. Be the first to add one!</p>
+          )}
         </div>
 
         <button
-          onClick={handleScrollRight}
+          onClick={() => containerRef.current.scrollBy({ left: 300, behavior: "smooth" })}
           className="bg-purple-900 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 transition duration-500 transform hover:scale-110 ml-4"
         >
           <FaChevronRight />
         </button>
       </div>
 
-      {isModalOpen && (
-        <AddReview
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleReviewSubmit}
-        />
-      )}
+      {isModalOpen && <AddReview isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleReviewSubmit} />}
     </div>
   );
 };

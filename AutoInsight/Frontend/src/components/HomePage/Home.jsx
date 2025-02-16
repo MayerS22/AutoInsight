@@ -1,23 +1,19 @@
-/* eslint-disable no-unused-vars */
-import { useRef ,useState} from "react";
-import { useOutletContext } from "react-router-dom";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
+import axios from "axios";
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
-import { toast } from 'react-toastify';
-import {authActions} from "../../store/index";
-import { useSelector} from "react-redux";
-import { useNavigate } from "react-router-dom";
-import Swal from 'sweetalert2'; // Import SweetAlert
-import axios from "axios";
-
-
+import Chatbot from "../Chatbot/Chatbot";
 
 export default function Home() {
-
-  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
-  const [isLoading,setIsLoading]=useState(false);
-  const fileInputRef = useRef(null); // Ref for the file input
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [chatbotIsOpen,setChatbotIsOpen]=useState(false);
   const navigate = useNavigate();
+
   const handleLoadDataset = () => {
     if (!isLoggedIn) {
       Swal.fire({
@@ -30,32 +26,26 @@ export default function Home() {
       });
       return;
     }
-
-    // Trigger the file input dialog
     fileInputRef.current.click();
   };
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const token = localStorage.getItem("token");
-  
+
     if (file) {
       const allowedTypes = [
         "text/csv",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       ];
-      const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
-  
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+
       if (allowedTypes.includes(file.type)) {
         if (file.size <= maxFileSize) {
-  
           const formData = new FormData();
           formData.append("file", file);
-          formData.append("dataset_name", file.name); // Use the actual file name
-  
-          console.log("Uploading file:", file.name);
-          console.log("Token:", token);
-  
+          formData.append("dataset_name", file.name);
+
           try {
             setIsLoading(true);
             const response = await axios.post(
@@ -68,10 +58,8 @@ export default function Home() {
                 },
               }
             );
-  
-            if (response.status===201) {
-              console.log("upload successful"+response.status);
-              
+
+            if (response.status === 201) {
               Swal.fire({
                 icon: "success",
                 title: "Upload Successful!",
@@ -79,26 +67,22 @@ export default function Home() {
                 confirmButtonColor: "#6B46C1",
               });
             }
-  
-            console.log("File name after upload:", file.name); // Fix: Use 'file' instead of 'selectedFile'
+
             fileInputRef.current.value = ""; // Clear input field
           } catch (error) {
             const errorMessage =
               error.response?.data?.message ||
               error.message ||
               "Something went wrong while uploading your file.";
-  
+
             Swal.fire({
               icon: "error",
               title: "Upload Error",
               text: errorMessage,
               confirmButtonColor: "#E53E3E",
             });
-  
+
             console.error("Upload Error:", error);
-            if (error.response) {
-              console.error("Server Response:", error.response.data);
-            }
           } finally {
             setIsLoading(false);
           }
@@ -119,19 +103,21 @@ export default function Home() {
         });
       }
     }
-  
-    console.log("Is Loading:", isLoading);
+  };
+
+  const handleChatbotClick = () => {
+    setChatbotIsOpen(true)
+    // You can replace this with an actual chatbot popup/modal logic
   };
 
   return (
     <div>
-      {/* Header */}
       {/* Main Content */}
-      <div id="home" className="pt-[30px]">
-        {/* Hero Section */}
-        <main className="flex-grow flex items-center justify-between md:px-10">
-          {/* Left Content */}
-          <div className="max-w-2xl pt-20">
+      <div id="home" className="pt-8 md:pt-30">
+        <main className="flex flex-col md:flex-row items-center justify-between md:px-10 px-4 mt-12">
+          
+          {/* Left Content (Developer Text Centered Left) */}
+          <div className="max-w-2xl text-center md:text-left flex flex-col justify-center h-full">
             <h2 className="text-2xl md:text-5xl font-bold text-purple-900">
               Empowering companies with instant data analytics.
             </h2>
@@ -139,46 +125,56 @@ export default function Home() {
               Advanced analytics made simple for everyone—from data analysts to
               non-technical users.
             </p>
-            <button
-              onClick={handleLoadDataset}
-              className="mt-6 bg-purple-900 text-white px-6 py-3 rounded hover:bg-purple-600"
-        >
-          {isLoading ? (
-            <div className="flex items-center">
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-              </svg>
-              Uploading...
+            <div className="mt-6 flex justify-center md:justify-start">
+              <button
+                onClick={handleLoadDataset}
+                className="bg-purple-900 text-white px-6 py-3 rounded hover:bg-purple-600 flex items-center"
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Uploading...
+                  </div>
+                ) : (
+                  "Load Dataset"
+                )}
+              </button>
             </div>
-          ) : (
-            "Load Dataset"
-          )}
-        </button>
             {/* Hidden file input */}
             <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-          accept=".csv, .xlsx"
-        />
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".csv, .xlsx"
+            />
           </div>
 
           {/* Right Illustration */}
-          <div className="flex flex-col items-center pt-20">
+          <div className="flex flex-col items-center pt-10 md:pt-20">
             <img
               src={TabelAnalysis}
               alt="Tablet Analytics Illustration"
-              className="max-w-full h-auto"
-            />
-            <img
-              src={CuteRobot}
-              alt="Cute Robot"
-              className="w-40 h-40 md:w-80 mt-8 pl-20"
+              className="w-auto max-w-full h-auto"
             />
           </div>
         </main>
+
+        {/* Chatbot (Fixed at Bottom Right) */}
+        <div 
+          onClick={handleChatbotClick}
+          className="fixed bottom-5 right-5 md:bottom-10 md:right-10 cursor-pointer"
+        >
+          <img
+            src={CuteRobot}
+            alt="Chatbot"
+            className="w-32 h-32 md:w-40 md:h-40 hover:scale-110 transition-transform duration-300"
+          />
+        </div>
+         {chatbotIsOpen&& <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen}/>}
       </div>
     </div>
   );

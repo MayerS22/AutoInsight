@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { NotLoggedIn } from "../NotLoggedIn";
-import AddIcon from "../../assets/AddPermision.svg";
+import AddIcon from "../../assets/addIcon.svg";
 import PermissionModal from "./PermissionModal.jsx"; // Import modal component
+import { marginActions } from "../../store/index";
+import { useDispatch,useSelector} from "react-redux";
+
 
 const Dashboard = () => {
   const { datasetName } = useParams(); // Get dataset name from URL params
   const [images, setImages] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const dispatch = useDispatch();
+
 
   useEffect(() => {
     // Fetch images from backend (mock API call for now)
@@ -25,6 +29,20 @@ const Dashboard = () => {
 
     fetchImages();
   }, []);
+
+
+
+    useEffect(() => {
+      dispatch(marginActions.setColor("bg-white"));
+      dispatch(marginActions.removeUserName());
+      dispatch(marginActions.addLogoutIcon());
+      return () => {
+        dispatch(marginActions.setMargin(""));
+        dispatch(marginActions.setColor("bg-purple-50"));
+        dispatch(marginActions.addUserName());
+        dispatch(marginActions.removeLogoutIcon());
+      };
+    }, [dispatch]);
 
   if (!isLoggedIn) {
     return <NotLoggedIn />;

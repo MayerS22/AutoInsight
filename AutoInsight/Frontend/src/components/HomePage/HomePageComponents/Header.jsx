@@ -1,5 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
- 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,44 +9,46 @@ import LogoutLogo from "../../../assets/Logout.svg";
 import ProfileLogo from "../../../assets/Profile.svg";
 import axios from "axios";
 
-
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const email = useSelector((state) => state.auth.email);
-  const [username,setUserName]=useState("");
+  const profilePicture = useSelector((state) => state.auth.profilePicture);
+  const [username, setUserName] = useState("");
+  const [isProfileLoading, setIsProfileLoading] = useState(false)
+  const [userPhoto, setUserPhoto] = useState(null); // New state for user photo
   const margin = useSelector((state) => state.margin.margin);
   const color = useSelector((state) => state.margin.color);
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
-  // const email = localStorage.getItem("email");
 
+ 
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    setIsProfileLoading(true); // Set loading to true when fetching starts
+    try {
+      const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+      setUserName(response.data.body.username);
+      console.log("Profile picture:", response.data.body.profile_picture);
+      console.log("Username:", response.data.body.username);
+    } catch (error) {
+      console.error("Error fetching profile picture:", error);
+    } finally {
+      setIsProfileLoading(false); // Set loading to false when fetching is done
+    }
+  };
+  
+  // Call fetchUserProfile inside useEffect when the component mounts or user logs in
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // setUserName(response.data);
-      
-        setUserName(response.data.body.username);
-        
-        
-        
-        
-
-      } catch (error) {
-        console.log("Error fetching user:",  error.message);
-
-      }
-    };
-
     fetchUser();
-  }, []);
+  }, [profilePicture]);
+
 
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
@@ -145,11 +147,19 @@ export default function Header() {
               }}
               className="flex items-center space-x-2"
             >
-              <img
-                src={ProfileLogo}
-                alt="Profile Icon"
-                className="w-8 h-8 cursor-pointer"
-              />
+              {profilePicture ? (
+                <img
+                  src={profilePicture}
+                  alt="User Photo"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <img
+                  src={ProfileLogo}
+                  alt="Profile Icon"
+                  className="w-8 h-8 cursor-pointer"
+                />
+              )}
               {!isRemoved && (
                 <span className="text-purple-900 font-bold text-md">
                   {username}
@@ -224,11 +234,19 @@ export default function Header() {
               <div>
                 <div className="relative group flex items-center space-x-2">
                   <button onClick={() => handleNavigation("/profile")}>
-                    <img
-                      src={ProfileLogo}
-                      alt="Profile Icon"
-                      className="w-8 h-8 cursor-pointer"
-                    />
+                    {profilePicture ? (
+                      <img
+                        src={profilePicture}
+                        alt="User Photo"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={ProfileLogo}
+                        alt="Profile Icon"
+                        className="w-8 h-8 cursor-pointer"
+                      />
+                    )}
                   </button>
 
                   {/* Tooltip with full username */}

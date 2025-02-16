@@ -8,6 +8,7 @@ import Profile from "./components/Profile/Profile.jsx";
 import { useState,useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { authActions } from "./store/index.js"
+import Dashboard from "./components/Profile/Dashboard.jsx";
 
 
 function App() {
@@ -39,7 +40,8 @@ function App() {
         { path: "contact", element: <HomePage /> },
         { path: "reviews", element: <HomePage /> }, // Reviews is a child of RootLayout
         { path: "faq", element: <HomePage /> }, 
-        { path: "profile", element: <Profile userName={userName}/> }, // DatasetPage is a child of RootLayout
+        { path: "profile", element: <Profile /> }, // DatasetPage is a child of RootLayout
+        { path: "dashboard", element: <Dashboard/>}
       ],
     },
     {

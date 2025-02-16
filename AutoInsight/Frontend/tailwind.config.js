@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -6,9 +5,11 @@ export default {
   ],
   theme: {
     extend: {
-      "robot-color":"#6B2078"
+      colors: {
+        "robot-color": "#6B2078",
+        "chatbot-bg-color": "#F3ECF8",
+      },
     },
   },
   plugins: [],
-}
-
+};

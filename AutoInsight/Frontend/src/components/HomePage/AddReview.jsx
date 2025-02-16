@@ -1,41 +1,89 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import Swal from "sweetalert2"; // Import SweetAlert2
+import axios from "axios";
 
-const AddReview = ({ isOpen, onClose, onSubmit, userImage }) => {
-  const [name, setName] = useState("");
+const AddReview = ({ isOpen, onClose, onSubmit }) => {
   const [rating, setRating] = useState(1);
   const [review, setReview] = useState("");
+  const [userName, setUserName] = useState(""); // State for user's name
+  const [userPhoto, setUserPhoto] = useState(null); // State for user's photo
 
-  const getInitials = (fullName) => {
-    if (!fullName) return "U"; 
-    const words = fullName.trim().split(" ");
-    if (words.length === 1) return words[0][0].toUpperCase();
-    return `${words[0][0]}${words[1]?.[0] || ""}`.toUpperCase();
-  };
+  // Fetch user data from the database
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-  const handleSubmit = () => {
-    if (!name) {
+      try {
+        const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserName(response.data.body.username); // Set user's name
+        setUserPhoto(response.data.body.profile_picture); // Set user's photo
+      } catch (error) {
+        console.error("Error fetching user data:", error.message);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Handle review submission
+  const handleSubmit = async () => {
+    if (!review) {
       Swal.fire({
         icon: "warning",
         title: "Oops...",
-        text: "Please enter your name!",
+        text: "Please write your review!",
       });
       return;
     }
 
-    onSubmit({ name, rating, review });
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "You need to be logged in to submit a review.",
+      });
+      return;
+    }
 
-    // Show success alert
-    Swal.fire({
-      icon: "success",
-      title: "Review Added!",
-      text: "Thank you for your feedback.",
-      confirmButtonColor: "#6B46C1", // Matches your purple theme
-    });
+    // Review data following API requirements
+    const reviewData = {
+      rating: rating, // Star rating
+      description: review, // Review text (renamed from "review" to "description")
+    };
 
-    onClose(); // Close the modal after submitting
+    try {
+      const response = await axios.post("http://localhost:3000/api/v1/reviews", reviewData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Send token for authentication
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 201) {
+        Swal.fire({
+          icon: "success",
+          title: "Review Added!",
+          text: "Thank you for your feedback.",
+          confirmButtonColor: "#6B46C1",
+        });
+
+        onSubmit(response.data.body); // Pass the newly created review object
+        onClose(); // Close the modal
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error.response?.data || error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Submission Failed",
+        text: error.response?.data?.message || "Something went wrong. Please try again.",
+      });
+    }
   };
 
   if (!isOpen) return null;
@@ -45,28 +93,21 @@ const AddReview = ({ isOpen, onClose, onSubmit, userImage }) => {
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-2xl font-bold mb-4">Add Review</h2>
 
-        {/* User Avatar */}
+        {/* User Avatar and Name */}
         <div className="flex items-center gap-3 mb-4">
-          {userImage ? (
+          {userPhoto ? (
             <img
-              src={userImage}
+              src={userPhoto}
               alt="User"
               className="w-16 h-16 rounded-full border border-gray-300"
             />
           ) : (
             <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-white">
-              {getInitials(name)}
+              {userName ? userName[0].toUpperCase() : "U"}
             </div>
           )}
           <div>
-            <label className="block text-sm font-semibold mb-1">Your Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
+            <p className="text-lg font-semibold">{userName}</p>
           </div>
         </div>
 

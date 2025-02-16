@@ -2,7 +2,9 @@ import { createSlice, configureStore } from "@reduxjs/toolkit";
 
 
 const initialAuthState = {
-    isLoggedIn: false
+    isLoggedIn: false,
+    profilePicture: null,
+    username: null,
 }
 
 const initialMarginState = {
@@ -30,6 +32,12 @@ const authSlice = createSlice({
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("email");
             localStorage.removeItem("token");
+        },
+        addProfilePicture(state,action){
+            state.profilePicture = action.payload;
+        },
+        addUsername(state,action){
+            state.username = action.payload;
         }
     }
 });

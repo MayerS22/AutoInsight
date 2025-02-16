@@ -36,12 +36,7 @@ export default function Contact() {
               >
                 FAQ
               </Link>
-              <Link
-                to="/home"
-                className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
-              >
-                Terms & Conditions
-              </Link>
+              
               <Link
                 to="/about-us"
                 className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
@@ -60,9 +55,6 @@ export default function Contact() {
             <p className="text-gray-600 text-lg">
               Join our website for all automated insights.
             </p>
-            <button className="mt-6 bg-purple-900 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-all duration-200">
-              Get Started
-            </button>
           </div>
 
           {/* Contact Us Column */}

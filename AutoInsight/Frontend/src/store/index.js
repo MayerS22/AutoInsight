@@ -4,7 +4,7 @@ import { createSlice, configureStore } from "@reduxjs/toolkit";
 const initialAuthState = {
     isLoggedIn: false,
     profilePicture: null,
-    username: null,
+    username: "",
 }
 
 const initialMarginState = {

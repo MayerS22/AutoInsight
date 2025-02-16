@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
@@ -10,19 +9,15 @@ import axios from "axios";
 const Reviews = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [reviews, setReviews] = useState([{
-    rating: 5,
-    content: "The restaurant was fantastic, and the ambiance was lovely.",
-    username: "John Doe",
-  }]);
+  const [reviews, setReviews] = useState([]);
   const [username, setUserName] = useState("");
   const containerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchReviews();
+    fetchUserProfile();
   }, []);
-
 
   const fetchUserProfile = async () => {
     const token = localStorage.getItem("token");
@@ -31,17 +26,11 @@ const Reviews = () => {
       const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // setUserName(response.data);
       setUserName(response.data.body.username);
     } catch (error) {
       console.log("Error fetching user:", error.message);
-
     }
   };
-  // Call fetchUserProfile inside useEffect when the component mounts or user logs in
-  useEffect(() => {
-    fetchUserProfile();
-  }, [isLoggedIn]);
 
   const fetchReviews = async () => {
     const token = localStorage.getItem("token");
@@ -60,7 +49,6 @@ const Reviews = () => {
       console.error("❌ Error fetching reviews:", error.message);
     }
   };
-
 
   const handleAddReview = () => {
     if (isLoggedIn) {
@@ -128,13 +116,17 @@ const Reviews = () => {
               <div key={review._id} className="bg-purple-100 rounded-lg shadow-md p-4 min-w-[300px]">
                 <div className="flex items-center space-x-2">
                   {review.user?.profile_picture ? (
-                    <img src={review.user.profile_picture} alt={review.user.username} className="w-10 h-10 rounded-full" />
+                    <img
+                      src={review.user.profile_picture}
+                      alt={review.user.username}
+                      className="w-10 h-10 rounded-full"
+                    />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-lg">
                       {review.user?.username ? review.user.username[0].toUpperCase() : "U"}
                     </div>
                   )}
-                  <h4 className="font-semibold">{review.user?.username || username}</h4>
+                  <h4 className="font-semibold">{review.user?.username || "Anonymous"}</h4>
                 </div>
                 <div className="flex mt-2">
                   {Array.from({ length: review.rating }).map((_, index) => (

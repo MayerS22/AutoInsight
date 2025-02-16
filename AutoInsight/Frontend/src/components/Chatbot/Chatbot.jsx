@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
-import { SendHorizontal, X, Maximize2, Minimize2 } from "lucide-react";
+import { X, Maximize2, Minimize2 } from "lucide-react";
 import ChatbotIcon from "../../assets/ChatbotResponse.svg";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -78,23 +78,20 @@ const Chatbot = ({ open, setOpen }) => {
   const getInitials = (name) => {
     return name
       ? name
-        .split(" ")
-        .map((part) => part[0]?.toUpperCase())
-        .join("")
+          .split(" ")
+          .map((part) => part[0]?.toUpperCase())
+          .join("")
       : "U";
   };
 
   return (
-    <div className={`fixed md:bottom-5 pt-24 md:right-5 ${isFullscreen ? 'inset-0' : 'bottom-0 right-0'} transition-all duration-300`}>
+    <div className="fixed bottom-0 right-0 z-[9999]">
       {open && (
         <div
           className={`
-            ${isFullscreen
-              ? 'w-full h-full rounded-none'
-              : 'w-full md:w-96 h-[450px] md:h-[450px] rounded-xl'
-            }
+            ${isFullscreen ? "fixed inset-0" : "w-full md:w-96 h-[450px] md:h-[450px] bottom-0 right-0"}
             bg-[#f3e8ff] shadow-lg flex flex-col border border-gray-300
-            transition-all duration-300
+            transition-all duration-300 ${isFullscreen ? "rounded-none" : "rounded-xl"}
           `}
         >
           {/* Header */}
@@ -164,14 +161,13 @@ const Chatbot = ({ open, setOpen }) => {
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             />
             <button
-              className="p-2 text-purple-900  disabled:opacity-50 disabled:cursor-not-allowed border border-gray-400 border-l-0 rounded-r-lg"
+              className="p-2 text-purple-900 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-400 border-l-0 rounded-r-lg"
               onClick={sendMessage}
               disabled={loading}
             >
-                  <img src={SendIcon} alt="send-button"  className="size-5"/>            
+              <img src={SendIcon} alt="send-button" className="size-5" />
             </button>
           </div>
-
         </div>
       )}
     </div>

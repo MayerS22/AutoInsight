@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { NotLoggedIn } from "../NotLoggedIn";
+import { NotLoggedIn } from "../NotLoggedIn.jsx";
 import AddIcon from "../../assets/addIcon.svg";
 import PermissionModal from "./PermissionModal.jsx"; // Import modal component
 import { marginActions } from "../../store/index";

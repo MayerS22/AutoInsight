@@ -176,6 +176,8 @@ export default function Home() {
         </div>
          {chatbotIsOpen&& <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen}/>}
       </div>
+   
+
     </div>
   );
 }

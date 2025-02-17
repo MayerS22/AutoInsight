@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
-import { X, Maximize2, Minimize2 } from "lucide-react";
+import { X, Maximize2, Minimize2, Image as ImageIcon } from "lucide-react";
 import ChatbotIcon from "../../assets/ChatbotResponse.svg";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,66 +10,143 @@ import SendIcon from "../../assets/SendButton.svg";
 
 const Chatbot = ({ open, setOpen }) => {
   const [messages, setMessages] = useState([]);
+  const email = localStorage.getItem("email");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const sessionId = useRef(Date.now().toString());
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const dispatch = useDispatch();
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const username = useSelector((state) => state.auth.username);
 
   useEffect(() => {
+    console.log("Retrieved email from localStorage:", email);
+  
+    if (email) {
+      const storedMessages = localStorage.getItem(`chatMessages_${email}`);
+      console.log("Retrieved messages:", storedMessages);
+  
+      setMessages(storedMessages ? JSON.parse(storedMessages) : []);
+    }
+  }, [open]); // Ensure messages load when chatbot opens
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const fetchUserProfile = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
-      dispatch(authActions.addUsername(response.data.body.username));
-    } catch (error) {
-      console.error("Error fetching profile picture:", error);
-    }
-  };
-
+  // Save messages to localStorage whenever they change, for the specific user
   useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
+    if (email && messages.length > 0) {
+      localStorage.setItem(`chatMessages_${email}`, JSON.stringify(messages));
+    }
+  }, [messages, email]);
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      
+      // Create a preview URL for the selected image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const newMessage = { sender: "user", text: input };
+  const removeSelectedImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() && !selectedImage) return; // Prevent sending empty messages or without an image
+  
+    // Prepare message data
+    let newMessage;
+    if (selectedImage) {
+      newMessage = { 
+        sender: "user", 
+        text: input.trim() ? input : "Image sent",
+        image: imagePreview
+      };
+    } else {
+      newMessage = { sender: "user", text: input };
+    }
+  
     setMessages((prev) => [...prev, newMessage, { sender: "bot", text: "Generating response..." }]);
     setInput("");
     setLoading(true);
-
+  
     try {
-      const response = await fetch("http://localhost:3000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, sessionId: sessionId.current }),
+      // Create FormData for file upload
+      const formData = new FormData();
+  
+      // Ensure that 'message' is never empty
+      const messageToSend = input.trim() || "No message";  // Default message if input is empty
+      formData.append('message', messageToSend);
+      formData.append('sessionId', sessionId.current);
+  
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+  
+      // Log the payload to check what is being sent
+      console.log('Request Payload:', {
+        message: messageToSend,
+        sessionId: sessionId.current,
+        image: selectedImage ? selectedImage.name : 'No image',
       });
-
+  
+      // Send the request
+      const response = await fetch("http://localhost:3000/api/v1/chatbot/", {
+        method: "POST",
+        body: formData,
+      });
+  
       const data = await response.json();
-      setMessages((prev) => prev.slice(0, -1).concat({ sender: "bot", text: data.reply }));
+      console.log("Chatbot Response:", data.reply);
+  
+      // Handle response with possible image
+      const botResponse = {
+        sender: "bot",
+        text: data.response.text,
+      };
+  
+      if (data.response.imageUrl) {
+        botResponse.image = data.response.imageUrl;
+      }
+  
+      setMessages((prev) => prev.slice(0, -1).concat(botResponse));
     } catch (error) {
-      setMessages((prev) => prev.slice(0, -1).concat({ sender: "bot", text: "Error: Could not connect to chatbot." }));
+      setMessages((prev) => prev.slice(0, -1).concat({ 
+        sender: "bot", 
+        text: "Error: Could not connect to chatbot." 
+      }));
     } finally {
       setLoading(false);
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       scrollToBottom();
     }
   };
+  
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -121,10 +198,10 @@ const Chatbot = ({ open, setOpen }) => {
               messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`flex items-center ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex items-start ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.sender === "bot" && (
-                    <img src={ChatbotIcon} alt="Bot" className="w-8 h-8 rounded-full mr-2" />
+                    <img src={ChatbotIcon} alt="Bot" className="w-8 h-8 rounded-full mr-2 mt-2" />
                   )}
                   <div
                     className={`
@@ -134,12 +211,23 @@ const Chatbot = ({ open, setOpen }) => {
                     `}
                   >
                     {msg.text}
+                    {msg.image && (
+                      <div className="mt-2">
+                        <img 
+                          src={msg.image} 
+                          alt="Shared image" 
+                          className="rounded-lg max-w-full max-h-40 object-contain"
+                          onClick={() => window.open(msg.image, '_blank')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </div>
+                    )}
                   </div>
                   {msg.sender === "user" && (
                     profilePicture ? (
-                      <img src={profilePicture} alt="User" className="ml-2 w-8 h-8 rounded-full object-cover" />
+                      <img src={profilePicture} alt="User" className="ml-2 w-8 h-8 rounded-full object-cover mt-2" />
                     ) : (
-                      <div className="ml-2 w-8 h-8 flex items-center justify-center bg-[#d8b4fe] text-white rounded-full text-sm font-bold">
+                      <div className="ml-2 w-8 h-8 flex items-center justify-center bg-[#d8b4fe] text-white rounded-full text-sm font-bold mt-2">
                         {getInitials(username)}
                       </div>
                     )
@@ -150,23 +238,57 @@ const Chatbot = ({ open, setOpen }) => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Image Preview */}
+          {imagePreview && (
+            <div className="px-3 pb-1">
+              <div className="relative inline-block">
+                <img 
+                  src={imagePreview} 
+                  alt="Selected image" 
+                  className="h-16 rounded-lg object-contain" 
+                />
+                <button 
+                  onClick={removeSelectedImage}
+                  className="absolute -top-2 -right-2 bg-purple-900 text-white rounded-full p-[1px] hover:bg-purple-700"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Input Field */}
-          <div className="p-3 flex items-center">
-            <input
-              type="text"
-              className="flex-1 p-2 text-sm border border-gray-400 border-r-0 focus:outline-none bg-transparent placeholder-gray-500 rounded-l-lg"
-              placeholder="Message AI-Sight..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-            />
-            <button
-              className="p-2 text-purple-900 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-400 border-l-0 rounded-r-lg"
-              onClick={sendMessage}
-              disabled={loading}
-            >
-              <img src={SendIcon} alt="send-button" className="size-5" />
-            </button>
+          <div className="p-3 flex flex-col">
+            <div className="flex items-center">
+              <input
+                type="text"
+                className="flex-1 p-2 text-sm border border-gray-400 border-r-0 focus:outline-none bg-transparent placeholder-gray-500 rounded-l-lg"
+                placeholder="Message AI-Sight..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+              />
+              <div className="flex border border-gray-400 rounded-r-lg overflow-hidden">
+                <label htmlFor="image-upload" className="p-2 cursor-pointer text-purple-900 hover:bg-purple-100">
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageSelect}
+                    ref={fileInputRef}
+                  />
+                  <ImageIcon size={20} />
+                </label>
+                <button
+                  className="p-2 text-purple-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={sendMessage}
+                  disabled={loading}
+                >
+                  <img src={SendIcon} alt="send-button" className="size-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

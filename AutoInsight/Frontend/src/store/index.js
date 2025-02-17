@@ -5,6 +5,7 @@ const initialAuthState = {
     isLoggedIn: false,
     profilePicture: null,
     username: "",
+    id:"",
 }
 
 const initialMarginState = {
@@ -32,12 +33,18 @@ const authSlice = createSlice({
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("email");
             localStorage.removeItem("token");
+            const userId = localStorage.getItem("userId"); 
+            localStorage.removeItem(`chatMessages_${userId}`);
+            localStorage.removeItem("userId");
         },
         addProfilePicture(state,action){
             state.profilePicture = action.payload;
         },
         addUsername(state,action){
             state.username = action.payload;
+        },
+        addID(state,action){
+            state.id = action.payload;
         }
     }
 });

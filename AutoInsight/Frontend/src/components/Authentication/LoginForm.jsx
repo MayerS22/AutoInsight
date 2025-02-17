@@ -51,6 +51,9 @@ const Login = ({ toggleForm,setUserName}) => {
     setEdited(prev => ({ ...prev, [identifier]: true }));
   };
 
+
+
+
   const handleSubmit = async (event) => {
     event.preventDefault();
   
@@ -67,6 +70,8 @@ const Login = ({ toggleForm,setUserName}) => {
       });
   
       const { token } = response.data.body; // ✅ Extract token from response
+      console.log(response.data);
+      
      const email=formData.email;
   
       toast.success("Login successful");
@@ -76,8 +81,6 @@ const Login = ({ toggleForm,setUserName}) => {
       navigate(redirectUrl);
       dispatch(authActions.login({email,token}));
       console.log("Login Form token"+token);
-      
-  
     } catch (error) {
       console.error("Login error:", error);
       

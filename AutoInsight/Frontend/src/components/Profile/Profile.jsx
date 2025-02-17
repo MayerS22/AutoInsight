@@ -132,7 +132,9 @@ const DatasetPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+      dispatch(
+        authActions.addProfilePicture(response.data.body.profile_picture)
+      );
       dispatch(authActions.addUsername(response.data.body.username));
     } catch (error) {
       console.error("Error fetching profile picture:", error);
@@ -146,9 +148,12 @@ const DatasetPage = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/datasets/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/datasets/",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       // Use response.data.body if that is the array of datasets
       const datasets = Array.isArray(response.data)
         ? response.data
@@ -242,23 +247,24 @@ const DatasetPage = () => {
     }
   };
 
-  // Download dataset file
   const handleDownload = (datasetUrl) => {
     if (!datasetUrl) return;
     // Option 1: Open in new tab (often triggers a download)
     window.open(datasetUrl, "_blank");
-
-    // Option 2 (if you need to force a download):
-    // const link = document.createElement("a");
-    // link.href = datasetUrl;
-    // link.setAttribute("download", "");
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
   };
 
-  // Delete a dataset from the list (you may need to call your delete API here)
+  // Delete a dataset from the database and update the UI
   const handleDelete = (id) => {
+    if (!id) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Dataset",
+        text: "Dataset ID is missing, unable to delete.",
+        confirmButtonColor: "#E53E3E",
+      });
+      return;
+    }
+  
     Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
@@ -267,20 +273,69 @@ const DatasetPage = () => {
       confirmButtonColor: "#E53E3E",
       cancelButtonColor: "#6B46C1",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setDashboardList((prevDashboards) =>
-          prevDashboards.filter((dashboard) => dashboard.id !== id)
-        );
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "The dashboard has been removed.",
-          confirmButtonColor: "#6B46C1",
-        });
+        try {
+          // Use the passed id directly (which is dataset._id)
+          await axios.delete(
+            `http://localhost:3000/api/v1/datasets/${id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+  
+          // Filter by _id to remove the deleted dataset
+          setDashboardList((prevDashboards) =>
+            prevDashboards.filter((dashboard) => dashboard._id !== id)
+          );
+  
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "The dataset has been removed.",
+            confirmButtonColor: "#6B46C1",
+          });
+        } catch (error) {
+          console.error("Delete error:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Delete Error",
+            text:
+              error.response?.data?.message ||
+              "Something went wrong while deleting the dataset.",
+            confirmButtonColor: "#E53E3E",
+          });
+        }
       }
     });
   };
+
+  // Inside your list mapping, make sure you're passing the correct `id`
+  {
+    dashboardList.map((dataset, idx) => (
+      <li
+        key={dataset._id || dataset.id || idx}
+        className="flex flex-col md:flex-row items-center p-4 bg-white rounded-lg hover:bg-slate-50 transition-all duration-200 w-full group"
+        onMouseEnter={() => setHoveredDashboardId(dataset.id)}
+        onMouseLeave={() => setHoveredDashboardId(null)}
+        style={{
+          zIndex:
+            hoveredDashboardId === dataset.id ||
+            clickedDashboardId === dataset.id
+              ? 10
+              : 1,
+        }}
+      >
+        {/* Other content */}
+        <button
+          onClick={() => handleDelete(dataset.id)} // Pass the correct `id` here
+          className="bg-white text-red-600 hover:bg-red-100 rounded-full p-2"
+        >
+          <img src={TrashLogo} alt="Delete dataset" className="w-5 h-5" />
+        </button>
+      </li>
+    ));
+  }
 
   // Set up some layout-related actions on mount/unmount
   useEffect(() => {
@@ -313,7 +368,10 @@ const DatasetPage = () => {
           <div className="w-full h-full bg-purple-600 text-white rounded-full flex items-center justify-center text-3xl md:text-4xl font-bold overflow-hidden relative">
             {isProfileLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  viewBox="0 0 24 24"
+                >
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -347,7 +405,10 @@ const DatasetPage = () => {
             disabled={isUploadingProfile}
           >
             {isUploadingProfile ? (
-              <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                viewBox="0 0 24 24"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -384,7 +445,10 @@ const DatasetPage = () => {
         >
           {isLoading ? (
             <div className="flex items-center">
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                viewBox="0 0 24 24"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -487,7 +551,11 @@ const DatasetPage = () => {
                   onClick={() => handleDownload(dataset.dataset_url)}
                   className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2"
                 >
-                  <img src={DownloadLogo} alt="Download dataset" className="w-5 h-5" />
+                  <img
+                    src={DownloadLogo}
+                    alt="Download dataset"
+                    className="w-5 h-5"
+                  />
                 </button>
                 {/* Open Button */}
                 <button className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2">
@@ -495,10 +563,14 @@ const DatasetPage = () => {
                 </button>
                 {/* Delete Button */}
                 <button
-                  onClick={() => handleDelete(dataset.id)}
+                  onClick={() => handleDelete(dataset._id)} // Pass dataset._id instead of dataset.id
                   className="bg-white text-red-600 hover:bg-red-100 rounded-full p-2"
                 >
-                  <img src={TrashLogo} alt="Delete dataset" className="w-5 h-5" />
+                  <img
+                    src={TrashLogo}
+                    alt="Delete dataset"
+                    className="w-5 h-5"
+                  />
                 </button>
               </div>
             </li>

@@ -142,35 +142,54 @@ const DatasetPage = () => {
   };
 
   // Fetch datasets uploaded by or shared with the user
-  const fetchDatasets = async () => {
-    if (!token) return;
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        "http://localhost:3000/api/v1/datasets/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
+  
+const fetchDatasets = async () => {
+  if (!token) return;
+  setIsLoading(true);
+  try {
+    const response = await axios.get(
+      "http://localhost:3000/api/v1/datasets/",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    // Extract the datasets array safely
+    let datasets = [];
+    if (response.data) {
+      // If the response data itself is an array, use it
+      if (Array.isArray(response.data)) {
+        datasets = response.data;
+      } 
+      // Otherwise, check if response.data.body exists
+      else if (response.data.body) {
+        // If body is an array, use it directly
+        if (Array.isArray(response.data.body)) {
+          datasets = response.data.body;
+        } 
+        // Or if body.datasets is an array, use that
+        else if (Array.isArray(response.data.body.datasets)) {
+          datasets = response.data.body.datasets;
         }
-      );
-      // Use response.data.body if that is the array of datasets
-      const datasets = Array.isArray(response.data)
-        ? response.data
-        : response.data.body;
-      setDashboardList(datasets);
-      console.log("datasets : "+ datasets);
-      
-    } catch (error) {
-      console.error("Error fetching datasets:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong while fetching the datasets.",
-        confirmButtonColor: "#E53E3E",
-      });
-    } finally {
-      setIsLoading(false);
+      }
     }
-  };
+
+    setDashboardList(datasets);
+    console.log("datasets:", datasets);
+    
+  } catch (error) {
+    console.error("Error fetching datasets:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Something went wrong while fetching the datasets.",
+      confirmButtonColor: "#E53E3E",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Toggle permission popup for a dataset
   const handlePermissionClick = (datasetId) => {

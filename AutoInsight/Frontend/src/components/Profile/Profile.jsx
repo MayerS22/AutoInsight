@@ -142,54 +142,49 @@ const DatasetPage = () => {
   };
 
   // Fetch datasets uploaded by or shared with the user
-  
-const fetchDatasets = async () => {
-  if (!token) return;
-  setIsLoading(true);
-  try {
-    const response = await axios.get(
-      "http://localhost:3000/api/v1/datasets/",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  // Fetch datasets uploaded by or shared with the user
+  const fetchDatasets = async () => {
+    if (!token) return;
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/datasets/",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    // Extract the datasets array safely
-    let datasets = [];
-    if (response.data) {
-      // If the response data itself is an array, use it
-      if (Array.isArray(response.data)) {
-        datasets = response.data;
-      } 
-      // Otherwise, check if response.data.body exists
-      else if (response.data.body) {
-        // If body is an array, use it directly
-        if (Array.isArray(response.data.body)) {
-          datasets = response.data.body;
-        } 
-        // Or if body.datasets is an array, use that
-        else if (Array.isArray(response.data.body.datasets)) {
-          datasets = response.data.body.datasets;
+      // Example 1: If your API returns data in response.data.body.datasets:
+      let datasets = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          datasets = response.data;
+        } else if (response.data.body) {
+          // If datasets is nested under body.datasets, use that.
+          if (Array.isArray(response.data.body.datasets)) {
+            datasets = response.data.body.datasets;
+          }
+          // Or if body itself is an array:
+          else if (Array.isArray(response.data.body)) {
+            datasets = response.data.body;
+          }
         }
       }
+
+      // Fallback to empty array if datasets isn't an array
+      setDashboardList(Array.isArray(datasets) ? datasets : []);
+      console.log("datasets:", datasets);
+    } catch (error) {
+      console.error("Error fetching datasets:", error.response || error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong while fetching the datasets.",
+        confirmButtonColor: "#E53E3E",
+      });
     }
-
-    setDashboardList(datasets);
-    console.log("datasets:", datasets);
-    
-  } catch (error) {
-    console.error("Error fetching datasets:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Something went wrong while fetching the datasets.",
-      confirmButtonColor: "#E53E3E",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   // Toggle permission popup for a dataset
   const handlePermissionClick = (datasetId) => {
@@ -283,7 +278,7 @@ const fetchDatasets = async () => {
       });
       return;
     }
-  
+
     Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
@@ -296,18 +291,15 @@ const fetchDatasets = async () => {
       if (result.isConfirmed) {
         try {
           // Use the passed id directly (which is dataset._id)
-          await axios.delete(
-            `http://localhost:3000/api/v1/datasets/${id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-  
+          await axios.delete(`http://localhost:3000/api/v1/datasets/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
           // Filter by _id to remove the deleted dataset
           setDashboardList((prevDashboards) =>
             prevDashboards.filter((dashboard) => dashboard._id !== id)
           );
-  
+
           Swal.fire({
             icon: "success",
             title: "Deleted!",

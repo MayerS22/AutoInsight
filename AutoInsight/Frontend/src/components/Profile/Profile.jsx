@@ -8,6 +8,8 @@ import { marginActions, authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+
 
 const DatasetPage = () => {
   // Component state and refs
@@ -25,6 +27,7 @@ const DatasetPage = () => {
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const username = useSelector((state) => state.auth.username);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   // Helper function: Get initials from a full name
   const getInitials = (name) => {
@@ -142,49 +145,54 @@ const DatasetPage = () => {
   };
 
   // Fetch datasets uploaded by or shared with the user
-  // Fetch datasets uploaded by or shared with the user
-  const fetchDatasets = async () => {
-    if (!token) return;
-    try {
-      const response = await axios.get(
-        "http://localhost:3000/api/v1/datasets/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  
+const fetchDatasets = async () => {
+  if (!token) return;
+  try {
+    const response = await axios.get(
+      "http://localhost:3000/api/v1/datasets/",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-      // Example 1: If your API returns data in response.data.body.datasets:
-      let datasets = [];
-      if (response.data) {
-        if (Array.isArray(response.data)) {
-          datasets = response.data;
-        } else if (response.data.body) {
-          // If datasets is nested under body.datasets, use that.
-          if (Array.isArray(response.data.body.datasets)) {
-            datasets = response.data.body.datasets;
-          }
-          // Or if body itself is an array:
-          else if (Array.isArray(response.data.body)) {
-            datasets = response.data.body;
-          }
+    // Extract the datasets array safely
+    let datasets = [];
+    if (response.data) {
+      // If the response data itself is an array, use it
+      if (Array.isArray(response.data)) {
+        datasets = response.data;
+      } 
+      // Otherwise, check if response.data.body exists
+      else if (response.data.body) {
+        // If body is an array, use it directly
+        if (Array.isArray(response.data.body)) {
+          datasets = response.data.body;
+        } 
+        // Or if body.datasets is an array, use that
+        else if (Array.isArray(response.data.body.datasets)) {
+          datasets = response.data.body.datasets;
         }
       }
-
-      // Fallback to empty array if datasets isn't an array
-      setDashboardList(Array.isArray(datasets) ? datasets : []);
-      console.log("datasets:", datasets);
-    } catch (error) {
-      console.error("Error fetching datasets:", error.response || error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text:
-          error.response?.data?.message ||
-          "Something went wrong while fetching the datasets.",
-        confirmButtonColor: "#E53E3E",
-      });
+      
     }
-  };
+    setDashboardList(datasets);
+    console.log("datasets:", datasets);
+    
+  } catch (error) {
+    console.error("Error fetching datasets:", error);
+    console.log("datasets : "+dashboardList);
+    
+    
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Something went wrong while fetching the datasets.",
+      confirmButtonColor: "#E53E3E",
+    });
+  } 
+};
+
 
   // Toggle permission popup for a dataset
   const handlePermissionClick = (datasetId) => {
@@ -556,7 +564,7 @@ const DatasetPage = () => {
               </div>
 
               {/* Right Side: Action buttons */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center">
                 {/* Download Button */}
                 <button
                   onClick={() => handleDownload(dataset.dataset_url)}
@@ -565,14 +573,15 @@ const DatasetPage = () => {
                   <img
                     src={DownloadLogo}
                     alt="Download dataset"
-                    className="w-5 h-5"
+                    className="w-8 h-8"
                   />
                 </button>
                 {/* Open Button */}
-                <button className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2">
-                  <img src={OpenLogo} alt="Open dataset" className="w-5 h-5" />
+                <button onClick={() => navigate(`/dashboard/${dataset._id}`)} className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2">
+                <img src={OpenLogo} alt="Open dataset" className="w-8 h-8" />
                 </button>
                 {/* Delete Button */}
+                
                 <button
                   onClick={() => handleDelete(dataset._id)} // Pass dataset._id instead of dataset.id
                   className="bg-white text-red-600 hover:bg-red-100 rounded-full p-2"
@@ -580,9 +589,10 @@ const DatasetPage = () => {
                   <img
                     src={TrashLogo}
                     alt="Delete dataset"
-                    className="w-5 h-5"
+                    className="w-8 h-8"
                   />
                 </button>
+                
               </div>
             </li>
           ))}

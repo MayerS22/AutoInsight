@@ -8,7 +8,6 @@ import { marginActions, authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
 import Swal from "sweetalert2";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const DatasetPage = () => {
   // Component state and refs
@@ -21,7 +20,6 @@ const DatasetPage = () => {
   const profileInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const popupRef = useRef(null);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
@@ -159,6 +157,8 @@ const DatasetPage = () => {
         ? response.data
         : response.data.body;
       setDashboardList(datasets);
+      console.log("datasets : "+ datasets);
+      
     } catch (error) {
       console.error("Error fetching datasets:", error);
       Swal.fire({

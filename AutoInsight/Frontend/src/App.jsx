@@ -38,9 +38,9 @@ function App() {
         { path: "how-it-works", element: <HomePage /> },
         { path: "about-us", element: <HomePage /> },
         { path: "contact", element: <HomePage /> },
-        { path: "reviews", element: <HomePage /> }, // Reviews is a child of RootLayout
+        { path: "reviews", element: <HomePage /> }, 
         { path: "faq", element: <HomePage /> }, 
-        { path: "profile", element: <Profile /> }, // DatasetPage is a child of RootLayout
+        { path: "profile", element: <Profile /> }, 
         { path: "dashboard", element: <Dashboard/>}
       ],
     },

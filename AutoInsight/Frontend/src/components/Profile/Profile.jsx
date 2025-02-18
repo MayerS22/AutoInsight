@@ -9,7 +9,8 @@ import { NotLoggedIn } from "../NotLoggedIn";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
-
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const DatasetPage = () => {
   // Component state and refs
@@ -269,11 +270,38 @@ const fetchDatasets = async () => {
     }
   };
 
-  const handleDownload = (datasetUrl) => {
-    if (!datasetUrl) return;
-    // Option 1: Open in new tab (often triggers a download)
-    window.open(datasetUrl, "_blank");
+  const handleDownload = async (imageUrls) => {
+    if (!Array.isArray(imageUrls) || imageUrls.length === 0) return;
+  
+    const zip = new JSZip();
+    const folder = zip.folder("insights_images");
+  
+    // Function to fetch an image as a blob
+    const fetchImageAsBlob = async (url) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${url}`);
+      }
+      return await response.blob();
+    };
+  
+    // Fetch each image and add it to the zip
+    for (let i = 0; i < imageUrls.length; i++) {
+      try {
+        const blob = await fetchImageAsBlob(imageUrls[i]);
+        // Optionally, determine file extension from URL or blob.type
+        folder.file(`image_${i + 1}.jpg`, blob);
+      } catch (error) {
+        console.error("Error fetching image:", error);
+      }
+    }
+  
+    // Generate the zip file and trigger the download
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, "insights_images.zip");
+    });
   };
+  
 
   // Delete a dataset from the database and update the UI
   const handleDelete = (id) => {
@@ -567,7 +595,7 @@ const fetchDatasets = async () => {
               <div className="flex items-center">
                 {/* Download Button */}
                 <button
-                  onClick={() => handleDownload(dataset.dataset_url)}
+                  onClick={() => handleDownload(dataset.insights_urls)}
                   className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2"
                 >
                   <img

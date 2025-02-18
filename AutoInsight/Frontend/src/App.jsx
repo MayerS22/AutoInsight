@@ -40,8 +40,9 @@ function App() {
         { path: "contact", element: <HomePage /> },
         { path: "reviews", element: <HomePage /> }, 
         { path: "faq", element: <HomePage /> }, 
-        { path: "profile", element: <Profile /> }, 
-        { path: "dashboard", element: <Dashboard/>}
+        { path: "profile", element: <Profile /> },
+        { path: "dashboard/:id", element: <Dashboard /> }
+       
       ],
     },
     {

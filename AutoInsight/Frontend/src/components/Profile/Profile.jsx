@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -149,35 +149,38 @@ const DatasetPage = () => {
   const fetchDatasets = async () => {
     if (!token) return;
     setIsDashboardLoading(true); // Set loading state to true
+  
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/v1/datasets/",
-        {
+      // Fetch both datasets in parallel
+      const [datasetsResponse, sharedDatasetsResponse] = await Promise.all([
+        axios.get("http://localhost:3000/api/v1/datasets/", {
           headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("http://localhost:3000/api/v1/datasets/shared/", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+  
+      // Function to safely extract dataset arrays
+      const extractDatasets = (response) => {
+        if (!response.data) return [];
+        if (Array.isArray(response.data)) return response.data;
+        if (response.data.body) {
+          if (Array.isArray(response.data.body)) return response.data.body;
+          if (Array.isArray(response.data.body.datasets)) return response.data.body.datasets;
         }
-      );
-
-      // Extract the datasets array safely
-      let datasets = [];
-      if (response.data) {
-        // If the response data itself is an array, use it
-        if (Array.isArray(response.data)) {
-          datasets = response.data;
-        } 
-        // Otherwise, check if response.data.body exists
-        else if (response.data.body) {
-          // If body is an array, use it directly
-          if (Array.isArray(response.data.body)) {
-            datasets = response.data.body;
-          } 
-          // Or if body.datasets is an array, use that
-          else if (Array.isArray(response.data.body.datasets)) {
-            datasets = response.data.body.datasets;
-          }
-        }
-      }
-      setDashboardList(datasets);
-      console.log("datasets:", datasets); 
+        return [];
+      };
+  
+      // Extract datasets from both responses
+      const datasets = extractDatasets(datasetsResponse);
+      const sharedDatasets = extractDatasets(sharedDatasetsResponse);
+  
+      // Merge both dataset lists
+      const combinedDatasets = [...datasets, ...sharedDatasets];
+  
+      setDashboardList(combinedDatasets);
+      console.log("Combined datasets:", combinedDatasets);
     } catch (error) {
       console.error("Error fetching datasets:", error);
       Swal.fire({
@@ -190,6 +193,7 @@ const DatasetPage = () => {
       setIsDashboardLoading(false); // Set loading state to false
     }
   };
+  
 
   // Toggle permission popup for a dataset
   const handlePermissionClick = (datasetId) => {
@@ -206,13 +210,31 @@ const DatasetPage = () => {
         "application/vnd.ms-excel",
       ];
       const maxFileSize = 10 * 1024 * 1024; // 10MB
-
+  
       if (allowedTypes.includes(file.type)) {
         if (file.size <= maxFileSize) {
+          // Ask the user for a dashboard name instead of using the file name as default.
+          const { value: dashboardName } = await Swal.fire({
+            title: "Enter Dashboard Name",
+            input: "text",
+            inputPlaceholder: "Enter a dashboard name",
+            showCancelButton: true,
+            inputValidator: (value) => {
+              if (!value) {
+                return "You need to provide a dashboard name!";
+              }
+            },
+          });
+  
+          // If user cancels or provides no value, stop the upload.
+          if (!dashboardName) {
+            return;
+          }
+  
           const formData = new FormData();
           formData.append("file", file);
-          formData.append("dataset_name", file.name);
-          
+          formData.append("dataset_name", dashboardName);
+  
           try {
             setIsLoading(true);
             const response = await axios.post(
@@ -225,12 +247,12 @@ const DatasetPage = () => {
                 },
               }
             );
-
+  
             if (response.status === 201) {
               Swal.fire({
                 icon: "success",
                 title: "Upload Successful!",
-                text: `Your file "${file.name}" has been uploaded successfully.`,
+                text: `Your file "${dashboardName}" has been uploaded successfully.`,
                 confirmButtonColor: "#6B46C1",
               });
               fetchDatasets(); // Refresh the list after upload
@@ -265,7 +287,7 @@ const DatasetPage = () => {
       }
     }
   };
-
+  
   const handleDownload = async (imageUrls) => {
     if (!Array.isArray(imageUrls) || imageUrls.length === 0) return;
   

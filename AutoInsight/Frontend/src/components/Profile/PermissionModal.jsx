@@ -1,19 +1,18 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
 import { useState } from "react";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
-const PermissionModal = ({ onClose, datasetId }) => {
+const PermissionModal = ({ onClose, datasetId,setIsModalOpen }) => {
   const [userEmail, setUserEmail] = useState(""); // State to hold user email
   const [loading, setLoading] = useState(false); // State to track loading status
   const [errorMessage, setError] = useState(""); // State to track error messages
   const [actionType, setActionType] = useState("grant"); // Track the action type (grant or revoke)
   const token = localStorage.getItem("token");
-  const [userId, setUserId] = useState("");
+  // const [userId, setUserId] = useState("");
 
   const fetchUserProfile = async () => {
-    if (!token || !userEmail) return;
-
+    if (!token || !userEmail.trim()) return;
     try {
       const response = await axios.get(
         `http://localhost:3000/api/v1/users/user-id?email=${userEmail}`,
@@ -21,11 +20,11 @@ const PermissionModal = ({ onClose, datasetId }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setUserId(response.data.body);
+      // setUserId(response.data.body);
       setError(""); // Clear any previous errors
       return response.data.body;
     } catch (error) {
-      console.error("Error fetching user ID:", error);
+      console.error("Error fetching user ID:", error.response?.data?.message);
       setError(error.response?.data?.message || "Failed to fetch user ID");
       return null;
     }
@@ -33,9 +32,9 @@ const PermissionModal = ({ onClose, datasetId }) => {
 
   const handleGivePermission = async () => {
     setLoading(true);
-    setError(""); // Reset error state before request
+    setError(""); // Reset error before starting
 
-    if (!userEmail) {
+    if (!userEmail.trim()) {
       setError("Please provide a valid email.");
       setLoading(false);
       return;
@@ -57,17 +56,13 @@ const PermissionModal = ({ onClose, datasetId }) => {
       console.log("Permission granted:", response.data);
       toast.success("Permission granted successfully!");
       setActionType("revoke");
+      setIsModalOpen(false);
     } catch (error) {
-      console.log(error.response?.data);
-      if (
-        error.response &&
-        error.response.status === 400 &&
-        error.response.data.message.includes("User already has access")
-      ) {
+      const errorMsg = error.response?.data?.message || "Something went wrong.";
+      if (errorMsg.includes("User already has access")) {
         setError("This user already has access to the dataset.");
       } else {
-        console.error("Error granting permission:", error);
-        setError(error.response.data.message);
+        setError(errorMsg);
       }
     }
     setLoading(false);
@@ -75,42 +70,39 @@ const PermissionModal = ({ onClose, datasetId }) => {
 
   const handleRevokePermission = async () => {
     setLoading(true);
-    setError(""); // Reset error state before request
-    console.log("user id "+userId);
-    
+    setError(""); // Reset error before starting
 
-    if (!userEmail) {
+    if (!userEmail.trim()) {
       setError("Please provide a valid email.");
       setLoading(false);
       return;
     }
+
     const fetchedUserId = await fetchUserProfile();
-    console.log(token);
-    
+    if (!fetchedUserId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.delete(
         `http://localhost:3000/api/v1/datasets/${datasetId}/share/`,
         {
-          data: { user_id: fetchedUserId }, 
+          data: { user_id: fetchedUserId },
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       console.log("Permission revoked:", response.data);
       toast.success("Permission revoked successfully!");
       setActionType("grant");
+      setIsModalOpen(false);
     } catch (error) {
-      console.log(error.response?.data);
-      if (
-        error.response &&
-        error.response.status === 400 &&
-        error.response.data.message.includes("User does not have access")
-      ) {
-        setError("This user already does not have access.");
+      const errorMsg = error.response?.data?.message || "Something went wrong.";
+      if (errorMsg.includes("User does not have access")) {
+        setError("This user does not have access to this dataset.");
       } else {
-        console.error("Error revoking permission:", error);
-        setError("Failed to revoke permission. Please try again.");
+        setError(errorMsg);
       }
     }
     setLoading(false);
@@ -137,8 +129,9 @@ const PermissionModal = ({ onClose, datasetId }) => {
             placeholder="Enter user's email"
             value={userEmail}
             onChange={(e) => {
-              setError("")
-              setUserEmail(e.target.value)}}
+              setError("");
+              setUserEmail(e.target.value);
+            }}
             className="w-full px-4 py-2 border rounded-md text-gray-700"
             disabled={loading} // Disable input when loading
           />

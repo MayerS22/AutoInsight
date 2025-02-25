@@ -8,7 +8,6 @@ function DashboardList({
   isProfileLoading,
   profilePicture,
   username,
-  userId,
   getInitials,
   handleProfilePictureClick,
   isUploadingProfile,
@@ -208,7 +207,8 @@ function DashboardList({
                         {new Date(dataset.createdAt).toLocaleString()}
                       </p>
                       {/* Badge indicating ownership or shared status */}
-                      {dataset.user_id === userId ? (
+                      {!(dataset.shared_usernames &&
+                        dataset.shared_usernames.includes(username))  ? (
                         <span className="text-xs text-green-500">
                           Owned by you
                         </span>
@@ -250,7 +250,7 @@ function DashboardList({
                                   key={`${user}-${index}`}
                                   className="text-sm text-gray-700 py-1"
                                 >
-                                  {user}
+                                  {((username)===user)?"you":user}
                                 </li>
                               ))}
                             </ul>

@@ -1,8 +1,6 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
-import DashboardLogo from "../../assets/Dashboard.svg";
-import DownloadLogo from "../../assets/Download.svg";
-import TrashLogo from "../../assets/Trash.svg";
-import OpenLogo from "../../assets/Open.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { marginActions, authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
@@ -11,6 +9,7 @@ import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import DashboardList from "./DashboardList";
 
 const DatasetPage = () => {
   // Component state and refs
@@ -20,6 +19,7 @@ const DatasetPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false); // New state for dashboard loading
   const profileInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const popupRef = useRef(null);
@@ -146,58 +146,54 @@ const DatasetPage = () => {
   };
 
   // Fetch datasets uploaded by or shared with the user
-  
-const fetchDatasets = async () => {
-  if (!token) return;
-  try {
-    const response = await axios.get(
-      "http://localhost:3000/api/v1/datasets/",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  const fetchDatasets = async () => {
+    if (!token) return;
+    setIsDashboardLoading(true); // Set loading state to true
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/datasets/",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    // Extract the datasets array safely
-    let datasets = [];
-    if (response.data) {
-      // If the response data itself is an array, use it
-      if (Array.isArray(response.data)) {
-        datasets = response.data;
-      } 
-      // Otherwise, check if response.data.body exists
-      else if (response.data.body) {
-        // If body is an array, use it directly
-        if (Array.isArray(response.data.body)) {
-          datasets = response.data.body;
+      // Extract the datasets array safely
+      let datasets = [];
+      if (response.data) {
+        // If the response data itself is an array, use it
+        if (Array.isArray(response.data)) {
+          datasets = response.data;
         } 
-        // Or if body.datasets is an array, use that
-        else if (Array.isArray(response.data.body.datasets)) {
-          datasets = response.data.body.datasets;
+        // Otherwise, check if response.data.body exists
+        else if (response.data.body) {
+          // If body is an array, use it directly
+          if (Array.isArray(response.data.body)) {
+            datasets = response.data.body;
+          } 
+          // Or if body.datasets is an array, use that
+          else if (Array.isArray(response.data.body.datasets)) {
+            datasets = response.data.body.datasets;
+          }
         }
       }
-      
+      setDashboardList(datasets);
+      console.log("datasets:", datasets); 
+    } catch (error) {
+      console.error("Error fetching datasets:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong while fetching the datasets.",
+        confirmButtonColor: "#E53E3E",
+      });
+    } finally {
+      setIsDashboardLoading(false); // Set loading state to false
     }
-    setDashboardList(datasets);
-    console.log("datasets:", datasets);
-    
-  } catch (error) {
-    console.error("Error fetching datasets:", error);
-    console.log("datasets : "+dashboardList);
-    
-    
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Something went wrong while fetching the datasets.",
-      confirmButtonColor: "#E53E3E",
-    });
-  } 
-};
-
+  };
 
   // Toggle permission popup for a dataset
   const handlePermissionClick = (datasetId) => {
-    setClickedDashboardId(datasetId === clickedDashboardId ? null : datasetId);
+    setClickedDashboardId(clickedDashboardId === datasetId ? null : datasetId);
   };
 
   // Handle dataset file upload
@@ -301,7 +297,6 @@ const fetchDatasets = async () => {
       saveAs(content, "insights_images.zip");
     });
   };
-  
 
   // Delete a dataset from the database and update the UI
   const handleDelete = (id) => {
@@ -357,33 +352,6 @@ const fetchDatasets = async () => {
     });
   };
 
-  // Inside your list mapping, make sure you're passing the correct `id`
-  {
-    dashboardList.map((dataset, idx) => (
-      <li
-        key={dataset._id || dataset.id || idx}
-        className="flex flex-col md:flex-row items-center p-4 bg-white rounded-lg hover:bg-slate-50 transition-all duration-200 w-full group"
-        onMouseEnter={() => setHoveredDashboardId(dataset.id)}
-        onMouseLeave={() => setHoveredDashboardId(null)}
-        style={{
-          zIndex:
-            hoveredDashboardId === dataset.id ||
-            clickedDashboardId === dataset.id
-              ? 10
-              : 1,
-        }}
-      >
-        {/* Other content */}
-        <button
-          onClick={() => handleDelete(dataset.id)} // Pass the correct `id` here
-          className="bg-white text-red-600 hover:bg-red-100 rounded-full p-2"
-        >
-          <img src={TrashLogo} alt="Delete dataset" className="w-5 h-5" />
-        </button>
-      </li>
-    ));
-  }
-
   // Set up some layout-related actions on mount/unmount
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
@@ -408,225 +376,14 @@ const fetchDatasets = async () => {
   return !isLoggedIn ? (
     <NotLoggedIn />
   ) : (
-    <div className="flex flex-col min-h-screen items-center pt-16 mt-[50px] px-4">
-      {/* Profile Section */}
-      <div className="flex flex-col items-center mt-8 w-full max-w-md">
-        <div className="relative w-24 h-24 md:w-40 md:h-40">
-          <div className="w-full h-full bg-purple-600 text-white rounded-full flex items-center justify-center text-3xl md:text-4xl font-bold overflow-hidden relative">
-            {isProfileLoading ? (
-              <div className="flex items-center justify-center">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-              </div>
-            ) : profilePicture ? (
-              <img
-                src={profilePicture}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              getInitials(username)
-            )}
-          </div>
-
-          {/* Button to trigger profile picture upload */}
-          <button
-            onClick={handleProfilePictureClick}
-            className="absolute bottom-0 right-0 bg-purple-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-xl border-2 border-white hover:bg-purple-500 transition"
-            disabled={isUploadingProfile}
-          >
-            {isUploadingProfile ? (
-              <svg
-                className="animate-spin h-4 w-4 text-white"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-            ) : (
-              "+"
-            )}
-          </button>
-          <input
-            type="file"
-            ref={profileInputRef}
-            className="hidden"
-            onChange={handleProfilePictureUpload}
-            accept="image/jpeg, image/png"
-          />
-        </div>
-        <h2 className="text-xl font-bold mt-3 text-purple-900 text-center">
-          {username}
-        </h2>
-        <button
-          onClick={handleUploadClick}
-          className="mt-3 bg-purple-900 h-[50px] text-white px-5 font-bold py-2 rounded-md hover:bg-purple-700 w-full md:w-auto flex items-center justify-center"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <div className="flex items-center">
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-              Uploading...
-            </div>
-          ) : (
-            "Upload Dataset"
-          )}
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-          accept=".csv, .xlsx"
-        />
-      </div>
-
-      {/* Dashboard Section */}
-      <div className="w-full max-w-[1700px] mt-8">
-        <h2 className="text-2xl font-bold text-purple-900">My Dashboards</h2>
-        <h3 className="text-sm text-gray-600 mt-2">Recent dashboards</h3>
-        <ul className="space-y-4">
-          {dashboardList.map((dataset, idx) => (
-            <li
-              key={dataset._id || dataset.id || idx}
-              className="flex flex-col md:flex-row items-center p-4 bg-white rounded-lg hover:bg-slate-50 transition-all duration-200 w-full group"
-              onMouseEnter={() => setHoveredDashboardId(dataset.id)}
-              onMouseLeave={() => setHoveredDashboardId(null)}
-              style={{
-                zIndex:
-                  hoveredDashboardId === dataset.id ||
-                  clickedDashboardId === dataset.id
-                    ? 10
-                    : 1,
-              }}
-            >
-              {/* Left Side: Dataset info */}
-              <div className="flex items-center gap-4 flex-1 w-full">
-                <div className="bg-purple-200 p-3 rounded-md flex items-center justify-center w-12 h-12">
-                  <img
-                    src={DashboardLogo}
-                    alt="Dataset logo"
-                    className="w-6 h-6"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-medium">{dataset.dataset_name}</h4>
-                  <p className="text-xs text-gray-500">
-                    {new Date(dataset.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Middle Section: Permissions info */}
-              <div className="flex flex-col md:flex-row flex-1 justify-center md:justify-start mt-4 md:mt-0 text-center md:text-left w-full items-center">
-                <div className="text-purple-900 font-medium min-w-[150px] max-w-[150px] text-center truncate">
-                  {dataset.dataset_name}
-                </div>
-                <button
-                  className="text-purple-800 underline relative mt-2 md:mt-0 md:ml-48"
-                  onClick={() => handlePermissionClick(dataset.id)}
-                >
-                  {dataset.permissions.length} users have permission
-                  {clickedDashboardId === dataset.id && (
-                    <div
-                      ref={popupRef}
-                      className="absolute top-full left-0 bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full md:w-[173px]"
-                    >
-                      <ul>
-                        {dataset.permissions.map((user, index) => (
-                          <li
-                            key={`${user.username}-${index}`}
-                            className="text-sm text-gray-700 py-1"
-                          >
-                            {user.username}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </button>
-              </div>
-
-              {/* Right Side: Action buttons */}
-              <div className="flex items-center">
-                {/* Download Button */}
-                <button
-                  onClick={() => handleDownload(dataset.insights_urls)}
-                  className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2"
-                >
-                  <img
-                    src={DownloadLogo}
-                    alt="Download dataset"
-                    className="w-8 h-8"
-                  />
-                </button>
-                {/* Open Button */}
-                <button onClick={() => navigate(`/dashboard/${dataset._id}`)} className="bg-white text-purple-600 hover:bg-purple-100 rounded-full p-2">
-                <img src={OpenLogo} alt="Open dataset" className="w-8 h-8" />
-                </button>
-                {/* Delete Button */}
-                
-                <button
-                  onClick={() => handleDelete(dataset._id)} // Pass dataset._id instead of dataset.id
-                  className="bg-white text-red-600 hover:bg-red-100 rounded-full p-2"
-                >
-                  <img
-                    src={TrashLogo}
-                    alt="Delete dataset"
-                    className="w-8 h-8"
-                  />
-                </button>
-                
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+   <DashboardList
+   isProfileLoading={isProfileLoading} profilePicture={profilePicture} username={username} getInitials={getInitials} 
+    handleProfilePictureClick={handleProfilePictureClick} isUploadingProfile={isUploadingProfile}
+    profileInputRef={profileInputRef} handleProfilePictureUpload={handleProfilePictureUpload} handleUploadClick={handleUploadClick}
+    isLoading={isLoading} fileInputRef={fileInputRef} handleFileChange={handleFileChange} isDashboardLoading={isDashboardLoading} dashboardList={dashboardList}
+    setHoveredDashboardId={setHoveredDashboardId} hoveredDashboardId={hoveredDashboardId} clickedDashboardId={clickedDashboardId}
+    handlePermissionClick={handlePermissionClick} popupRef={popupRef} handleDownload={handleDownload} navigate={navigate} handleDelete={handleDelete}
+   />
   );
 };
 

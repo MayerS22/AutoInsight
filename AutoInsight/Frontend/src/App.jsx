@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
  import { ToastContainer } from "react-toastify";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import RootLayout from "./components/RootLayout.jsx";

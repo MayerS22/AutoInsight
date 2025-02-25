@@ -3,11 +3,19 @@ import { useParams } from "react-router-dom";
 import { NotLoggedIn } from "../NotLoggedIn.jsx";
 import AddIcon from "../../assets/addIcon.svg";
 import PermissionModal from "./PermissionModal.jsx";
+import PermissionModal from "./PermissionModal.jsx";
 import { marginActions } from "../../store/index";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import axios from "axios";
 
 const Dashboard = () => {
+  const { id } = useParams(); // Get dataset ID from URL params
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [insightsUrls, setInsightsUrls] = useState([]);
+  const [datasetName, setDatasetName] = useState("Loading...");
+  const [creationDate, setCreationDate] = useState("");
   const { id } = useParams(); // Get dataset ID from URL params
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -19,6 +27,7 @@ const Dashboard = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   useEffect(() => {
+    const fetchDatasetDetails = async () => {
     const fetchDatasetDetails = async () => {
       try {
         const response = await axios.get(
@@ -43,6 +52,7 @@ const Dashboard = () => {
           console.error("Invalid API response structure:", response.data);
         }
       } catch (error) {
+        console.error("Error fetching dataset details:", error);
         console.error("Error fetching dataset details:", error);
       }
     };
@@ -70,9 +80,11 @@ const Dashboard = () => {
 
   const handleImageClick = (url) => {
     setSelectedImage(url);
+    setSelectedImage(url);
   };
 
   const closeModal = () => {
+    setSelectedImage(null);
     setSelectedImage(null);
   };
 
@@ -129,7 +141,32 @@ const Dashboard = () => {
                 </div>
               </div>
             ))
+              <div
+                key={index}
+                className="relative group w-full h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
+                onClick={() => handleImageClick(url)}
+              >
+                <img
+                  src={url}
+                  alt={`Insight Image ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {/* Hover Effect */}
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white text-lg font-semibold">
+                  Click to View Larger
+                </div>
+              </div>
+            ))
           : Array(6)
+              .fill(0)
+              .map((_, index) => (
+                <div
+                  key={index}
+                  className="w-full h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600"
+                >
+                  No Image
+                </div>
+              ))}
               .fill(0)
               .map((_, index) => (
                 <div
@@ -145,11 +182,14 @@ const Dashboard = () => {
       {selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 sm:px-6 lg:px-8">
           <div className="relative w-full max-w-4xl mx-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 sm:px-6 lg:px-8">
+          <div className="relative w-full max-w-4xl mx-auto">
             {/* Image with border */}
             <div className="relative border-4 border-white rounded-lg">
               {/* Close Button */}
               <button
                 onClick={closeModal}
+                className="absolute top-0 right-0 text-white w-9 h-9 text-3xl bg-black bg-opacity-50 rounded-full"
                 className="absolute top-0 right-0 text-white w-9 h-9 text-3xl bg-black bg-opacity-50 rounded-full"
               >
                 &times;
@@ -158,13 +198,16 @@ const Dashboard = () => {
                 src={selectedImage}
                 alt="Selected Insight"
                 className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+                className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
               />
             </div>
           </div>
         </div>
       )}
 
+
       {/* Show Permission Modal */}
+      {isModalOpen && <PermissionModal datasetId={id} onClose={() => setIsModalOpen(false)} />}
       {isModalOpen && <PermissionModal datasetId={id} onClose={() => setIsModalOpen(false)} />}
     </div>
   );

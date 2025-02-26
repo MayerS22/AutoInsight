@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { useState } from "react";
 import DashboardLogo from "../../assets/Dashboard.svg";
 import DownloadLogo from "../../assets/Download.svg";
 import TrashLogo from "../../assets/Trash.svg";
@@ -28,6 +29,26 @@ function DashboardList({
   navigate,
   handleDelete,
 }) {
+  // State to track active tab: "all", "my" or "shared"
+  const [activeTab, setActiveTab] = useState("all");
+
+  // Filter dashboards based on ownership and sharing status
+  const myDatasets = dashboardList.filter(
+    (dataset) =>
+      !(dataset.shared_usernames && dataset.shared_usernames.includes(username))
+  );
+  const sharedDatasets = dashboardList.filter(
+    (dataset) =>
+      dataset.shared_usernames && dataset.shared_usernames.includes(username)
+  );
+
+  const filteredDashboards =
+    activeTab === "all"
+      ? dashboardList
+      : activeTab === "my"
+      ? myDatasets
+      : sharedDatasets;
+
   return (
     <>
       <div className="flex flex-col min-h-screen items-center pt-16 mt-[50px] px-4">
@@ -150,7 +171,43 @@ function DashboardList({
         {/* Dashboard Section */}
         <div className="w-full max-w-[1700px] mt-8">
           <h2 className="text-2xl font-bold text-purple-900">My Dashboards</h2>
-          <h3 className="text-sm text-gray-600 mt-2">Recent dashboards</h3>
+
+          {/* Segmented Tabs */}
+          <div className="mt-4">
+            <div className="inline-flex rounded-lg shadow-sm overflow-hidden">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`px-4 py-2 border border-r-0 border-purple-600 focus:outline-none ${
+                  activeTab === "all"
+                    ? "bg-purple-900 text-white"
+                    : "bg-white text-purple-600 hover:bg-purple-100"
+                } rounded-l-lg`}
+              >
+                All Dashboards
+              </button>
+              <button
+                onClick={() => setActiveTab("my")}
+                className={`px-4 py-2 border-t border-b border-purple-600 focus:outline-none ${
+                  activeTab === "my"
+                    ? "bg-purple-900 text-white"
+                    : "bg-white text-purple-600 hover:bg-purple-100"
+                }`}
+              >
+                My Datasets
+              </button>
+              <button
+                onClick={() => setActiveTab("shared")}
+                className={`px-4 py-2 border border-purple-600 focus:outline-none ${
+                  activeTab === "shared"
+                    ? "bg-purple-900 text-white"
+                    : "bg-white text-purple-600 hover:bg-purple-100"
+                } rounded-r-lg`}
+              >
+                Shared With You
+              </button>
+            </div>
+          </div>
+
           {isDashboardLoading ? (
             <div className="flex justify-center items-center h-40">
               <svg
@@ -172,13 +229,13 @@ function DashboardList({
                 ></path>
               </svg>
             </div>
-          ) : dashboardList.length === 0 ? (
+          ) : filteredDashboards.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
               No dashboards available.
             </div>
           ) : (
             <ul className="space-y-4">
-              {dashboardList.map((dataset, idx) => (
+              {filteredDashboards.map((dataset, idx) => (
                 <li
                   key={dataset._id || dataset.id || idx}
                   className="flex flex-col md:flex-row items-center p-4 bg-white rounded-lg hover:bg-slate-50 transition-all duration-200 w-full group"
@@ -207,8 +264,10 @@ function DashboardList({
                         {new Date(dataset.createdAt).toLocaleString()}
                       </p>
                       {/* Badge indicating ownership or shared status */}
-                      {!(dataset.shared_usernames &&
-                        dataset.shared_usernames.includes(username))  ? (
+                      {!(
+                        dataset.shared_usernames &&
+                        dataset.shared_usernames.includes(username)
+                      ) ? (
                         <span className="text-xs text-green-500">
                           Owned by you
                         </span>
@@ -235,7 +294,9 @@ function DashboardList({
                       {dataset.permissions.length === 0 ? (
                         <span>No users have permission</span>
                       ) : (
-                        <span>{dataset.permissions.length} users have permission</span>
+                        <span>
+                          {dataset.permissions.length} users have permission
+                        </span>
                       )}
                       {clickedDashboardId === dataset._id && (
                         <div
@@ -250,14 +311,12 @@ function DashboardList({
                                   key={`${user}-${index}`}
                                   className="text-sm text-gray-700 py-1"
                                 >
-                                  {((username)===user)?"you":user}
+                                  {username === user ? "you" : user}
                                 </li>
                               ))}
                             </ul>
                           ) : (
-                            <p className="text-sm text-gray-700">
-                              No users
-                            </p>
+                            <p className="text-sm text-gray-700">No users</p>
                           )}
                         </div>
                       )}

@@ -170,7 +170,7 @@ function DashboardList({
 
         {/* Dashboard Section */}
         <div className="w-full max-w-[1700px] mt-8">
-          <h2 className="text-2xl font-bold text-purple-900">My Dashboards</h2>
+          <h2 className="text-2xl font-bold text-purple-900">Dashboards</h2>
 
           {/* Segmented Tabs */}
           <div className="mt-4">
@@ -193,7 +193,7 @@ function DashboardList({
                     : "bg-white text-purple-600 hover:bg-purple-100"
                 }`}
               >
-                My Datasets
+                My Dashboards
               </button>
               <button
                 onClick={() => setActiveTab("shared")}
@@ -203,7 +203,7 @@ function DashboardList({
                     : "bg-white text-purple-600 hover:bg-purple-100"
                 } rounded-r-lg`}
               >
-                Shared With You
+                Shared Dashboards
               </button>
             </div>
           </div>

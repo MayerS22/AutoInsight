@@ -11,7 +11,7 @@ export default function Home() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
-  const [chatbotIsOpen,setChatbotIsOpen]=useState(false);
+  const [chatbotIsOpen, setChatbotIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLoadDataset = () => {
@@ -106,7 +106,7 @@ export default function Home() {
   };
 
   const handleChatbotClick = () => {
-    setChatbotIsOpen(true)
+    setChatbotIsOpen(true);
     // You can replace this with an actual chatbot popup/modal logic
   };
 
@@ -115,7 +115,6 @@ export default function Home() {
       {/* Main Content */}
       <div id="home" className="pt-8 md:pt-30">
         <main className="flex flex-col md:flex-row items-center justify-between md:px-10 px-4 mt-12">
-          
           {/* Left Content (Developer Text Centered Left) */}
           <div className="max-w-2xl text-center md:text-left flex flex-col justify-center h-full">
             <h2 className="text-2xl md:text-5xl font-bold text-purple-900">
@@ -132,9 +131,23 @@ export default function Home() {
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
                     </svg>
                     Uploading...
                   </div>
@@ -164,20 +177,23 @@ export default function Home() {
         </main>
 
         {/* Chatbot (Fixed at Bottom Right) */}
-        <div 
+        <div
           onClick={handleChatbotClick}
-          className="fixed bottom-5 right-5 md:bottom-10 md:right-10 cursor-pointer"
+          style={{ animationDuration: "2s" }}
+          className="fixed bottom-5 right-5 md:bottom-10 md:right-10 z-50 cursor-pointer animate-bounce"
+          aria-label="Open Chatbot"
         >
           <img
             src={CuteRobot}
             alt="Chatbot"
-            className="w-32 h-32 md:w-40 md:h-40 hover:scale-110 transition-transform duration-300"
+            className="w-32 h-32 md:w-40 md:h-40 hover:scale-110 transition-transform duration-100"
           />
         </div>
-         {chatbotIsOpen&& <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen}/>}
-      </div>
-   
 
+        {chatbotIsOpen && (
+          <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen} />
+        )}
+      </div>
     </div>
   );
 }

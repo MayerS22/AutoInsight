@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 export default function Contact() {
   return (
-    <div className="font-sans h-screen flex justify-center items-center bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="font-sans min-h-screen flex justify-center items-center bg-purple-50">
       {/* Main container */}
       <div className="container mx-auto px-4 md:px-12">
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 flex flex-col md:flex-row justify-between gap-8 md:gap-16">
-          {/* Quick Action Column */}
-          <div className="flex-1">
+          {/* Quick Actions Column */}
+          <div className="w-full md:w-1/4">
             <h2 className="text-2xl font-bold mb-6 text-purple-900 border-b-2 border-purple-200 pb-2">
               Quick Actions
             </h2>
@@ -36,19 +36,17 @@ export default function Contact() {
               >
                 FAQ
               </Link>
-              
               <Link
                 to="/about-us"
                 className="block text-purple-800 hover:text-purple-600 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
               >
                 About Us
               </Link>
-              
             </nav>
           </div>
 
           {/* Center Column */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <div className="w-full md:w-1/2 flex flex-col items-center justify-center text-center md:-translate-x-4">
             <h2 className="text-5xl font-bold text-purple-900 mb-4">
               Auto Insight
             </h2>
@@ -58,7 +56,7 @@ export default function Contact() {
           </div>
 
           {/* Contact Us Column */}
-          <div className="flex-1">
+          <div className="w-full md:w-1/4">
             <h2 className="text-2xl font-bold mb-6 text-purple-900 border-b-2 border-purple-200 pb-2">
               Contact Us
             </h2>

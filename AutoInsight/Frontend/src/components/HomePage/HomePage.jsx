@@ -33,8 +33,8 @@ const HomePage = () => {
   }, [location.pathname]);
 
   return (
-    <div className="bg-purple-50 min-h-screen relative flex flex-col">
-      <div ref={homeRef} className="min-h-screen">
+    <div className=" min-h-screen relative flex flex-col">
+      <div ref={homeRef} className="bg-purple-50 min-h-screen">
         <Home />
       </div>
       <div ref={howItWorksRef} className="min-h-screen">

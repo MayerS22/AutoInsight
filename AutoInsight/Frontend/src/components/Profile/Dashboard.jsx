@@ -77,9 +77,11 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-16">
       {/* Top Section with Title and Button */}
-      <div className="flex justify-between items-center w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-center w-full">
         {/* Dashboard Title (Left-Aligned) */}
-        <h2 className="text-3xl font-bold text-purple-900">{datasetName} Dashboard</h2>
+        <h2 className="text-3xl font-bold text-purple-900 mb-4 sm:mb-0">
+          {datasetName} Dashboard
+        </h2>
 
         {/* Permission Button (Right-Aligned) */}
         <button
@@ -107,7 +109,7 @@ const Dashboard = () => {
           ? insightsUrls.map((url, index) => (
               <div
                 key={index}
-                className="relative group w-full h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
+                className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
                 onClick={() => handleImageClick(url)}
               >
                 <img
@@ -126,7 +128,7 @@ const Dashboard = () => {
               .map((_, index) => (
                 <div
                   key={index}
-                  className="w-full h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600"
+                  className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600"
                 >
                   No Image
                 </div>
@@ -157,7 +159,13 @@ const Dashboard = () => {
       )}
 
       {/* Show Permission Modal */}
-      {isModalOpen && <PermissionModal setIsModalOpen={setIsModalOpen} datasetId={id} onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <PermissionModal
+          setIsModalOpen={setIsModalOpen}
+          datasetId={id}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

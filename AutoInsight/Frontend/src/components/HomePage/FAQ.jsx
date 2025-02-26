@@ -40,7 +40,7 @@ export default function FAQ() {
   return (
     <div
       id="faq"
-      className="bg-gradient-to-b from-purple-50 to-purple-100 min-h-screen py-12 pt-20"
+      className=" min-h-screen py-12 pt-20"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header Section */}
@@ -55,11 +55,11 @@ export default function FAQ() {
           {questions.map((item, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg shadow-md p-6 cursor-pointer transition duration-300 hover:shadow-lg"
+              className="bg-purple-50 rounded-lg shadow-md p-6 cursor-pointer transition duration-300 hover:shadow-lg "
               onClick={() => toggleQuestion(index)}
             >
               {/* Question */}
-              <div className="flex items-center justify-start space-x-3">
+              <div className="flex items-center justify-start space-x-3 ">
                 {/* Custom Arrow Icons (Now on the Left) */}
                 <img
                   src={activeQuestion === index ? openedFAQ : closedFAQ}
@@ -74,7 +74,7 @@ export default function FAQ() {
 
               {/* Answer */}
               {activeQuestion === index && (
-                <p className="mt-4 text-purple-700">{item.answer}</p>
+                <p className="mt-4 text-purple-800">{item.answer}</p>
               )}
             </div>
           ))}

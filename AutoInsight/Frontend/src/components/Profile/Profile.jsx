@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import DashboardList from "./DashboardList";
+import Chatbot from "../Chatbot/Chatbot";
 
 const DatasetPage = () => {
   // Component state and refs
@@ -373,6 +374,10 @@ const DatasetPage = () => {
       }
     });
   };
+  const handleChatbotClick = () => {
+    setChatbotIsOpen(true);
+    // You can replace this with an actual chatbot popup/modal logic
+  };
 
   // Set up some layout-related actions on mount/unmount
   useEffect(() => {
@@ -406,6 +411,7 @@ const DatasetPage = () => {
     setHoveredDashboardId={setHoveredDashboardId} hoveredDashboardId={hoveredDashboardId} clickedDashboardId={clickedDashboardId}
     handlePermissionClick={handlePermissionClick} popupRef={popupRef} handleDownload={handleDownload} navigate={navigate} handleDelete={handleDelete}
    />
+
   );
 };
 

@@ -48,13 +48,13 @@ const Reviews = () => {
 
   const scrollLeft = () => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: -400, behavior: "smooth" });
+      containerRef.current.scrollBy({ left: -500, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: 400, behavior: "smooth" });
+      containerRef.current.scrollBy({ left: 500, behavior: "smooth" });
     }
   };
 

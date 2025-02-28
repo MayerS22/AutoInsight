@@ -9,12 +9,14 @@ import { useState,useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { authActions } from "./store/index.js"
 import Dashboard from "./components/Profile/Dashboard.jsx";
+import DashboardListComponent from "./components/Profile/DashboardList.jsx";
 
 
 function App() {
 
 //  const [headerColor,setHeaderColor]=useState("bg-purple-50");
    const [userName, setUserName] = useState("");
+   const [mounted,setMounted]=useState(false);
 
    const dispatch = useDispatch();
 
@@ -40,7 +42,8 @@ function App() {
         { path: "contact", element: <HomePage /> },
         { path: "reviews", element: <HomePage /> }, 
         { path: "faq", element: <HomePage /> }, 
-        { path: "profile", element: <Profile /> },
+        { path: "profile", element: <Profile setMounted={setMounted} mounted={mounted}/> },
+        { path: "dashboards", element: <DashboardListComponent setMounted={setMounted} mounted={mounted}/> },
         { path: "dashboard/:id", element: <Dashboard /> }
        
       ],

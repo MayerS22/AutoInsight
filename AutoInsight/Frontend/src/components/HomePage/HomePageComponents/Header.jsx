@@ -121,6 +121,12 @@ export default function Header() {
           Home
         </button>
         <button
+          onClick={() => handleNavigation("/dashboards")}
+          className="text-purple-900 hover:text-purple-700 hover:underline"
+        >
+          Dashboards
+        </button>
+        <button
           onClick={() => handleNavigation("/about-us")}
           className="text-purple-900 hover:text-purple-700 hover:underline"
         >
@@ -210,6 +216,12 @@ export default function Header() {
               className="text-purple-900 hover:text-purple-700 text-left"
             >
               Home
+            </button>
+            <button
+              onClick={() => handleNavigation("/dashboards")}
+              className="text-purple-900 hover:text-purple-700 text-left"
+            >
+              Dashboards
             </button>
             <button
               onClick={() => handleNavigation("/about-us")}

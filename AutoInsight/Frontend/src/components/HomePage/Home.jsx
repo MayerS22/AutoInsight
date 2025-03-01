@@ -1,16 +1,17 @@
-import { useRef, useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
-import axios from "axios";
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
 import Chatbot from "../Chatbot/Chatbot";
+import DashboardSetupFlow from "../Profile/UploadDatasetWizard";
 
 export default function Home() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef(null);
+  const [showUploadingDashboard, setShowUploadingDashboard] = useState(false);
   const [chatbotIsOpen, setChatbotIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -26,88 +27,12 @@ export default function Home() {
       });
       return;
     }
-    fileInputRef.current.click();
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    const token = localStorage.getItem("token");
-
-    if (file) {
-      const allowedTypes = [
-        "text/csv",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      const maxFileSize = 10 * 1024 * 1024; // 10MB
-
-      if (allowedTypes.includes(file.type)) {
-        if (file.size <= maxFileSize) {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("dataset_name", file.name);
-
-          try {
-            setIsLoading(true);
-            const response = await axios.post(
-              "http://localhost:3000/api/v1/datasets/upload",
-              formData,
-              {
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            if (response.status === 201) {
-              Swal.fire({
-                icon: "success",
-                title: "Upload Successful!",
-                text: `Your file "${file.name}" has been uploaded successfully.`,
-                confirmButtonColor: "#6B46C1",
-              });
-            }
-
-            fileInputRef.current.value = ""; // Clear input field
-          } catch (error) {
-            const errorMessage =
-              error.response?.data?.message ||
-              error.message ||
-              "Something went wrong while uploading your file.";
-
-            Swal.fire({
-              icon: "error",
-              title: "Upload Error",
-              text: errorMessage,
-              confirmButtonColor: "#E53E3E",
-            });
-
-            console.error("Upload Error:", error);
-          } finally {
-            setIsLoading(false);
-          }
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "File Too Large",
-            text: `The file "${file.name}" exceeds the maximum allowed size of 10MB.`,
-            confirmButtonColor: "#E53E3E",
-          });
-        }
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Invalid File Format",
-          text: "Please upload a CSV or Excel (.xlsx) file.",
-          confirmButtonColor: "#E53E3E",
-        });
-      }
-    }
+    // Open the UploadingDashboard modal
+    setShowUploadingDashboard(true);
   };
 
   const handleChatbotClick = () => {
     setChatbotIsOpen(true);
-    // You can replace this with an actual chatbot popup/modal logic
   };
 
   return (
@@ -115,14 +40,13 @@ export default function Home() {
       {/* Main Content */}
       <div id="home" className="pt-8 md:pt-30">
         <main className="flex flex-col md:flex-row items-center justify-between md:px-10 px-4 mt-12">
-          {/* Left Content (Developer Text Centered Left) */}
+          {/* Left Content */}
           <div className="max-w-2xl text-center md:text-left flex flex-col justify-center h-full">
             <h2 className="text-2xl md:text-5xl font-bold text-purple-900">
               Empowering companies with instant data analytics.
             </h2>
             <p className="mt-4 text-purple-900 text-lg">
-              Advanced analytics made simple for everyone—from data analysts to
-              non-technical users.
+              Advanced analytics made simple for everyone—from data analysts to non-technical users.
             </p>
             <div className="mt-6 flex justify-center md:justify-start">
               <button
@@ -156,14 +80,6 @@ export default function Home() {
                 )}
               </button>
             </div>
-            {/* Hidden file input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileChange}
-              accept=".csv, .xlsx"
-            />
           </div>
 
           {/* Right Illustration */}
@@ -192,6 +108,15 @@ export default function Home() {
 
         {chatbotIsOpen && (
           <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen} />
+        )}
+
+        {/* UploadingDashboard Modal */}
+        {showUploadingDashboard && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+           
+              {/* Close button */}             
+              <DashboardSetupFlow onClose={setShowUploadingDashboard}/>
+          </div>
         )}
       </div>
     </div>

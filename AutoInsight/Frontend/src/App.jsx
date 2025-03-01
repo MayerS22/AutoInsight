@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { authActions } from "./store/index.js"
 import Dashboard from "./components/Profile/Dashboard.jsx";
 import DashboardListComponent from "./components/Profile/DashboardList.jsx";
+import DashboardSetupFlow from "./components/Profile/UploadDatasetWizard.jsx";
 
 
 function App() {
@@ -43,7 +44,9 @@ function App() {
         { path: "faq", element: <HomePage /> }, 
         { path: "profile", element: <Profile /> },
         { path: "dashboards", element: <DashboardListComponent isStandAlone={true}/> },
-        { path: "dashboard/:id", element: <Dashboard /> }
+        { path: "dashboard/:id", element: <Dashboard /> },
+        { path: "wizard", element: <DashboardSetupFlow /> }
+        
        
       ],
     },

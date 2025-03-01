@@ -3,7 +3,7 @@ import { useState } from "react";
 import { XCircle, Upload, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-const UploadDatasetContent = ({ onNext, onPrevious }) => {
+const UploadDatasetContent = ({ onNext, onPrevious, onFileUploaded }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -12,7 +12,6 @@ const UploadDatasetContent = ({ onNext, onPrevious }) => {
   // Handle File Upload
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-
     if (!file) return;
 
     setUploadedFile(file);
@@ -52,8 +51,12 @@ const UploadDatasetContent = ({ onNext, onPrevious }) => {
 
       if (response.status === 200) {
         console.log("File uploaded successfully:", response.data);
-        setUploadProgress(100); // Ensure progress reaches 100%
-        setUploadComplete(true); // Mark upload as complete
+        setUploadProgress(100);
+        setUploadComplete(true);
+        // Update parent's state via callback
+        if (onFileUploaded) {
+          onFileUploaded(file);
+        }
       }
     } catch (error) {
       console.error("File upload failed:", error);
@@ -140,7 +143,11 @@ const UploadDatasetContent = ({ onNext, onPrevious }) => {
           <span className="mr-1">←</span> Previous
         </button>
         <button 
-          onClick={uploadComplete ? onNext : null}
+          onClick={() => {
+            if (uploadComplete) {
+              onNext();
+            }
+          }}
           className={`${!uploadComplete ? "bg-purple-400 cursor-not-allowed" : "bg-purple-700 hover:bg-purple-800"} 
             text-white px-6 py-2 rounded-md`}
           disabled={!uploadComplete}

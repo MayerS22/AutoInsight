@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React from 'react';
+import React, { useState } from 'react';
 
 const CustomizeProcessingContent = ({ 
   processingOption, 
@@ -10,6 +9,42 @@ const CustomizeProcessingContent = ({
   onNext, 
   onPrevious 
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+  // When Next is clicked, send the request.
+  const handleNextClick = async () => {
+    setIsSubmitting(true);
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch('http://localhost:3000/api/v1/datasets/processing-options/', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        // Use the key the API expects; adjust if necessary.
+        body: JSON.stringify({ option: processingOption })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // On success, update the option and navigate to next step.
+        onProcessingOptionChange(processingOption);
+        onNext();
+      } else {
+        console.error('Failed to update processing option.', data);
+        // Disable the button if the request did not work.
+        setIsButtonDisabled(true);
+      }
+    } catch (error) {
+      console.error('Error updating processing option:', error);
+      setIsButtonDisabled(true);
+    }
+    setIsSubmitting(false);
+  };
+
   return (
     <>
       <h2 className="text-2xl font-medium text-purple-700 mb-2">Customize Your Processing</h2>
@@ -78,8 +113,9 @@ const CustomizeProcessingContent = ({
           <span className="mr-1">←</span> Previous
         </button>
         <button 
-          onClick={onNext}
+          onClick={handleNextClick}
           className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800"
+          disabled={isSubmitting || isButtonDisabled}
         >
           Next <span className="ml-1">→</span>
         </button>

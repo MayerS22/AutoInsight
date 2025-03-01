@@ -1,25 +1,24 @@
 /* eslint-disable react/prop-types */
-import  { useState } from 'react';
-import { XCircle } from 'lucide-react';
-import SetupSidebar from './SetUpSideBar';
-import BusinessDomainContent from './BusinessDomainContent';
-import UploadDatasetContent from './UploadDatasetContent';
-import CustomizeProcessingContent from './CustomizeProcessingContent';
+import { useState } from "react";
+import { XCircle } from "lucide-react";
+import SetupSidebar from "./SetUpSideBar";
+import BusinessDomainContent from "./BusinessDomainContent";
+import UploadDatasetContent from "./UploadDatasetContent";
+import CustomizeProcessingContent from "./CustomizeProcessingContent";
 
 const DashboardSetupFlow = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [businessDomain, setBusinessDomain] = useState('ecommerce');
+  const [businessDomain, setBusinessDomain] = useState("ecommerce");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [processingOption, setProcessingOption] = useState('clean_only');
+  const [processingOption, setProcessingOption] = useState("clean_only");
   const [downloadAfterCreating, setDownloadAfterCreating] = useState(true);
   const [showError, setShowError] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Choose Business Domain' },
-    { number: 2, title: 'Upload Dataset' },
-    { number: 3, title: 'Customize Your Processing' },
-    { number: 4, title: 'Grant Access to Users' }
+    { number: 1, title: "Choose Business Domain" },
+    { number: 2, title: "Upload Dataset" },
+    { number: 3, title: "Customize Your Processing" },
+    { number: 4, title: "Grant Access to Users" }
   ];
 
   const handleNext = () => {
@@ -27,51 +26,18 @@ const DashboardSetupFlow = ({ onClose }) => {
       setShowError(true);
       return;
     }
-    
     setShowError(false);
-    setCurrentStep(prev => Math.min(prev + 1, 4));
+    setCurrentStep((prev) => Math.min(prev + 1, 4));
   };
 
   const handlePrevious = () => {
     setShowError(false);
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUploadedFile(file);
-      setShowError(false);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        setUploadProgress(progress);
-        if (progress >= 60) {
-          clearInterval(interval);
-        }
-      }, 300);
-    }
-  };
-
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      setUploadedFile(file);
-      setShowError(false);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        setUploadProgress(progress);
-        if (progress >= 60) {
-          clearInterval(interval);
-        }
-      }, 300);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
+  // Callback to update parent's file state upon successful upload
+  const handleFileUploaded = (file) => {
+    setUploadedFile(file);
   };
 
   const handleDomainChange = (domain) => {
@@ -80,11 +46,6 @@ const DashboardSetupFlow = ({ onClose }) => {
 
   const handleProcessingOptionChange = (option) => {
     setProcessingOption(option);
-  };
-
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-    setUploadProgress(0);
   };
 
   return (
@@ -98,35 +59,29 @@ const DashboardSetupFlow = ({ onClose }) => {
 
         <div className="flex-1">
           {currentStep === 1 && (
-            <BusinessDomainContent 
-              businessDomain={businessDomain} 
-              onDomainChange={handleDomainChange} 
-              onNext={handleNext} 
+            <BusinessDomainContent
+              businessDomain={businessDomain}
+              onDomainChange={handleDomainChange}
+              onNext={handleNext}
             />
           )}
 
           {currentStep === 2 && (
-            <UploadDatasetContent 
-              uploadedFile={uploadedFile} 
-              uploadProgress={uploadProgress}
-              showError={showError}
-              onFileUpload={handleFileUpload}
-              onFileDrop={handleFileDrop}
-              onDragOver={handleDragOver}
-              onRemoveFile={handleRemoveFile}
-              onNext={handleNext} 
-              onPrevious={handlePrevious} 
+            <UploadDatasetContent
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              onFileUploaded={handleFileUploaded}
             />
           )}
 
           {currentStep === 3 && (
-            <CustomizeProcessingContent 
-              processingOption={processingOption} 
+            <CustomizeProcessingContent
+              processingOption={processingOption}
               downloadAfterCreating={downloadAfterCreating}
-              onProcessingOptionChange={handleProcessingOptionChange} 
+              onProcessingOptionChange={handleProcessingOptionChange}
               onDownloadToggle={() => setDownloadAfterCreating(!downloadAfterCreating)}
-              onNext={handleNext} 
-              onPrevious={handlePrevious} 
+              onNext={handleNext}
+              onPrevious={handlePrevious}
             />
           )}
 
@@ -137,15 +92,13 @@ const DashboardSetupFlow = ({ onClose }) => {
                 Specify which users or teams should have access to this dashboard.
               </p>
               <div className="flex justify-between">
-                <button 
+                <button
                   onClick={handlePrevious}
                   className="border border-purple-700 text-purple-700 px-4 py-2 rounded-md flex items-center"
                 >
                   <span className="mr-1">←</span> Previous
                 </button>
-                <button 
-                  className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800"
-                >
+                <button className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800">
                   Finish
                 </button>
               </div>

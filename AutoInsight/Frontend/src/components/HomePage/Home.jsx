@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import TabelAnalysis from "../../assets/Work automation, console control.svg";
 import CuteRobot from "../../assets/cute robot.svg";
 import Chatbot from "../Chatbot/Chatbot";
-import DashboardSetupFlow from "../Profile/UploadDatasetWizard";
+import DashboardSetupFlow from "../UploadWizard/DashboardSetupFlow";
 
 export default function Home() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);

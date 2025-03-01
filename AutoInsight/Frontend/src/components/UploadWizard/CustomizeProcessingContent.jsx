@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react';
+import { useState } from "react";
 
 const CustomizeProcessingContent = ({ 
   processingOption, 
@@ -17,29 +17,36 @@ const CustomizeProcessingContent = ({
     setIsSubmitting(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch('http://localhost:3000/api/v1/datasets/processing-options/', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/api/v1/datasets/processing-options/", {
+        method: "POST",
         headers: { 
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        // Use the key the API expects; adjust if necessary.
-        body: JSON.stringify({ option: processingOption })
+        body: JSON.stringify({ 
+          analysis_option: processingOption,
+          downloadAfterCreating: downloadAfterCreating
+        })
       });
       
       const data = await response.json();
+      console.log(downloadAfterCreating);
+      console.log("processing options: "+processingOption);
+      
+      
+      
       
       if (response.ok) {
-        // On success, update the option and navigate to next step.
         onProcessingOptionChange(processingOption);
+      console.log("success");
+
         onNext();
       } else {
-        console.error('Failed to update processing option.', data);
-        // Disable the button if the request did not work.
+        console.error("Failed to update processing option.", data);
         setIsButtonDisabled(true);
       }
     } catch (error) {
-      console.error('Error updating processing option:', error);
+      console.error("Error updating processing option:", error);
       setIsButtonDisabled(true);
     }
     setIsSubmitting(false);
@@ -49,8 +56,8 @@ const CustomizeProcessingContent = ({
     <>
       <h2 className="text-2xl font-medium text-purple-700 mb-2">Customize Your Processing</h2>
       <p className="text-sm text-gray-600 mb-6">
-        In this step, choose the intent of data processing. Opt to simply clean your dataset for manual review later,
-        or clean and auto-generate a dashboard loaded with key insights to kickstart your analysis.
+        Choose your data processing intent. You can either clean the dataset for manual review
+        or clean it while generating a dashboard with key insights.
       </p>
 
       <div className="space-y-6 mb-8">
@@ -59,16 +66,15 @@ const CustomizeProcessingContent = ({
             type="radio" 
             name="processing" 
             value="clean_only"
-            checked={processingOption === 'clean_only'}
-            onChange={() => onProcessingOptionChange('clean_only')}
+            checked={processingOption === "clean_only"}
+            onChange={() => onProcessingOptionChange("clean_only")}
             className="mt-1 text-purple-700"
           />
           <div>
             <p className="font-medium">Clean Only</p>
             <p className="text-sm text-purple-600">
-              Choose this option if you prefer to focus solely on preparing your data. Our cleaning process will address
-              inconsistencies, handle missing values, and standardize your data, ensuring a robust foundation for any 
-              future analysis or manual dashboard creation.
+              This option prepares your data by handling inconsistencies and missing values,
+              ensuring a robust foundation for analysis.
             </p>
           </div>
         </label>
@@ -78,16 +84,14 @@ const CustomizeProcessingContent = ({
             type="radio" 
             name="processing" 
             value="clean_and_generate"
-            checked={processingOption === 'clean_and_generate'}
-            onChange={() => onProcessingOptionChange('clean_and_generate')}
+            checked={processingOption === "clean_and_generate"}
+            onChange={() => onProcessingOptionChange("clean_and_generate")} 
             className="mt-1 text-purple-700"
           />
           <div>
             <p className="font-medium">Clean & Generate Dashboard</p>
             <p className="text-sm text-purple-600">
-              Choose this option to not only clean your dataset but also to automatically generate a fully dashboard.
-              This option provides immediate visual insights by transforming your data into actionable analytics,
-              perfect for users looking to jump straight into data exploration.
+              This option cleans your data and generates an interactive dashboard for instant insights.
             </p>
           </div>
         </label>

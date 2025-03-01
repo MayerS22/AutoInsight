@@ -16,7 +16,6 @@ function App() {
 
 //  const [headerColor,setHeaderColor]=useState("bg-purple-50");
    const [userName, setUserName] = useState("");
-   const [mounted,setMounted]=useState(false);
 
    const dispatch = useDispatch();
 
@@ -42,8 +41,8 @@ function App() {
         { path: "contact", element: <HomePage /> },
         { path: "reviews", element: <HomePage /> }, 
         { path: "faq", element: <HomePage /> }, 
-        { path: "profile", element: <Profile setMounted={setMounted} mounted={mounted}/> },
-        { path: "dashboards", element: <DashboardListComponent setMounted={setMounted} mounted={mounted}/> },
+        { path: "profile", element: <Profile /> },
+        { path: "dashboards", element: <DashboardListComponent isStandAlone={true}/> },
         { path: "dashboard/:id", element: <Dashboard /> }
        
       ],

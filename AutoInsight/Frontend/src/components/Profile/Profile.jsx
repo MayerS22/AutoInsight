@@ -11,12 +11,13 @@ import UploadDatasetComponent from "./UploadDataset";
 import DashboardListComponent from "./DashboardList";
 import { Allignment } from "./Allignment";
 
-const DatasetPage = ({setMounted,mounted}) => {
+const DatasetPage = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const token = localStorage.getItem("token");
   const [refreshDashboardTrigger, setRefreshDashboardTrigger] = useState(0);
+  
 
   // Layout effects
   useEffect(() => {
@@ -76,8 +77,8 @@ const DatasetPage = ({setMounted,mounted}) => {
       
       {/* Dashboard List Section */}
       <DashboardListComponent 
-        setMounted={setMounted}
-        refreshTrigger={refreshDashboardTrigger}
+      isStandAlone={false}  
+      refreshTrigger={refreshDashboardTrigger}
       />
    </Allignment>
     

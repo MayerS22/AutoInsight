@@ -11,9 +11,14 @@ const Dashboard = () => {
   const { id } = useParams(); // Get dataset ID from URL params
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [insightsUrls, setInsightsUrls] = useState([]);
+  const [insightsUrls, setInsightsUrls] = useState({});
+  const [filteredInsights, setFilteredInsights] = useState({});
   const [datasetName, setDatasetName] = useState("Loading...");
   const [creationDate, setCreationDate] = useState("");
+  const [activeChartType, setActiveChartType] = useState("all");
+  const [isTopFilterOpen, setIsTopFilterOpen] = useState(false);
+  const [isGraphTypesOpen, setIsGraphTypesOpen] = useState(false);
+  const [topFilter, setTopFilter] = useState(10);
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -30,15 +35,27 @@ const Dashboard = () => {
           }
         );
 
-        console.log("API Response:", response.data);
+        console.log("API Response urls:", response.data.body.dataset.insights_urls);
+        console.log("API Response :", response.data.body.dataset);
 
-        // Ensure response has the expected structure
+
         if (response.data.body && response.data.body.dataset) {
           const { dataset_name, createdAt, insights_urls } = response.data.body.dataset;
 
           setDatasetName(dataset_name || "Unnamed Dataset");
           setCreationDate(createdAt ? new Date(createdAt).toLocaleDateString() : "Unknown");
-          setInsightsUrls(insights_urls || []);
+
+          // Ensure insightsUrls is structured properly
+          const processedUrls = {
+            bar_chart: insights_urls.bar_chart || [],
+            pie_chart: insights_urls.pie_chart || [],
+            histogram: insights_urls.histogram || [],
+            KDE: insights_urls.kde || [],
+            correlation: insights_urls.correlation || [],
+          };
+
+          setInsightsUrls(processedUrls);
+          setFilteredInsights(processedUrls);
         } else {
           console.error("Invalid API response structure:", response.data);
         }
@@ -49,6 +66,23 @@ const Dashboard = () => {
 
     fetchDatasetDetails();
   }, [id, token]);
+
+  // Apply filters whenever active chart type or top filter changes
+  useEffect(() => {
+    if (activeChartType === "all") {
+      // Show all chart types, limited by topFilter
+      const filtered = {};
+      Object.keys(insightsUrls).forEach(type => {
+        filtered[type] = insightsUrls[type]?.slice(0, topFilter) || [];
+      });
+      setFilteredInsights(filtered);
+    } else {
+      // Show only the selected chart type
+      const filtered = {};
+      filtered[activeChartType] = insightsUrls[activeChartType]?.slice(0, topFilter) || [];
+      setFilteredInsights(filtered);
+    }
+  }, [activeChartType, insightsUrls, topFilter]);
 
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
@@ -74,97 +108,156 @@ const Dashboard = () => {
     setSelectedImage(null);
   };
 
+  const selectChartType = (type) => {
+    setActiveChartType(type);
+    setIsGraphTypesOpen(false);
+  };
+
+  const handleTopFilterChange = (value) => {
+    setTopFilter(value);
+    setIsTopFilterOpen(false);
+  };
+
+  // Get current active chart type display name
+  const getActiveChartTypeDisplay = () => {
+    if (activeChartType === "all") return "All Graphs";
+    return activeChartType.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   return (
     <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-16">
-      {/* Top Section with Title and Button */}
+      {/* Top Section with Title and Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-center w-full">
-        {/* Dashboard Title (Left-Aligned) */}
         <h2 className="text-3xl font-bold text-purple-900 mb-4 sm:mb-0">
           {datasetName} Dashboard
         </h2>
 
-        {/* Permission Button (Right-Aligned) */}
-        <button
-          className="bg-purple-900 text-white px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
-          <span className="text-sm font-medium">Give Permission</span>
-        </button>
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Top filter dropdown */}
+          <div className="relative">
+            <button
+              className="bg-white border border-purple-800  px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[120px] text-purple-800 font-bold"
+              onClick={() => setIsTopFilterOpen(!isTopFilterOpen)}
+            >
+              {topFilter === Infinity ? "All Items" : `Top ${topFilter}`}
+              <svg className="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isTopFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
+              </svg>
+            </button>
+            {isTopFilterOpen && (
+              <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
+                {[5, 10, 15, 20, 'All'].map((value) => (
+                  <button
+                    key={value}
+                    className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold"
+                    onClick={() => handleTopFilterChange(value === 'All' ? Infinity : value)}
+                  >
+                    {value === 'All' ? 'All Items' : `Top ${value}`}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Graph types dropdown */}
+          <div className="relative">
+            <button
+              className="bg-white border text-purple-800 font-bold border-purple-800  px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[150px]"
+              onClick={() => setIsGraphTypesOpen(!isGraphTypesOpen)}
+            >
+              {getActiveChartTypeDisplay()}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isGraphTypesOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
+              </svg>
+            </button>
+            {isGraphTypesOpen && (
+              <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full text-purple-800 font-bold">
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-purple-50 transition "
+                  onClick={() => selectChartType("all")}
+                >
+                  All Graphs
+                </button>
+                {Object.keys(insightsUrls).map((type) => (
+                  <button
+                    key={type}
+                    className="w-full text-left px-4 py-2 hover:bg-purple-50 transition capitalize text-purple-800 font-bold"
+                    onClick={() => selectChartType(type)}
+                  >
+                    {type.replace("_", " ")}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Permissions button */}
+          <button
+            className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
+            <span className="text-sm font-medium">Permissions</span>
+          </button>
+        </div>
       </div>
 
-      {/* Dataset Creation Date */}
       <h3 className="text-sm text-gray-600 mt-2">
-        Date Created:{" "}
-        {new Date(creationDate).toLocaleDateString("en-US", {
+        Date Created: {new Date(creationDate).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
         })}
       </h3>
 
-      {/* Image Grid for Insights URLs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-12 w-full max-w-[2300px]">
-        {insightsUrls.length > 0
-          ? insightsUrls.map((url, index) => (
-              <div
-                key={index}
-                className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
-                onClick={() => handleImageClick(url)}
-              >
-                <img
-                  src={url}
-                  alt={`Insight Image ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                {/* Hover Effect */}
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white text-lg font-semibold">
-                  Click to View Larger
+      <div className="mt-12">
+        {Object.entries(filteredInsights).map(([chartType, urls]) => (
+          <div key={chartType} className="mb-10">
+            <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
+              {chartType.replace("_", " ")} Insights
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {urls.length > 0 ? (
+                urls.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => handleImageClick(url)}
+                  >
+                    <img src={url} alt={`${chartType} Insight ${index + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white text-lg font-semibold">
+                      Click to View Larger
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600">
+                  No {chartType.replace("_", " ")} Images
                 </div>
-              </div>
-            ))
-          : Array(6)
-              .fill(0)
-              .map((_, index) => (
-                <div
-                  key={index}
-                  className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600"
-                >
-                  No Image
-                </div>
-              ))}
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Image Modal */}
       {selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 sm:px-6 lg:px-8">
           <div className="relative w-full max-w-4xl mx-auto">
-            {/* Image with border */}
             <div className="relative border-4 border-white rounded-lg">
-              {/* Close Button */}
               <button
                 onClick={closeModal}
                 className="absolute top-0 right-0 text-white w-9 h-9 text-3xl bg-black bg-opacity-50 rounded-full"
               >
                 &times;
               </button>
-              <img
-                src={selectedImage}
-                alt="Selected Insight"
-                className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-              />
+              <img src={selectedImage} alt="Selected Insight" className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Show Permission Modal */}
       {isModalOpen && (
-        <PermissionModal
-          setIsModalOpen={setIsModalOpen}
-          datasetId={id}
-          onClose={() => setIsModalOpen(false)}
-        />
+        <PermissionModal setIsModalOpen={setIsModalOpen} datasetId={id} onClose={() => setIsModalOpen(false)} />
       )}
     </div>
   );

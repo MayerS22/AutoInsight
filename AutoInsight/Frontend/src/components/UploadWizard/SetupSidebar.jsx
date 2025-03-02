@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Check, CheckCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 const SetupSidebar = ({ steps, currentStep }) => {
   return (

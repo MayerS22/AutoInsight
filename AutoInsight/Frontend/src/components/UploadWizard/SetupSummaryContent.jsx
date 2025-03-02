@@ -1,13 +1,28 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React from "react";
-
+import { Loader } from "lucide-react";
 const SetupSummaryContent = ({
   businessDomain,
   uploadedFile,
   processingOption,
   onPrevious,
-  onFinish
+  onFinish,
+  isProcessing
 }) => {
+
+
+  // Fetch the list of business domains from the API
+  if(isProcessing)
+  {
+    // Show a loading spinner while waiting for the API response
+    return (
+      <div className="flex justify-center flex-col items-center h-full">
+        <Loader className="animate-spin" size={48} />
+        <p className="text-lg text-gray-500 mt-2 font-bold">Analyzing...</p>
+      </div>
+    );
+  }
+  
   return (
     <div>
       <h2 className="text-2xl font-bold text-purple/500 mb-2">Setup Summary</h2>
@@ -32,7 +47,7 @@ const SetupSummaryContent = ({
           onClick={onFinish}
           className="bg-purple/500 text-white px-8 py-2 rounded-md hover:bg-purple-800"
         >
-          Finish
+      Finish
         </button>
       </div>
     </div>

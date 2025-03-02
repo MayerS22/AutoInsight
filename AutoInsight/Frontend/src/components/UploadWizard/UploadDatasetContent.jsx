@@ -54,6 +54,7 @@ const UploadDatasetContent = ({
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
+          withCredentials:true,
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
@@ -213,7 +214,7 @@ const UploadDatasetContent = ({
         <button
           onClick={onPrevious}
           className="border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
-        >
+          disabled={!uploadComplete}>
           <span className="mr-1">←</span> Previous
         </button>
         <button

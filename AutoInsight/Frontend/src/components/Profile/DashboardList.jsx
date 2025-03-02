@@ -99,7 +99,10 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
   useEffect(() => {
     fetchDatasets();
   }, []);
-
+   
+  useEffect(() => {
+    fetchDatasets();
+  }, []);
   // Refresh dashboards when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger) {

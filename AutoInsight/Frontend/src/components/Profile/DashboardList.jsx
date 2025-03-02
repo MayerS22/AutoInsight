@@ -16,7 +16,7 @@ import OpenLogo from "../../assets/Open.svg";
 import { marginActions } from "../../store";
 import { Allignment } from "./Allignment";
 
-const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlone}) => {
+const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlone }) => {
   const [activeTab, setActiveTab] = useState("all");
   const [clickedDashboardId, setClickedDashboardId] = useState(null);
   const [hoveredDashboardId, setHoveredDashboardId] = useState(null);
@@ -28,8 +28,8 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-
   const token = localStorage.getItem("token");
+
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
     dispatch(marginActions.removeUserName());
@@ -42,9 +42,6 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
       dispatch(marginActions.removeLogoutIcon());
     };
   }, [dispatch]);
-
-  
-  
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -65,6 +62,7 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
       console.error("Error fetching user profile:", error);
     }
   };
+
   const fetchDatasets = async () => {
     if (!token) return;
     setIsDashboardLoading(true);
@@ -100,9 +98,6 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
     fetchDatasets();
   }, []);
    
-  useEffect(() => {
-    fetchDatasets();
-  }, []);
   // Refresh dashboards when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger) {
@@ -172,18 +167,30 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
     });
   };
 
-  // Filter datasets based on active tab
+  // Filtering datasets for each tab
   const myDatasets = dashboardList.filter(dataset =>
     !dataset.shared_usernames?.includes(username)
   );
   const sharedDatasets = dashboardList.filter(dataset =>
     dataset.shared_usernames?.includes(username)
   );
-  const filteredDashboards = activeTab === "all" ? dashboardList :
-    activeTab === "my" ? myDatasets : sharedDatasets;
+  const cleanedDatasets = dashboardList.filter(dataset => dataset.cleaned);
+
+  const filteredDashboards =
+    activeTab === "all" ? dashboardList :
+    activeTab === "my" ? myDatasets :
+    activeTab === "shared" ? sharedDatasets :
+    activeTab === "cleaned" ? cleanedDatasets : dashboardList;
+
+  // Array of tabs with display labels
+  const tabs = [
+    { key: "all", label: "All Dashboards" },
+    { key: "my", label: "My Dashboards" },
+    { key: "shared", label: "Shared Dashboards" },
+    { key: "cleaned", label: "Cleaned Dataset" }
+  ];
 
   return (
-
     <>
       {isStandAlone && <Allignment>
         <div className="w-full max-w-[2000px] mt-8">
@@ -192,23 +199,20 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
           {/* Tabs */}
           <div className="mt-4">
             <div className="inline-flex rounded-lg shadow-sm overflow-hidden">
-              {["all", "my", "shared"].map((tab) => (
+              {tabs.map((tab, index) => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 border border-purple-600 focus:outline-none ${activeTab === tab
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-4 py-2 border border-purple-600 focus:outline-none ${activeTab === tab.key
                       ? "bg-purple-900 text-white"
                       : "bg-white text-purple-600 hover:bg-purple-100"
-                    } ${tab === "all" ? "rounded-l-lg border-r-0" : ""} 
-               ${tab === "shared" ? "rounded-r-lg border-l-0" : ""}`}
+                    } ${index === 0 ? "rounded-l-lg border-r-0" : ""} 
+               ${index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""}`}
                 >
-                  {tab === "all" && "All Dashboards"}
-                  {tab === "my" && "My Dashboards"}
-                  {tab === "shared" && "Shared Dashboards"}
+                  {tab.label}
                 </button>
               ))}
             </div>
-
           </div>
 
           {/* Dashboard List */}
@@ -303,31 +307,27 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
           )}
         </div>
       </Allignment>}
+      
       {!isStandAlone && <div className="w-full max-w-[2000px] mt-8">
-
         <h2 className="text-2xl font-bold text-purple-900">Dashboards</h2>
 
         {/* Tabs */}
         <div className="mt-4">
           <div className="inline-flex rounded-lg shadow-sm overflow-hidden">
-            {["all", "my", "shared"].map((tab) => (
+            {tabs.map((tab, index) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 border border-purple-600 focus:outline-none ${activeTab === tab
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-2 border border-purple-600 focus:outline-none ${activeTab === tab.key
                     ? "bg-purple-900 text-white"
                     : "bg-white text-purple-600 hover:bg-purple-100"
-                  } ${tab === "all" ? "rounded-l-lg border-r-0" : ""} 
-               ${tab === "shared" ? "rounded-r-lg border-l-0" : ""}`}
+                  } ${index === 0 ? "rounded-l-lg border-r-0" : ""} 
+               ${index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""}`}
               >
-                {tab === "all" && "All Dashboards"}
-                {tab === "my" && "My Dashboards"}
-                {tab === "shared" && "Shared Dashboards"}
+                {tab.label}
               </button>
             ))}
           </div>
-      
-
         </div>
 
         {/* Dashboard List */}
@@ -421,7 +421,6 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger,isStandAlon
           </ul>
         )}
       </div>}
-
     </>
   );
 };

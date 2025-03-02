@@ -17,8 +17,8 @@ const SetupSummaryContent = ({
     // Show a loading spinner while waiting for the API response
     return (
       <div className="flex justify-center flex-col items-center h-full">
-        <Loader className="animate-spin" size={48} />
-        <p className="text-lg text-gray-500 mt-2 font-bold">Analyzing...</p>
+        <Loader className="animate-spin text-purple/500" size={48} />
+        <p className="text-lg text-purple/500 mt-2 font-bold">Analyzing...</p>
       </div>
     );
   }

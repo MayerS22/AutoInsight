@@ -2,16 +2,17 @@
 /* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { XCircle, Loader } from "lucide-react";
-import SetupSidebar from "./SetUpSideBar";
+import SetupSidebar from "./SetupSidebar";
 import BusinessDomainContent from "./BusinessDomainContent";
 import UploadDatasetContent from "./UploadDatasetContent";
 import CustomizeProcessingContent from "./CustomizeProcessingContent";
 import GrantAccessContent from "./GrantAccessContent"; // Import the new component
 import SetupSummaryContent from "./SetupSummaryContent";
 import axios from "axios";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
-
-const DashboardSetupFlow = ({ onClose,onUploadSuccess}) => {
+const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [businessDomain, setBusinessDomain] = useState("ecommerce");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -28,7 +29,7 @@ const DashboardSetupFlow = ({ onClose,onUploadSuccess}) => {
     { number: 2, title: "Upload Dataset" },
     { number: 3, title: "Customize Your Processing" },
     { number: 4, title: "Grant Access to Users" },
-    { number: 5, title: "Setup Summary" }
+    { number: 5, title: "Setup Summary" },
   ];
 
   const handleNext = () => {
@@ -61,51 +62,113 @@ const DashboardSetupFlow = ({ onClose,onUploadSuccess}) => {
   const handleFinish = async () => {
     setIsProcessing(true);
     const token = localStorage.getItem("token");
- 
+
     if (!token) {
-       console.error("Error: Missing authentication token.");
-       setIsProcessing(false);
-       return;
+      console.error("Error: Missing authentication token.");
+      setIsProcessing(false);
+      return;
     }
     if (!processingOption) {
-       console.error("Error: processingOption is undefined.");
-       setIsProcessing(false);
-       return;
+      console.error("Error: processingOption is undefined.");
+      setIsProcessing(false);
+      return;
     }
- 
+
     try {
-       console.log("Sending request with:", { analysis_option: processingOption });
- 
-       const response = await axios.post(
-          "http://localhost:3000/api/v1/datasets/generate-insights",
-          {},
-          {
-             headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              
-             },
-             withCredentials: true, // Ensures cookies are sent with the request
+      console.log("Sending request with:", {
+        analysis_option: processingOption,
+      });
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/datasets/generate-insights",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true, // Ensures cookies are sent with the request
+        }
+      );
+
+      console.log("Finish Response:", response.data);
+
+      // If downloadAfterCreating is true, proceed to download files
+      if (downloadAfterCreating) {
+        if (processingOption === "clean_only") {
+          // Check for the cleaned_dataset_url inside body.dataset first
+          const cleanedUrl =
+            response.data.body?.dataset?.cleaned_dataset_url ||
+            response.data.cleaned_dataset_url ||
+            response.data.body?.cleaned_dataset_url;
+
+          if (cleanedUrl) {
+            const fileResponse = await axios.get(cleanedUrl, {
+              responseType: "blob",
+            });
+            saveAs(fileResponse.data, "cleaned_dataset.csv");
+          } else {
+            console.error(
+              "cleaned_dataset_url not found in response:",
+              response.data
+            );
           }
-       );
- 
-       console.log("Finish Response:", response.data);
-       setIsProcessing(false);
-       onClose(false);
-       if (onUploadSuccess) {
+        } else if (processingOption === "clean_and_generate") {
+          // Retrieve insights_urls from the nested dataset field
+          const insightsUrls =
+            response.data.body?.dataset?.insights_urls ||
+            response.data.body?.insights_urls;
+          if (insightsUrls) {
+            const zip = new JSZip();
+            // For each chart type, create a folder and add each image file
+            for (const chartType in insightsUrls) {
+              if (insightsUrls.hasOwnProperty(chartType)) {
+                const folder = zip.folder(chartType);
+                const urls = insightsUrls[chartType];
+                for (let i = 0; i < urls.length; i++) {
+                  try {
+                    const res = await fetch(urls[i]);
+                    const blob = await res.blob();
+                    // Name each file with the chart type and index
+                    folder.file(`${chartType}_${i + 1}.jpg`, blob);
+                  } catch (err) {
+                    console.error(
+                      `Error fetching image from ${chartType}:`,
+                      urls[i],
+                      err
+                    );
+                  }
+                }
+              }
+            }
+            // Generate zip and trigger download
+            zip.generateAsync({ type: "blob" }).then((content) => {
+              saveAs(content, "insights_images.zip");
+            });
+          } else {
+            console.error(
+              "insights_urls not found in response:",
+              response.data
+            );
+          }
+        }
+      }
+
+      setIsProcessing(false);
+      onClose(false);
+      if (onUploadSuccess) {
         onUploadSuccess();
       } else {
         console.log("Default upload success action");
       }
     } catch (error) {
-       console.error(
-          "Request failed:",
-          error.response?.data?.message || error.response?.data || error.message
-       );
-       setIsProcessing(false);
+      console.error(
+        "Request failed:",
+        error.response?.data?.message || error.response?.data || error.message
+      );
+      setIsProcessing(false);
     }
   };
- 
+
   const handleClose = () => {
     if (!isProcessing) {
       onClose(false);
@@ -114,9 +177,13 @@ const DashboardSetupFlow = ({ onClose,onUploadSuccess}) => {
 
   return (
     <div className="relative bg-white rounded-lg w-full max-w-4xl p-4 md:p-12">
-      <button 
-        onClick={handleClose} 
-        className={`absolute top-4 right-4 ${isProcessing ? 'text-gray-400 cursor-not-allowed' : 'text-purple-800 hover:text-purple-900'}`}
+      <button
+        onClick={handleClose}
+        className={`absolute top-4 right-4 ${
+          isProcessing
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-purple-800 hover:text-purple-900"
+        }`}
         disabled={isProcessing}
       >
         {isProcessing ? "" : <XCircle size={24} />}
@@ -153,7 +220,9 @@ const DashboardSetupFlow = ({ onClose,onUploadSuccess}) => {
               processingOption={processingOption}
               downloadAfterCreating={downloadAfterCreating}
               onProcessingOptionChange={handleProcessingOptionChange}
-              onDownloadToggle={() => setDownloadAfterCreating(!downloadAfterCreating)}
+              onDownloadToggle={() =>
+                setDownloadAfterCreating(!downloadAfterCreating)
+              }
               onNext={handleNext}
               onPrevious={handlePrevious}
             />

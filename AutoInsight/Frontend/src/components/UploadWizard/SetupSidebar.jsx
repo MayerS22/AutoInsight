@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { CheckCircle } from 'lucide-react';
+import { Check, CheckCircle } from 'lucide-react';
 
 const SetupSidebar = ({ steps, currentStep }) => {
   return (
@@ -15,7 +15,7 @@ const SetupSidebar = ({ steps, currentStep }) => {
                 step.number === currentStep ? 'bg-purple/500 text-white' : 'bg-gray-200 text-gray-500'}`}
           >
             {step.number < currentStep ? (
-              <CheckCircle size={16} />
+              <Check size={20} className='text-bold'/>
             ) : step.number === currentStep ? (
               <span>{step.number}</span>
             ) : (

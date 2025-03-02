@@ -1,17 +1,33 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import { XCircle, Upload, AlertCircle, CheckCircle } from "lucide-react";
+import { XCircle, AlertCircle, CheckCircle} from "lucide-react";
 import axios from "axios";
-import FileLogo from "../../assets/FileLogo.png"
+import FileLogo from "../../assets/FileLogo.png";
+import CloudAdd from "../../assets/cloud-add.svg";
 
-const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDataset,uploadedDataset,uploadComplete,setUploadComplete,uploadProgress,setUploadProgress }) => {
+const UploadDatasetContent = ({
+  onNext,
+  onPrevious,
+  onFileUploaded,
+  setUploadedDataset,
+  uploadedDataset,
+  uploadComplete,
+  setUploadComplete,
+  uploadProgress,
+  setUploadProgress,
+}) => {
   const [showError, setShowError] = useState(false);
-   
-  // Handle File Upload
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const [isDragging, setIsDragging] = useState(false);
+  const [dropAnimation, setDropAnimation] = useState(false);
 
+  // Helper function to format file sizes to MB with two decimals
+  const formatFileSize = (sizeInBytes) => {
+    const mb = sizeInBytes / (1024 * 1024);
+    return `${mb.toFixed(2)}MB`;
+  };
+
+  // Refactored function to handle file upload logic
+  const uploadFile = async (file) => {
     setUploadedDataset(file);
     setShowError(false);
     setUploadProgress(0);
@@ -51,7 +67,6 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
         console.log("File uploaded successfully:", response.data);
         setUploadProgress(100);
         setUploadComplete(true);
-        // Update parent's state via callback
         if (onFileUploaded) {
           onFileUploaded(file);
         }
@@ -59,6 +74,30 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
     } catch (error) {
       console.error("File upload failed:", error);
       setShowError(true);
+    }
+  };
+
+  // Handle file selection via file input
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    uploadFile(file);
+  };
+
+  // Prevent default behavior when a file is dragged over the drop area
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  // Handle file drop event with animation feedback
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      uploadFile(file);
+      setDropAnimation(true);
+      setTimeout(() => setDropAnimation(false), 300);
     }
   };
 
@@ -71,29 +110,49 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
 
   return (
     <>
-      <h2 className="text-2xl font-medium text-purple-700 mb-2">Upload Dataset</h2>
-      <p className="text-sm text-gray-600 mb-6">
-        Securely upload your data file to start building your dashboard. Our platform supports multiple file formats
-        (CSV, Excel, JSON, etc.). Preview your data to ensure accuracy before moving forward.
+      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+        Upload Dataset
+      </h2>
+      <p className="text-sm text-orig/600 mb-6">
+        Securely upload your data file to start building your dashboard. Our
+        platform supports multiple file formats (CSV, Excel, JSON, etc.). Preview
+        your data to ensure accuracy before moving forward.
       </p>
 
-      <div 
-        className={`border-2 border-dashed ${showError ? "border-red-500" : "border-gray-300"} 
-          rounded-lg p-4 md:p-8 flex flex-col items-center justify-center mb-4`}
+      <div
+        className={`border-4 border-dashed ${
+          showError
+            ? "border-red-500"
+            : isDragging
+            ? "border-blue-400"
+            : "border-gray-200"
+        } rounded-lg p-4 md:p-8 flex flex-col items-center justify-center mb-4 transition-transform duration-300 ${
+          dropAnimation ? "scale-105" : ""
+        }`}
+        onDragOver={handleDragOver}
+        onDragEnter={() => setIsDragging(true)}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
       >
-        <Upload className={`${showError ? "text-red-500" : "text-gray-400"} mb-4`} size={32} />
-        <p className="text-base md:text-lg text-center mb-2">Choose a file or drag & drop it here</p>
-        <p className="text-xs md:text-sm text-gray-500 mb-4">CSV, Excel, and JSON supported up to 500MB</p>
-        <button 
+        <img src={CloudAdd} alt="Cloud Add" className="h-14 w-14" />
+        <p className="font-poppins text-orig/500 text-base md:text-lg text-center pt-2 mb-2">
+          Choose a file or drag & drop it here
+        </p>
+        <p className="text-xs md:text-sm text-gray-400 mb-4">
+          CSV, Excel, and JSON files
+        </p>
+        <button
           onClick={() => document.getElementById("file-upload").click()}
-          className={`${showError ? "bg-red-500" : "bg-purple-700"} text-white px-4 py-2 rounded-md hover:opacity-90`}
+          className={`${
+            showError ? "bg-red-500" : "bg-purple/500"
+          } text-white px-4 py-2 rounded-md hover:opacity-90`}
         >
           Browse File
         </button>
-        <input 
-          id="file-upload" 
-          type="file" 
-          className="hidden" 
+        <input
+          id="file-upload"
+          type="file"
+          className="hidden"
           onChange={handleFileUpload}
           accept=".csv,.xls,.xlsx,.json"
         />
@@ -111,13 +170,30 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
               <div className="w-10 h-12 rounded mr-3 flex items-center justify-center">
-                {uploadComplete ? <CheckCircle size={24} className="text-green-600" /> : <img  src={FileLogo} alt="file-logo" className="w-[30px]"/>}
+                {uploadComplete ? (
+                  <CheckCircle size={24} className="text-green-600 text-bold" />
+                ) : (
+                  <img
+                    src={FileLogo}
+                    alt="file-logo"
+                    className="w-[30px] animate-pulse"
+                  />
+                )}
               </div>
-              <div>
-                <p className="font-medium text-sm md:text-base">{uploadedDataset.name}</p>
-                <p className="text-xs md:text-sm text-gray-500">
-                  {uploadComplete ? "Upload Complete ✅" : `Uploading... (${uploadProgress}%)`}
-                </p>
+              <div className="flex flex-wrap items-center space-x-4">
+                <span className="font-medium text-sm md:text-base">
+                  {uploadedDataset.name}
+                </span>
+                <span className="text-xs md:text-sm text-gray-500">
+                  {`${formatFileSize(
+                    uploadedDataset.size * (uploadProgress / 100)
+                  )} / ${formatFileSize(uploadedDataset.size)}`}
+                </span>
+                <span className="text-xs md:text-sm text-gray-500">
+                  {uploadComplete
+                    ? "Upload Complete ✅"
+                    : `Uploading... (${uploadProgress}%)`}
+                </span>
               </div>
             </div>
             <button className="text-gray-500" onClick={handleRemoveFile}>
@@ -125,8 +201,8 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
             </button>
           </div>
           <div className="h-2 bg-gray-200 rounded-full">
-            <div 
-              className="h-2 bg-purple-600 rounded-full transition-all duration-500 ease-in-out" 
+            <div
+              className="h-2 bg-purple-600 rounded-full transition-all duration-500 ease-in-out"
               style={{ width: `${uploadProgress}%` }}
             ></div>
           </div>
@@ -134,20 +210,23 @@ const UploadDatasetContent = ({ onNext,onPrevious, onFileUploaded,setUploadedDat
       )}
 
       <div className="flex justify-between">
-        <button 
+        <button
           onClick={onPrevious}
-          className="border border-purple-700 text-purple-700 px-4 py-2 rounded-md flex items-center"
+          className="border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
         >
           <span className="mr-1">←</span> Previous
         </button>
-        <button 
+        <button
           onClick={() => {
             if (uploadComplete) {
               onNext();
             }
           }}
-          className={`${!uploadComplete ? "bg-purple-400 cursor-not-allowed" : "bg-purple-700 hover:bg-purple-800"} 
-            text-white px-6 py-2 rounded-md`}
+          className={`${
+            !uploadComplete
+              ? "bg-purple-400 cursor-not-allowed"
+              : "bg-purple/500 hover:bg-purple-700"
+          } text-white px-6 py-2 rounded-md`}
           disabled={!uploadComplete}
         >
           Next <span className="ml-1">→</span>

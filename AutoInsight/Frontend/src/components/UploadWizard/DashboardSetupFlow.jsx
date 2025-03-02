@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { XCircle } from "lucide-react";
 import SetupSidebar from "./SetUpSideBar";
 import BusinessDomainContent from "./BusinessDomainContent";
 import UploadDatasetContent from "./UploadDatasetContent";
 import CustomizeProcessingContent from "./CustomizeProcessingContent";
+import GrantAccessContent from "./GrantAccessContent"; // Import the new component
+import SetupSummaryContent from "./SetupSummaryContent";
 
 const DashboardSetupFlow = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -19,7 +19,8 @@ const DashboardSetupFlow = ({ onClose }) => {
     { number: 1, title: "Choose Business Domain" },
     { number: 2, title: "Upload Dataset" },
     { number: 3, title: "Customize Your Processing" },
-    { number: 4, title: "Grant Access to Users" }
+    { number: 4, title: "Grant Access to Users" },
+    { number: 5, title: "Setup Summary" }
   ];
 
   const handleNext = () => {
@@ -28,7 +29,7 @@ const DashboardSetupFlow = ({ onClose }) => {
       return;
     }
     setShowError(false);
-    setCurrentStep((prev) => Math.min(prev + 1, 4));
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
   };
 
   const handlePrevious = () => {
@@ -47,6 +48,11 @@ const DashboardSetupFlow = ({ onClose }) => {
 
   const handleProcessingOptionChange = (option) => {
     setProcessingOption(option);
+  };
+
+  const handleFinish = () => {
+    // Add your finish logic here
+    console.log("Finish clicked");
   };
 
   return (
@@ -87,23 +93,20 @@ const DashboardSetupFlow = ({ onClose }) => {
           )}
 
           {currentStep === 4 && (
-            <div>
-              <h2 className="text-2xl font-medium text-purple-700 mb-2">Grant Access to Users</h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Specify which users or teams should have access to this dashboard.
-              </p>
-              <div className="flex justify-between">
-                <button
-                  onClick={handlePrevious}
-                  className="border border-purple-700 text-purple-700 px-4 py-2 rounded-md flex items-center"
-                >
-                  <span className="mr-1">←</span> Previous
-                </button>
-                <button className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800">
-                  Finish
-                </button>
-              </div>
-            </div>
+            <GrantAccessContent
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+            />
+          )}
+
+          {currentStep === 5 && (
+            <SetupSummaryContent
+              businessDomain={businessDomain}
+              uploadedFile={uploadedFile}
+              processingOption={processingOption}
+              onPrevious={handlePrevious}
+              onFinish={handleFinish}
+            />
           )}
         </div>
       </div>

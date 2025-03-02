@@ -50,7 +50,7 @@ const DashboardSetupFlow = ({ onClose }) => {
   };
 
   return (
-    <div className="relative bg-white rounded-lg w-full max-w-3xl p-4 md:p-8">
+    <div className="relative bg-white rounded-lg w-full max-w-4xl p-4 md:p-12">
       <button onClick={() => onClose(false)} className="absolute top-4 right-4 text-purple-800">
         <XCircle size={24} />
       </button>

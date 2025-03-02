@@ -1,4 +1,3 @@
- 
 /* eslint-disable react/prop-types */
 import axios from "axios";
 
@@ -6,14 +5,14 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const token=localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     try {
       // Send the selected business domain using the key "domainType"
       const response = await axios.post(
         "http://localhost:3000/api/v1/datasets/choose-domain/",
         { domainType: businessDomain },
         {
-          headers: { Authorization:`Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       console.log("Response Session: ", response.data.body.sessionId);
@@ -33,32 +32,32 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-medium text-purple-700 mb-2">Choose Business Domain</h2>
-      <p className="text-sm text-gray-600 mb-6">
+      <h2 className="text-2xl font-bold text-purple/500 mb-2">Choose Business Domain</h2>
+      <p className="text-sm text-orig/600 mb-6">
         Begin your dashboard creation by choosing the business domain that best represents your organization.
         This selection helps tailor your dashboard to industry-specific metrics and insights.
       </p>
 
       <div className="space-y-2 mb-8">
-        <label className="flex items-center space-x-2">
+        <label className="flex items-center space-x-2 font-bold text-orig/600">
           <input 
             type="radio" 
             name="domain" 
             value="ecommerce"
             checked={businessDomain === 'ecommerce'}
             onChange={() => onDomainChange('ecommerce')}
-            className="text-purple-700"
+            className="accent-purple/500"
           />
           <span>Ecommerce</span>
         </label>
-        <label className="flex items-center space-x-2">
+        <label className="flex items-center space-x-2 font-bold text-orig/600">
           <input 
             type="radio" 
             name="domain" 
             value="hr"
             checked={businessDomain === 'HR'}
             onChange={() => onDomainChange('HR')}
-            className="text-purple-700"
+            className="accent-purple/500"
           />
           <span>HR</span>
         </label>
@@ -67,7 +66,7 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
       <div className="flex justify-end">
         <button 
           type="submit"
-          className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800"
+          className="bg-purple/500 text-white px-6 py-2 rounded-md hover:bg-purple-800"
         >
           Next
         </button>

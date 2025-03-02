@@ -8,6 +8,8 @@ export default {
       colors: {
         "robot-color": "#6B2078",
         "chatbot-bg-color": "#F3ECF8",
+        "purple/500":"#532494",
+        "orig/600":"#693696",
       },
     },
   },

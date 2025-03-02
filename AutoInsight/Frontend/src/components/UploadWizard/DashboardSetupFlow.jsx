@@ -14,6 +14,12 @@ const DashboardSetupFlow = ({ onClose }) => {
   const [processingOption, setProcessingOption] = useState("clean_only");
   const [downloadAfterCreating, setDownloadAfterCreating] = useState(true);
   const [showError, setShowError] = useState(false);
+  const [uploadedDataset, setUploadedDataset] = useState(null);
+  const [uploadComplete, setUploadComplete] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+
+
 
   const steps = [
     { number: 1, title: "Choose Business Domain" },
@@ -72,6 +78,12 @@ const DashboardSetupFlow = ({ onClose }) => {
               onNext={handleNext}
               onPrevious={handlePrevious}
               onFileUploaded={handleFileUploaded}
+              uploadedDataset={uploadedDataset}
+              setUploadedDataset={setUploadedDataset}
+              uploadComplete={uploadComplete}
+              setUploadComplete={setUploadComplete}
+              setUploadProgress={setUploadProgress}
+              uploadProgress={uploadProgress}
             />
           )}
 

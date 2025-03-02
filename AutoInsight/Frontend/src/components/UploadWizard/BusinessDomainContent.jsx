@@ -2,7 +2,6 @@
 import axios from "axios";
 
 const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     const token = localStorage.getItem("token");
@@ -13,6 +12,7 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
         { domainType: businessDomain },
         {
           headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true, // Ensures cookies are sent with the request
         }
       );
       console.log("Response Session: ", response.data.body.sessionId);
@@ -20,19 +20,19 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
       onNext();
     } catch (error) {
       console.error("An error occurred:", error);
-    
       if (error.response) {
         console.error("Full error response:", error.response.data);
       } else {
         console.error("No response received, possible network error or CORS issue.");
       }
     }
-    
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-bold text-purple/500 mb-2">Choose Business Domain</h2>
+      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+        Choose Business Domain
+      </h2>
       <p className="text-sm text-orig/600 mb-6">
         Begin your dashboard creation by choosing the business domain that best represents your organization.
         This selection helps tailor your dashboard to industry-specific metrics and insights.
@@ -54,7 +54,7 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
           <input 
             type="radio" 
             name="domain" 
-            value="hr"
+            value="HR"
             checked={businessDomain === 'HR'}
             onChange={() => onDomainChange('HR')}
             className="accent-purple/500"

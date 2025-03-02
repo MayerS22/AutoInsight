@@ -10,6 +10,11 @@ export default {
         "chatbot-bg-color": "#F3ECF8",
         "purple/500":"#532494",
         "orig/600":"#693696",
+        "orig/500":"#4A266A",
+
+      },
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
       },
     },
   },

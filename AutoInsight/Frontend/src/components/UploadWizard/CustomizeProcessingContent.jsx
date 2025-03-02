@@ -1,48 +1,47 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
+import axios from "axios";
 
-const CustomizeProcessingContent = ({ 
-  processingOption, 
+const CustomizeProcessingContent = ({
+  processingOption,
   downloadAfterCreating,
-  onProcessingOptionChange, 
+  onProcessingOptionChange,
   onDownloadToggle,
-  onNext, 
-  onPrevious 
+  onNext,
+  onPrevious,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  // When Next is clicked, send the request.
+  // When Next is clicked, send the request using axios.
   const handleNextClick = async () => {
     setIsSubmitting(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:3000/api/v1/datasets/processing-options/", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/datasets/processing-options/",
+        {
           analysis_option: processingOption,
-          downloadAfterCreating: downloadAfterCreating
-        })
-      });
-      
-      const data = await response.json();
-      console.log(downloadAfterCreating);
-      console.log("processing options: "+processingOption);
-      
-      
-      
-      
-      if (response.ok) {
-        onProcessingOptionChange(processingOption);
-      console.log("success");
+          downloadAfterCreating: downloadAfterCreating,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true, // Ensures cookies (and session data) are sent with the request
+        }
+      );
 
+      console.log("Download after creating:", downloadAfterCreating);
+      console.log("Processing option:", processingOption);
+
+      if (response.status === 200) {
+        onProcessingOptionChange(processingOption);
+        console.log("Success");
         onNext();
       } else {
-        console.error("Failed to update processing option.", data);
+        console.error("Failed to update processing option.", response.data);
         setIsButtonDisabled(true);
       }
     } catch (error) {
@@ -54,44 +53,55 @@ const CustomizeProcessingContent = ({
 
   return (
     <>
-      <h2 className="text-2xl font-medium text-purple-700 mb-2">Customize Your Processing</h2>
-      <p className="text-sm text-gray-600 mb-6">
-        Choose your data processing intent. You can either clean the dataset for manual review
-        or clean it while generating a dashboard with key insights.
+      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+        Customize Your Processing
+      </h2>
+      <p className="text-sm text-orig/600 mb-6">
+        Choose your data processing intent. You can either clean the dataset for
+        manual review or clean it while generating a dashboard with key
+        insights.
       </p>
 
       <div className="space-y-6 mb-8">
         <label className="flex items-start space-x-2">
-          <input 
-            type="radio" 
-            name="processing" 
+          <input
+            type="radio"
+            name="processing"
             value="clean_only"
             checked={processingOption === "clean_only"}
             onChange={() => onProcessingOptionChange("clean_only")}
-            className="mt-1 text-purple-700"
+            className="mt-1 accent-purple/500"
           />
           <div>
-            <p className="font-medium">Clean Only</p>
-            <p className="text-sm text-purple-600">
-              This option prepares your data by handling inconsistencies and missing values,
-              ensuring a robust foundation for analysis.
+            <p className="font-bold text-orig/500">Clean Only</p>
+            <p className="text-sm text-orig/600">
+              Choose this option if you prefer to focus solely on preparing your
+              data. Our cleaning process will address inconsistencies, handle
+              missing values, and standardize your data, ensuring a robust
+              foundation for any future analysis or manual dashboard creation.
             </p>
           </div>
         </label>
 
         <label className="flex items-start space-x-2">
-          <input 
-            type="radio" 
-            name="processing" 
+          <input
+            type="radio"
+            name="processing"
             value="clean_and_generate"
             checked={processingOption === "clean_and_generate"}
-            onChange={() => onProcessingOptionChange("clean_and_generate")} 
-            className="mt-1 text-purple-700"
+            onChange={() => onProcessingOptionChange("clean_and_generate")}
+            className="mt-1 accent-purple/500"
           />
           <div>
-            <p className="font-medium">Clean & Generate Dashboard</p>
-            <p className="text-sm text-purple-600">
-              This option cleans your data and generates an interactive dashboard for instant insights.
+            <p className="font-bold text-orig/500">
+              Clean & Generate Dashboard
+            </p>
+            <p className="text-sm text-orig/600">
+              Choose this option to not only clean your dataset but also to
+              automatically generate a fully dashboard. This option provides
+              immediate visual insights by transforming your data into
+              actionable analytics, perfect for users looking to jump straight
+              into data exploration.
             </p>
           </div>
         </label>
@@ -99,26 +109,26 @@ const CustomizeProcessingContent = ({
 
       <div className="mb-8">
         <label className="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={downloadAfterCreating}
             onChange={onDownloadToggle}
-            className="text-purple-700"
+            className="accent-purple/500"
           />
-          <span>Download after creating</span>
+          <span className="text-orig/500">Download after creating</span>
         </label>
       </div>
 
       <div className="flex justify-between">
-        <button 
+        <button
           onClick={onPrevious}
-          className="border border-purple-700 text-purple-700 px-4 py-2 rounded-md flex items-center"
+          className="bg-purple/500 text-white px-6 py-2 rounded-md hover:bg-purple-800 flex items-center"
         >
           <span className="mr-1">←</span> Previous
         </button>
-        <button 
+        <button
           onClick={handleNextClick}
-          className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800"
+          className="bg-purple/500   text-white px-6 py-2 rounded-md hover:bg-purple-800"
           disabled={isSubmitting || isButtonDisabled}
         >
           Next <span className="ml-1">→</span>

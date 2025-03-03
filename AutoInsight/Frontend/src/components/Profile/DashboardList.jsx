@@ -334,7 +334,7 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
                       onClick={() => handleEditDashboardName(dataset)}
                       className="ml-2 p-1 hover:bg-gray-200 rounded"
                     >
-                      <Edit size={16} className="text-gray-600" />
+                      <Edit size={16} className="text-orig/500" />
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">

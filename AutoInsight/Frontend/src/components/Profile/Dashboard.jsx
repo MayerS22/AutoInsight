@@ -258,9 +258,9 @@ const Dashboard = () => {
         </div>
       )}
 
-      {isModalOpen && (
-        <PermissionModal setIsModalOpen={setIsModalOpen} datasetId={id} onClose={() => setIsModalOpen(false)} />
-      )}
+        {isModalOpen && (
+          <PermissionModal setIsModalOpen={setIsModalOpen} datasetId={id} onClose={() => setIsModalOpen(false)} />
+        )}
     </div>
   );
 };

@@ -30,6 +30,14 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
 
   const token = localStorage.getItem("token");
 
+  // Helper function to check if a dataset is "cleaned"
+  const isCleanedDataset = (dataset) => {
+    const insights = dataset.insights_urls;
+    if (!insights) return false;
+    const keys = ["pie_chart", "bar_chart", "kde", "histogram", "correlation", "others"];
+    return keys.every(key => Array.isArray(insights[key]) && insights[key].length === 0);
+  };
+
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
     dispatch(marginActions.removeUserName());
@@ -167,20 +175,17 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
     });
   };
 
-  // Filtering datasets for each tab
-  const myDatasets = dashboardList.filter(dataset =>
+  // Separate the datasets into cleaned and non-cleaned based on insights_urls
+  const nonCleanedDashboards = dashboardList.filter(dataset => !isCleanedDataset(dataset));
+  const cleanedDatasets = dashboardList.filter(isCleanedDataset);
+
+  // Further filter non-cleaned datasets into "My" and "Shared"
+  const myDatasets = nonCleanedDashboards.filter(dataset =>
     !dataset.shared_usernames?.includes(username)
   );
-  const sharedDatasets = dashboardList.filter(dataset =>
+  const sharedDatasets = nonCleanedDashboards.filter(dataset =>
     dataset.shared_usernames?.includes(username)
   );
-  const cleanedDatasets = dashboardList.filter(dataset => dataset.cleaned);
-
-  const filteredDashboards =
-    activeTab === "all" ? dashboardList :
-    activeTab === "my" ? myDatasets :
-    activeTab === "shared" ? sharedDatasets :
-    activeTab === "cleaned" ? cleanedDatasets : dashboardList;
 
   // Array of tabs with display labels
   const tabs = [
@@ -189,6 +194,13 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
     { key: "shared", label: "Shared Dashboards" },
     { key: "cleaned", label: "Cleaned Dataset" }
   ];
+
+  // Show non-cleaned datasets in the default tabs and cleaned datasets in the "cleaned" tab.
+  const filteredDashboards =
+    activeTab === "all" ? nonCleanedDashboards :
+    activeTab === "my" ? myDatasets :
+    activeTab === "shared" ? sharedDatasets :
+    activeTab === "cleaned" ? cleanedDatasets : nonCleanedDashboards;
 
   return (
     <>

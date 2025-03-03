@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
+ 
+ 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -49,6 +49,7 @@ const DatasetPage = () => {
       );
       dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
       dispatch(authActions.addUsername(response.data.body.username));
+      dispatch(authActions.addID(response.data.body.id));
     } catch (error) {
       console.error("Error fetching user profile:", error);
     }

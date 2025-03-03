@@ -1,162 +1,166 @@
+
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import SearchIcon from "../../assets/SearchIcon.svg";
 
-const GrantAccessContent = ({ onNext, onPrevious }) => {
+
+const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  // Start with an empty array for added users.
   const [users, setUsers] = useState([]);
-  
-  // State to hold the default access permission for new users.
-  const [defaultAccess, setDefaultAccess] = useState("view");
-  // State to toggle the dropdown in the search section.
-  const [defaultDropdownOpen, setDefaultDropdownOpen] = useState(false);
-  // This state tracks which user's dropdown (in the user list) is open.
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const token = localStorage.getItem("token");
+  const userId = useSelector((state) => state.auth.id);
+  const handleInputChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setSelectedUser(null);
 
-  // Adds a user to the list based on the search query.
-  const handleAddUser = () => {
-    const trimmed = searchQuery.trim().toLowerCase();
-    if (!trimmed) return;
 
-    let newUser;
-
-    // Check if search matches Mazen.
-    if (trimmed.includes("mazen")) {
-      newUser = {
-        id: Date.now(),
-        name: "Mazen Raafat",
-        email: "mazenraafat@gmail.com",
-        // Use a hard-coded access for Mazen if needed,
-        // or you can opt to use defaultAccess instead.
-        access: "edit",
-        avatar: "MR",
-      };
-    }
-    // Check if search matches Mayer.
-    else if (trimmed.includes("mayer")) {
-      newUser = {
-        id: Date.now(),
-        name: "Mayer Soliman",
-        email: "mayer88@gmail.com",
-        access: "view",
-        avatar: "MS",
-      };
-    }
-    // Otherwise, create a generic user from whatever is typed.
-    else {
-      // Derive initials from the search query.
-      const initials = searchQuery
-        .split(" ")
-        .map((word) => word[0]?.toUpperCase() || "")
-        .join("");
-
-      newUser = {
-        id: Date.now(),
-        name: searchQuery,
-        email: `${trimmed.replace(/\s+/g, "")}@example.com`,
-        // Use the defaultAccess value here.
-        access: defaultAccess,
-        avatar: initials || "U", // 'U' for unknown.
-      };
+    if (!query.trim()) {
+      setSuggestions([]);
+      return;
     }
 
-    setUsers((prev) => [...prev, newUser]);
-    setSearchQuery(""); // Clear the input.
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/v1/users/search?username=${query}`
+      );
+      const filteredUsers = response.data.data.filter(u => u._id !== userId);
+      console.log(userId);
+      
+      setSuggestions(filteredUsers || []);
+    } catch (error) {
+      setSuggestions([]);
+    }
+  };
+  const handleSelectUser = (user) => {
+    setSearchQuery(user.username);
+    setSelectedUser(user);
+    setSuggestions([]);
   };
 
-  // Update a user's access field from the list.
-  const toggleAccess = (userId, newAccess) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId ? { ...user, access: newAccess } : user
-      )
-    );
+  const handleAddUser = () => {
+    if (selectedUser && !users.some(u => u._id === selectedUser._id)) {
+      setUsers(prev => [...prev, {
+        ...selectedUser,
+        access: "view" // Default access level
+      }]);
+      setSearchQuery("");
+      setSelectedUser(null);
+    }
+  };
+
+  const handleNext = async () => {
+    setErrorMessage("");
+    console.log(users[0].access);
+    
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/datasets/grant-access/",
+        {
+          userPermissions: users.map(user => ({
+            userId: user._id,
+            permission: user.access
+          }))
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true
+        }
+      );
+
+
+      if (response.data.status === 200) {
+        console.log("Permission granted Successfully!");
+
+        onNext();
+      } else {
+        setErrorMessage(response.data.message || "Failed to grant access");
+      }
+    } catch (error) {
+      console.error("Error granting access:", error.response?.data?.message);
+
+
+    }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+      <h2 className="text-2xl font-bold text-purple-500 mb-2">
         Grant Access to Users
       </h2>
-      <p className="text-sm text-orig/600 mb-6">
-        Securely share your dashboard by inviting team members and assigning
-        specific permissions. You can grant users view-only access for secure
-        data consumption, or allow full editing rights to enable collaboration
-        and dashboard customization.
+      <p className="text-sm text-gray-600 mb-6">
+        Securely share your dashboard by inviting team members and assigning specific permissions.
       </p>
 
-      {/* Search and Add section */}
-      <div className="flex items-center mb-6">
-        <div className="relative flex-1 mr-2">
-          <input
-            type="text"
-            placeholder="Mazen Mostafa"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
-          />
-          {/* Simple search icon */}
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        </div>
+      {errorMessage && (
+        <div className="text-red-500 mb-4 text-center">{errorMessage}</div>
+      )}
 
-        {/* Default Access Dropdown */}
-        <div className="relative w-32 mr-2">
-          <button
-            onClick={() => setDefaultDropdownOpen(!defaultDropdownOpen)}
-            className="w-full flex items-center justify-between bg-white border border-gray-300 rounded-md px-4 py-2 text-sm"
-          >
-            <span>Can {defaultAccess}</span>
-            <ChevronDown size={16} />
-          </button>
-          {defaultDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-              <button
-                onClick={() => {
-                  setDefaultAccess("view");
-                  setDefaultDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Can view
-              </button>
-              <button
-                onClick={() => {
-                  setDefaultAccess("edit");
-                  setDefaultDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Can edit
-              </button>
-              <button
-                onClick={() => {
-                  setDefaultAccess("admin");
-                  setDefaultDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Can admin
-              </button>
+      {/* Search and Add section */}
+      <div className="flex items-center gap-2 mb-6">
+        <div className="relative flex-1">
+          <div className="relative w-full">
+            <img
+              src={SearchIcon}
+              alt="Search"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+            />
+            <input
+              type="text"
+              placeholder="Enter user name"
+              value={searchQuery}
+              onChange={handleInputChange}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
+            />
+          </div>
+          {suggestions.length > 0 && (
+            <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+              {suggestions.map((user) => (
+                <div
+                  key={user._id}
+                  className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSelectUser(user)}
+                >
+                  <div className="flex-shrink-0 mr-3">
+                    {user.profile_picture ? (
+                      <img
+                        src={user.profile_picture}
+                        alt={`${user.username}'s profile`}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-purple-950 flex items-center justify-center text-white font-semibold">
+                        {user.username
+                          .split(" ")
+                          .slice(0, 2)
+                          .map((name) => name.charAt(0).toUpperCase())
+                          .join("")}
+                      </div>
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <span className="font-medium text-gray-900">{user.username}</span>
+                    <span className="block text-sm text-gray-500">{user.email}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
-
         <button
           onClick={handleAddUser}
-          className="bg-purple/500 text-white px-6 py-2 rounded-md hover:bg-purple-800"
+          disabled={!selectedUser}
+          className="bg-purple-950 text-white px-8 py-2 rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add
         </button>
@@ -166,60 +170,58 @@ const GrantAccessContent = ({ onNext, onPrevious }) => {
       <div className="space-y-4 mb-8">
         {users.map((user) => (
           <div
-            key={user.id}
-            className="relative flex items-center justify-between border-b border-dashed border-gray-300 pb-4"
+            key={user._id}
+            className="relative flex items-center justify-between pb-4"
           >
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-purple-800 text-white flex items-center justify-center mr-3">
-                {user.avatar}
-              </div>
+            <div className="flex items-center space-x-3">
+              {user.profile_picture ? (
+                <img
+                  src={user.profile_picture}
+                  alt={user.username}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
+                  {user.username
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((name) => name.charAt(0).toUpperCase())
+                    .join("")}
+                </div>
+              )}
               <div>
-                <p className="font-medium">{user.name}</p>
+                <p className="font-medium text-gray-900">{user.username}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
             </div>
 
-            {/* Dropdown button & menu for each user */}
             <div className="relative">
               <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === user.id ? null : user.id)
-                }
+                onClick={() => setOpenDropdown(openDropdown === user._id ? null : user._id)}
                 className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
               >
-                <span>Can {user.access}</span>
+                <span>{user.access === "admin" ? `All` : `Can ${user.access}`}</span>
                 <ChevronDown size={16} />
               </button>
 
-              {openDropdown === user.id && (
-                <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    onClick={() => {
-                      toggleAccess(user.id, "view");
-                      setOpenDropdown(null);
-                    }}
-                  >
-                    Can view
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    onClick={() => {
-                      toggleAccess(user.id, "edit");
-                      setOpenDropdown(null);
-                    }}
-                  >
-                    Can edit
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    onClick={() => {
-                      toggleAccess(user.id, "admin");
-                      setOpenDropdown(null);
-                    }}
-                  >
-                    Can admin
-                  </button>
+              {openDropdown === user._id && (
+                <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
+                  {["view", "edit", "admin"].map((access) => (
+                    <button
+                      key={access}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                      onClick={() => {
+                        setUsers(prev =>
+                          prev.map(u =>
+                            u._id === user._id ? { ...u, access } : u
+                          )
+                        );
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {access === "admin" ? `All` : `Can ${access}`}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -231,15 +233,15 @@ const GrantAccessContent = ({ onNext, onPrevious }) => {
       <div className="flex justify-between">
         <button
           onClick={onPrevious}
-          className="bg-purple/500 text-white px-4 py-2 rounded-md hover:bg-purple-800 "
+          className="bg-purple-900 text-white px-4 py-2 rounded-md hover:bg-purple-800"
         >
           <span className="mr-1">←</span> Previous
         </button>
         <button
-          onClick={onNext}
-          className="bg-purple/500 text-white px-8 py-2 rounded-md hover:bg-purple-800 "
+          onClick={handleNext}
+          className="bg-purple-900 text-white px-8 py-2 rounded-md hover:bg-purple-800"
         >
-          Next
+          Next <span className="ml-1">→</span>
         </button>
       </div>
     </div>

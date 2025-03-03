@@ -16,6 +16,8 @@ import OpenLogo from "../../assets/Open.svg";
 import { marginActions } from "../../store";
 import { Allignment } from "./Allignment";
 import { Edit, XCircle, AlertCircle, CheckCircle } from "lucide-react";
+import EditIcon from "../../assets/EditLogo.svg";
+
 
 const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlone }) => {
   const [activeTab, setActiveTab] = useState("all");
@@ -332,9 +334,9 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
                     <h4 className="font-medium">{dataset.dataset_name}</h4>
                     <button
                       onClick={() => handleEditDashboardName(dataset)}
-                      className="ml-2 p-1 hover:bg-gray-200 rounded"
+                      className="ml-2 p-1 bg-purple-200  hover:bg-purple-100 rounded-full"
                     >
-                      <Edit size={16} className="text-orig/500" />
+                      <img src={EditIcon} alt="" />
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -354,7 +356,7 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
                   className="text-purple-800 underline relative"
                   onClick={() => handlePermissionClick(dataset._id)}
                 >
-                  {dataset.permissions?.length || 0} users have permission
+                  {dataset.shared_usernames?.length || 0} users have permission
                   {clickedDashboardId === dataset._id && (
                     <div
                       ref={popupRef}

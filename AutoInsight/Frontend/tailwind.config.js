@@ -11,6 +11,7 @@ export default {
         "purple/500":"#532494",
         "orig/600":"#693696",
         "orig/500":"#4A266A",
+        "purple/200":"#C7ADEB"
 
       },
       fontFamily: {

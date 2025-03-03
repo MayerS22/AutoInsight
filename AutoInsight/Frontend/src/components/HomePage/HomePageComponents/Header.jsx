@@ -22,6 +22,7 @@ export default function Header() {
   const color = useSelector((state) => state.margin.color);
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
+  const id= useSelector((state) => state.auth.id);
 
  
   const fetchUser = async () => {
@@ -35,8 +36,6 @@ export default function Header() {
       });
       dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
       setUserName(response.data.body.username);
-      console.log("Profile picture:", response.data.body.profile_picture);
-      console.log("Username:", response.data.body.username);
     } catch (error) {
       console.error("Error fetching profile picture:", error);
     } finally {
@@ -87,7 +86,7 @@ export default function Header() {
           />
         </div>
         <h1 className="px-2 font-bold text-purple-900 text-xl md:text-2xl">
-          Auto Insight
+          AutoInsight
         </h1>
       </div>
 

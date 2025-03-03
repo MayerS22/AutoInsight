@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { XCircle, Loader } from "lucide-react";
 import SetupSidebar from "./SetupSidebar";
 import BusinessDomainContent from "./BusinessDomainContent";
@@ -11,6 +12,8 @@ import SetupSummaryContent from "./SetupSummaryContent";
 import axios from "axios";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { useDispatch } from "react-redux";
+import { authActions } from "../../store";
 
 const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -24,6 +27,29 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const dispatch = useDispatch();
+  
+    useEffect(()=>{
+      const fetchUserData=async()=>{
+        const token = localStorage.getItem('token');
+        try{
+          const response = await axios.get(`http://localhost:3000/api/v1/users/user-data`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+          dispatch(authActions.addUsername(response.data.body.username));
+          dispatch(authActions.addID(response.data.body._id));
+          console.log(response.data.body._id);
+            
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      fetchUserData();
+    },[])
+  
   const steps = [
     { number: 1, title: "Choose Business Domain" },
     { number: 2, title: "Upload Dataset" },
@@ -78,9 +104,11 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
       console.log("Sending request with:", {
         analysis_option: processingOption,
       });
+      console.log(token);
+      
       const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/generate-insights/",
-        { analysis_option: processingOption },
+        "http://localhost:3000/api/v1/datasets/generate-insights",
+        {}, // No body needed
         {
           headers: {
             "Content-Type": "application/json",
@@ -89,6 +117,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
           withCredentials: true,
         }
       );
+    
       
 
       console.log("Finish Response:", response.data);
@@ -122,6 +151,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
             const zip = new JSZip();
             // For each chart type, create a folder and add each image file
             for (const chartType in insightsUrls) {
+              // eslint-disable-next-line no-prototype-builtins
               if (insightsUrls.hasOwnProperty(chartType)) {
                 const folder = zip.folder(chartType);
                 const urls = insightsUrls[chartType];
@@ -177,13 +207,13 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   };
 
   return (
-    <div className="relative bg-white rounded-lg w-full max-w-4xl p-4 md:p-12">
+    <div className="relative bg-white rounded-lg w-full max-w-5xl p-4 md:p-12">
       <button
         onClick={handleClose}
         className={`absolute top-4 right-4 ${
           isProcessing
             ? "text-gray-400 cursor-not-allowed"
-            : "text-purple-800 hover:text-purple-900"
+            : "text-purple-800  hover:text-purple-900"
         }`}
         disabled={isProcessing}
       >

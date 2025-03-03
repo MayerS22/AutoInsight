@@ -159,7 +159,8 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
     }
   };
 
-  // New function to open the download options modal using radio buttons
+  // New function to open the download options modal using radio buttons.
+  // This is used only when not in the "cleaned" tab.
   const handleDownloadModule = (dataset) => {
     Swal.fire({
       title: "Download Options",
@@ -317,17 +318,37 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
               {/* Actions */}
               <div className="flex items-center">
                 <button
-                  onClick={() => handleDownloadModule(dataset)}
+                  onClick={() => {
+                    // If in "cleaned" tab, directly download the CSV,
+                    // otherwise open the download options modal.
+                    if (activeTab === "cleaned") {
+                      if (dataset.cleaned_dataset_url) {
+                        downloadCleanedDataset(dataset.cleaned_dataset_url);
+                      } else {
+                        Swal.fire({
+                          icon: "error",
+                          title: "No Cleaned Dataset",
+                          text: "No cleaned dataset URL available.",
+                          confirmButtonColor: "#E53E3E",
+                        });
+                      }
+                    } else {
+                      handleDownloadModule(dataset);
+                    }
+                  }}
                   className="p-2 hover:bg-purple-100 rounded-full"
                 >
                   <img src={DownloadLogo} alt="Download" className="w-8 h-8" />
                 </button>
-                <button
-                  onClick={() => navigate(`/dashboard/${dataset._id}`)}
-                  className="p-2 hover:bg-purple-100 rounded-full"
-                >
-                  <img src={OpenLogo} alt="Open" className="w-8 h-8" />
-                </button>
+                {/* Render navigate button only if not in "cleaned" tab */}
+                {activeTab !== "cleaned" && (
+                  <button
+                    onClick={() => navigate(`/dashboard/${dataset._id}`)}
+                    className="p-2 hover:bg-purple-100 rounded-full"
+                  >
+                    <img src={OpenLogo} alt="Open" className="w-8 h-8" />
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     Swal.fire({

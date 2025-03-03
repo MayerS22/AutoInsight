@@ -38,20 +38,20 @@ const Dashboard = () => {
         console.log("API Response urls:", response.data.body.dataset.insights_urls);
         console.log("API Response :", response.data.body.dataset);
 
-
         if (response.data.body && response.data.body.dataset) {
           const { dataset_name, createdAt, insights_urls } = response.data.body.dataset;
 
           setDatasetName(dataset_name || "Unnamed Dataset");
           setCreationDate(createdAt ? new Date(createdAt).toLocaleDateString() : "Unknown");
 
-          // Ensure insightsUrls is structured properly
+          // Ensure insightsUrls is structured properly; include "others" for report
           const processedUrls = {
             bar_chart: insights_urls.bar_chart || [],
             pie_chart: insights_urls.pie_chart || [],
             histogram: insights_urls.histogram || [],
             KDE: insights_urls.kde || [],
             correlation: insights_urls.correlation || [],
+            others: insights_urls.others || []  // Added "others" key for report
           };
 
           setInsightsUrls(processedUrls);
@@ -121,6 +121,8 @@ const Dashboard = () => {
   // Get current active chart type display name
   const getActiveChartTypeDisplay = () => {
     if (activeChartType === "all") return "All Graphs";
+    // For the "others" key, display as "Report"
+    if (activeChartType === "others") return "Report";
     return activeChartType.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -136,11 +138,11 @@ const Dashboard = () => {
           {/* Top filter dropdown */}
           <div className="relative">
             <button
-              className="bg-white border border-purple-800  px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[120px] text-purple-800 font-bold"
+              className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[120px] text-purple-800 font-bold"
               onClick={() => setIsTopFilterOpen(!isTopFilterOpen)}
             >
               {topFilter === Infinity ? "All Items" : `Top ${topFilter}`}
-              <svg className="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isTopFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
               </svg>
             </button>
@@ -162,7 +164,7 @@ const Dashboard = () => {
           {/* Graph types dropdown */}
           <div className="relative">
             <button
-              className="bg-white border text-purple-800 font-bold border-purple-800  px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[150px]"
+              className="bg-white border text-purple-800 font-bold border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[150px]"
               onClick={() => setIsGraphTypesOpen(!isGraphTypesOpen)}
             >
               {getActiveChartTypeDisplay()}
@@ -173,7 +175,7 @@ const Dashboard = () => {
             {isGraphTypesOpen && (
               <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full text-purple-800 font-bold">
                 <button
-                  className="w-full text-left px-4 py-2 hover:bg-purple-50 transition "
+                  className="w-full text-left px-4 py-2 hover:bg-purple-50 transition"
                   onClick={() => selectChartType("all")}
                 >
                   All Graphs
@@ -184,7 +186,7 @@ const Dashboard = () => {
                     className="w-full text-left px-4 py-2 hover:bg-purple-50 transition capitalize text-purple-800 font-bold"
                     onClick={() => selectChartType(type)}
                   >
-                    {type.replace("_", " ")}
+                    {type === "others" ? "Report" : type.replace("_", " ")}
                   </button>
                 ))}
               </div>
@@ -214,7 +216,7 @@ const Dashboard = () => {
         {Object.entries(filteredInsights).map(([chartType, urls]) => (
           <div key={chartType} className="mb-10">
             <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
-              {chartType.replace("_", " ")} Insights
+              {chartType === "others" ? "Report" : `${chartType.replace("_", " ")} Insights`}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {urls.length > 0 ? (
@@ -232,7 +234,7 @@ const Dashboard = () => {
                 ))
               ) : (
                 <div className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600">
-                  No {chartType.replace("_", " ")} Images
+                  No {chartType === "others" ? "Report" : `${chartType.replace("_", " ")} Images`}
                 </div>
               )}
             </div>

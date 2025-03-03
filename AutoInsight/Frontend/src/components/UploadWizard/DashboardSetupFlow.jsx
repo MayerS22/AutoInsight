@@ -79,16 +79,17 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
         analysis_option: processingOption,
       });
       const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/generate-insights",
-        {},
+        "http://localhost:3000/api/v1/datasets/generate-insights/",
+        { analysis_option: processingOption },
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          withCredentials: true, // Ensures cookies are sent with the request
+          withCredentials: true,
         }
       );
+      
 
       console.log("Finish Response:", response.data);
 

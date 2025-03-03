@@ -15,6 +15,7 @@ import TrashLogo from "../../assets/Trash.svg";
 import OpenLogo from "../../assets/Open.svg";
 import { marginActions } from "../../store";
 import { Allignment } from "./Allignment";
+import { Edit, XCircle, AlertCircle, CheckCircle } from "lucide-react";
 
 const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlone }) => {
   const [activeTab, setActiveTab] = useState("all");
@@ -159,8 +160,8 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
     }
   };
 
-  // New function to open the download options modal using radio buttons.
-  // This is used only when not in the "cleaned" tab.
+  // Function to open download options modal using radio buttons.
+  // Used only when not in the "cleaned" tab.
   const handleDownloadModule = (dataset) => {
     Swal.fire({
       title: "Download Options",
@@ -222,6 +223,58 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
     });
   };
 
+  // Function to open a modal to edit the dashboard name.
+  const handleEditDashboardName = (dashboard) => {
+    Swal.fire({
+      title: "Rename Dashboard",
+      input: "text",
+      inputLabel: "New dashboard name",
+      inputValue: dashboard.dataset_name,
+      showCancelButton: true,
+      confirmButtonText: "Save",
+      preConfirm: (newName) => {
+        if (!newName || newName.trim() === "") {
+          Swal.showValidationMessage("Dashboard name cannot be empty.");
+        }
+        return newName;
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const newName = result.value;
+        try {
+          // Call the backend to update the dashboard name.
+          await axios.patch(
+            `http://localhost:3000/api/v1/datasets/${dashboard._id}`,
+            {
+              dataset_name: newName,
+              user_id: username // adjust this to pass the proper user identifier if needed
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` }
+            }
+          );                  
+          // Update the dashboard list state with the new name.
+          setDashboardList((prevList) =>
+            prevList.map((d) => (d._id === dashboard._id ? { ...d, dataset_name: newName } : d))
+          );
+          Swal.fire({
+            icon: "success",
+            title: "Renamed",
+            text: "Dashboard name updated successfully.",
+            confirmButtonColor: "#6B46C1",
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.response?.data?.message || "Failed to update dashboard name.",
+            confirmButtonColor: "#E53E3E",
+          });
+        }
+      }
+    });
+  };
+
   // Separate the datasets into cleaned and non-cleaned based on insights_urls
   const nonCleanedDashboards = dashboardList.filter(dataset => !isCleanedDataset(dataset));
   const cleanedDatasets = dashboardList.filter(isCleanedDataset);
@@ -274,8 +327,16 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
                 <div className="bg-purple-200 p-3 rounded-md flex items-center justify-center w-12 h-12">
                   <img src={DashboardLogo} alt="Dataset" className="w-6 h-6" />
                 </div>
-                <div>
-                  <h4 className="font-medium">{dataset.dataset_name}</h4>
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    <h4 className="font-medium">{dataset.dataset_name}</h4>
+                    <button
+                      onClick={() => handleEditDashboardName(dataset)}
+                      className="ml-2 p-1 hover:bg-gray-200 rounded"
+                    >
+                      <Edit size={16} className="text-gray-600" />
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-500">
                     {new Date(dataset.createdAt).toLocaleString()}
                   </p>

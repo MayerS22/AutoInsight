@@ -1,19 +1,17 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-import { useState,useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import { XCircle, Loader } from "lucide-react";
 import SetupSidebar from "./SetupSidebar";
 import BusinessDomainContent from "./BusinessDomainContent";
 import UploadDatasetContent from "./UploadDatasetContent";
 import CustomizeProcessingContent from "./CustomizeProcessingContent";
-import GrantAccessContent from "./GrantAccessContent"; // Import the new component
+import GrantAccessContent from "./GrantAccessContent";
 import SetupSummaryContent from "./SetupSummaryContent";
-import axios from "axios";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { useDispatch } from "react-redux";
 import { authActions } from "../../store";
+import { getUserData, generateInsights } from "../../services/Api_Services";
 
 const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -29,27 +27,22 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
 
   const dispatch = useDispatch();
   
-    useEffect(()=>{
-      const fetchUserData=async()=>{
-        const token = localStorage.getItem('token');
-        try{
-          const response = await axios.get(`http://localhost:3000/api/v1/users/user-data`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
-          dispatch(authActions.addUsername(response.data.body.username));
-          dispatch(authActions.addID(response.data.body._id));
-          console.log(response.data.body._id);
-            
-        } catch (error) {
-          console.error(error);
-        }
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await getUserData(token);
+        dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+        dispatch(authActions.addUsername(response.data.body.username));
+        dispatch(authActions.addID(response.data.body._id));
+        console.log(response.data.body._id);
+      } catch (error) {
+        console.error(error);
       }
-      fetchUserData();
-    },[])
-  
+    };
+    fetchUserData();
+  }, []);
+
   const steps = [
     { number: 1, title: "Choose Business Domain" },
     { number: 2, title: "Upload Dataset" },
@@ -101,57 +94,34 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
     }
 
     try {
-      console.log("Sending request with:", {
-        analysis_option: processingOption,
-      });
+      console.log("Sending request with:", { analysis_option: processingOption });
       console.log(token);
-      
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/generate-insights",
-        {}, // No body needed
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-    
-      
 
+      const response = await generateInsights(token);
       console.log("Finish Response:", response.data);
 
       // If downloadAfterCreating is true, proceed to download files
       if (downloadAfterCreating) {
         if (processingOption === "clean_only") {
-          // Check for the cleaned_dataset_url inside body.dataset first
           const cleanedUrl =
             response.data.body?.dataset?.cleaned_dataset_url ||
             response.data.cleaned_dataset_url ||
             response.data.body?.cleaned_dataset_url;
 
           if (cleanedUrl) {
-            const fileResponse = await axios.get(cleanedUrl, {
-              responseType: "blob",
-            });
-            saveAs(fileResponse.data, "cleaned_dataset.csv");
+            const fileResponse = await fetch(cleanedUrl);
+            const blob = await fileResponse.blob();
+            saveAs(blob, "cleaned_dataset.csv");
           } else {
-            console.error(
-              "cleaned_dataset_url not found in response:",
-              response.data
-            );
+            console.error("cleaned_dataset_url not found in response:", response.data);
           }
         } else if (processingOption === "clean_and_generate") {
-          // Retrieve insights_urls from the nested dataset field
           const insightsUrls =
             response.data.body?.dataset?.insights_urls ||
             response.data.body?.insights_urls;
           if (insightsUrls) {
             const zip = new JSZip();
-            // For each chart type, create a folder and add each image file
             for (const chartType in insightsUrls) {
-              // eslint-disable-next-line no-prototype-builtins
               if (insightsUrls.hasOwnProperty(chartType)) {
                 const folder = zip.folder(chartType);
                 const urls = insightsUrls[chartType];
@@ -159,27 +129,18 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
                   try {
                     const res = await fetch(urls[i]);
                     const blob = await res.blob();
-                    // Name each file with the chart type and index
                     folder.file(`${chartType}_${i + 1}.jpg`, blob);
                   } catch (err) {
-                    console.error(
-                      `Error fetching image from ${chartType}:`,
-                      urls[i],
-                      err
-                    );
+                    console.error(`Error fetching image from ${chartType}:`, urls[i], err);
                   }
                 }
               }
             }
-            // Generate zip and trigger download
             zip.generateAsync({ type: "blob" }).then((content) => {
               saveAs(content, "insights_images.zip");
             });
           } else {
-            console.error(
-              "insights_urls not found in response:",
-              response.data
-            );
+            console.error("insights_urls not found in response:", response.data);
           }
         }
       }
@@ -213,7 +174,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
         className={`absolute top-4 right-4 ${
           isProcessing
             ? "text-gray-400 cursor-not-allowed"
-            : "text-purple-800  hover:text-purple-900"
+            : "text-purple-800 hover:text-purple-900"
         }`}
         disabled={isProcessing}
       >
@@ -251,9 +212,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
               processingOption={processingOption}
               downloadAfterCreating={downloadAfterCreating}
               onProcessingOptionChange={handleProcessingOptionChange}
-              onDownloadToggle={() =>
-                setDownloadAfterCreating(!downloadAfterCreating)
-              }
+              onDownloadToggle={() => setDownloadAfterCreating(!downloadAfterCreating)}
               onNext={handleNext}
               onPrevious={handlePrevious}
             />

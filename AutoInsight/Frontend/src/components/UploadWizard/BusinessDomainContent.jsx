@@ -1,20 +1,12 @@
-/* eslint-disable react/prop-types */
-import axios from "axios";
+import { chooseDomain } from "../../services/Api_Services";
 
 const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      // Send the selected business domain using the key "domainType"
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/choose-domain/",
-        { domainType: businessDomain },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true, // Ensures cookies are sent with the request
-        }
-      );
+      // Call the API service function
+      const response = await chooseDomain(businessDomain, token);
       console.log("Response Session: ", response.data.body.sessionId);
       localStorage.setItem("sessionId", response.data.body.sessionId);
       onNext();

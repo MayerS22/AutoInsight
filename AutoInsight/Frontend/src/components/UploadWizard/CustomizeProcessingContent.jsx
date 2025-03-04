@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import axios from "axios";
+import { processOptions } from "./../../services/Api_Services"; 
 
 const CustomizeProcessingContent = ({
   processingOption,
@@ -13,25 +13,12 @@ const CustomizeProcessingContent = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  // When Next is clicked, send the request using axios.
+  // When Next is clicked, send the request using the API service.
   const handleNextClick = async () => {
     setIsSubmitting(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/processing-options/",
-        {
-          analysis_option: processingOption,
-          downloadAfterCreating: downloadAfterCreating,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true, // Ensures cookies (and session data) are sent with the request
-        }
-      );
+      const response = await processOptions(processingOption, downloadAfterCreating, token);
 
       console.log("Download after creating:", downloadAfterCreating);
       console.log("Processing option:", processingOption);
@@ -128,7 +115,7 @@ const CustomizeProcessingContent = ({
         </button>
         <button
           onClick={handleNextClick}
-          className="bg-purple/500   text-white px-6 py-2 rounded-md hover:bg-purple-800"
+          className="bg-purple/500 text-white px-6 py-2 rounded-md hover:bg-purple-800"
           disabled={isSubmitting || isButtonDisabled}
         >
           Next <span className="ml-1">→</span>

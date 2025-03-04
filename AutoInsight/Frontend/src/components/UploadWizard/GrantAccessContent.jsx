@@ -1,12 +1,10 @@
-
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import SearchIcon from "../../assets/SearchIcon.svg";
-
+import { searchUsers, grantAccessToUsers } from "../../services/Api_Services";
 
 const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,11 +15,11 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
+
   const handleInputChange = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     setSelectedUser(null);
-
 
     if (!query.trim()) {
       setSuggestions([]);
@@ -29,17 +27,15 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
     }
 
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/v1/users/search?username=${query}`
-      );
+      const response = await searchUsers(query);
+      // Filter out the current user
       const filteredUsers = response.data.data.filter(u => u._id !== userId);
-      console.log(userId);
-      
       setSuggestions(filteredUsers || []);
     } catch (error) {
       setSuggestions([]);
     }
   };
+
   const handleSelectUser = (user) => {
     setSearchQuery(user.username);
     setSelectedUser(user);
@@ -48,10 +44,10 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
 
   const handleAddUser = () => {
     if (selectedUser && !users.some(u => u._id === selectedUser._id)) {
-      setUsers(prev => [...prev, {
-        ...selectedUser,
-        access: "view" // Default access level
-      }]);
+      setUsers(prev => [
+        ...prev,
+        { ...selectedUser, access: "view" } // Default access level
+      ]);
       setSearchQuery("");
       setSelectedUser(null);
     }
@@ -59,37 +55,23 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
 
   const handleNext = async () => {
     setErrorMessage("");
-    console.log(users[0].access);
-    
+
+    // If no users have been added, simply proceed to the next step.
+    if (users.length === 0) {
+      onNext();
+      return;
+    }
+
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/grant-access/",
-        {
-          userPermissions: users.map(user => ({
-            userId: user._id,
-            permission: user.access
-          }))
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true
-        }
-      );
-
-
+      const response = await grantAccessToUsers(users, token);
       if (response.data.status === 200) {
-        console.log("Permission granted Successfully!");
-
         onNext();
       } else {
         setErrorMessage(response.data.message || "Failed to grant access");
       }
     } catch (error) {
       console.error("Error granting access:", error.response?.data?.message);
-
-
+      setErrorMessage("An error occurred while granting access.");
     }
   };
 
@@ -197,10 +179,16 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
 
             <div className="relative">
               <button
-                onClick={() => setOpenDropdown(openDropdown === user._id ? null : user._id)}
+                onClick={() =>
+                  setOpenDropdown(
+                    openDropdown === user._id ? null : user._id
+                  )
+                }
                 className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
               >
-                <span>{user.access === "admin" ? `All` : `Can ${user.access}`}</span>
+                <span>
+                  {user.access === "admin" ? `All` : `Can ${user.access}`}
+                </span>
                 <ChevronDown size={16} />
               </button>
 

@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import { XCircle, AlertCircle, CheckCircle} from "lucide-react";
-import axios from "axios";
+import { XCircle, AlertCircle, CheckCircle } from "lucide-react";
 import FileLogo from "../../assets/FileLogo.png";
 import CloudAdd from "../../assets/cloud-add.svg";
+import { uploadDataset } from "../../services/Api_Services";
 
 const UploadDatasetContent = ({
   onNext,
@@ -26,7 +26,7 @@ const UploadDatasetContent = ({
     return `${mb.toFixed(2)}MB`;
   };
 
-  // Refactored function to handle file upload logic
+  // Refactored function to handle file upload logic using the API service
   const uploadFile = async (file) => {
     setUploadedDataset(file);
     setShowError(false);
@@ -42,27 +42,13 @@ const UploadDatasetContent = ({
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/datasets/upload/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials:true,
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadProgress(percentCompleted);
-          },
-        }
-      );
+      const response = await uploadDataset(file, token, (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        setUploadProgress(percentCompleted);
+      });
 
       if (response.status === 200) {
         console.log("File uploaded successfully:", response.data);
@@ -214,7 +200,8 @@ const UploadDatasetContent = ({
         <button
           onClick={onPrevious}
           className="border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
-          disabled={!uploadComplete}>
+          disabled={!uploadComplete}
+        >
           <span className="mr-1">←</span> Previous
         </button>
         <button

@@ -27,9 +27,14 @@ const SetupSummaryContent = ({
     <div>
       <h2 className="text-2xl font-bold text-purple/500 mb-2">Setup Summary</h2>
       <p className="text-sm text-orig/600 mb-6">Review your selections before finishing.</p>
-      <div className="text-bold mb-4">
-        <strong className="text-purple/500">Business Domain:</strong> {businessDomain}
-      </div>
+      
+      {/* Conditionally render Business Domain only if processing option is not "clean_only" */}
+      {processingOption !== "clean_only" && (
+        <div className="text-bold mb-4">
+          <strong className="text-purple/500">Business Domain:</strong> {businessDomain}
+        </div>
+      )}
+      
       <div className="mb-4">
         <strong className="text-purple/500">Dataset:</strong> {uploadedFile ? uploadedFile.name : "No dataset uploaded"}
       </div>
@@ -47,11 +52,12 @@ const SetupSummaryContent = ({
           onClick={onFinish}
           className="bg-purple/500 text-white px-8 py-2 rounded-md hover:bg-purple-800"
         >
-      Finish
+          Finish
         </button>
       </div>
     </div>
   );
+  
 };
 
 export default SetupSummaryContent;

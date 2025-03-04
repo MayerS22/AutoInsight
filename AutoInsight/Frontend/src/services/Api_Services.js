@@ -27,7 +27,7 @@ export const processOptions = async (processingOption, downloadAfterCreating, to
       `${API_BASE_URL}/datasets/processing-options/`,
       {
         analysis_option: processingOption,
-        downloadAfterCreating,
+        download_after_creating: downloadAfterCreating // Match backend naming convention
       },
       {
         headers: {

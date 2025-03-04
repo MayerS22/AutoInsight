@@ -73,7 +73,7 @@ export const generateInsights = async (token) => {
   }
 };
 
-/*to search for users to give permissions */
+/* to search for users to give permissions */
 export const searchUsers = async (username) => {
   try {
     const response = await axios.get(
@@ -85,7 +85,7 @@ export const searchUsers = async (username) => {
   }
 };
 
-/*for granting access to users */
+/* for granting access to users */
 export const grantAccessToUsers = async (users, token) => {
   try {
     const response = await axios.post(
@@ -107,22 +107,38 @@ export const grantAccessToUsers = async (users, token) => {
   }
 };
 
-/* Uploading DataSet */
+/* Uploading Dataset */
 export const uploadDataset = async (file, token, onUploadProgress) => {
-    const formData = new FormData();
-    formData.append("file", file);
-  
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axios.post(
+    `${API_BASE_URL}/datasets/upload/`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+      onUploadProgress,
+    }
+  );
+  return response;
+};
+
+/* Sending a Chatbot Message */
+export const sendChatbotMessage = async (formData) => {
+  try {
     const response = await axios.post(
-      `${API_BASE_URL}/datasets/upload/`,
+      `${API_BASE_URL}/chatbot/`,
       formData,
       {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-        onUploadProgress,
+        headers: { "Content-Type": "multipart/form-data" },
       }
     );
     return response;
-  };
+  } catch (error) {
+    throw error;
+  }
+};

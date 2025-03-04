@@ -3,12 +3,12 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
 import { X, Maximize2, Minimize2, Image as ImageIcon } from "lucide-react";
-import ChatbotResponse from "../..//assets/ChatbotResponse.svg";
+import ChatbotResponse from "../../assets/ChatbotResponse.svg";
 import ChatbotIcon from "../../assets/cute robot.svg";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store";
 import SendIcon from "../../assets/SendButton.svg";
+import { sendChatbotMessage, getUserData } from "../../services/Api_Services"; // Import API functions
 
 const Chatbot = ({ open, setOpen }) => {
   const [messages, setMessages] = useState([]);
@@ -37,15 +37,10 @@ const Chatbot = ({ open, setOpen }) => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/v1/users/user-data",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await getUserData(token);
       dispatch(authActions.addUsername(response.data.body.username));
     } catch (error) {
-      console.error("Error fetching profile picture:", error);
+      console.error("Error fetching user data:", error);
     }
   };
 
@@ -106,13 +101,7 @@ const Chatbot = ({ open, setOpen }) => {
         message: input,
         image: image instanceof File ? image.name : "No Image",
       });
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/chatbot/",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await sendChatbotMessage(formData);
       setMessages((prev) =>
         prev
           .slice(0, -1)
@@ -171,7 +160,7 @@ const Chatbot = ({ open, setOpen }) => {
               isFullscreen ? "fixed inset-0" : "w-full md:w-[490px] h-[550px]"
             } bg-chatbot-bg-color shadow-lg flex flex-col border border-gray-300 transition-all duration-300 ${
               isFullscreen ? "rounded-none" : "rounded-xl"
-            }`} // Removed mb-4 margin
+            }`}
           >
             {/* Header */}
             <div className="bg-chatbot-bg-color text-black p-3 flex justify-between items-center rounded-t-xl">

@@ -16,6 +16,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
@@ -131,6 +132,8 @@ const PermissionModal = ({ onClose, datasetId }) => {
           setSearchQuery("");
           setSelectedUser(null);
           setErrorMessage("");
+          setSuccessMessage("User added successfully!");
+          setTimeout(() => setSuccessMessage(""), 3000);
         } else {
           setErrorMessage(response.data.message || "Failed to grant access");
         }
@@ -188,6 +191,8 @@ const PermissionModal = ({ onClose, datasetId }) => {
         // Remove the user from the local users list.
         setUsers((prev) => prev.filter((u) => u._id !== userIdToDelete));
         setErrorMessage("");
+        setSuccessMessage("User permission removed successfully!");
+        setTimeout(() => setSuccessMessage(""), 3000);
       } else {
         setErrorMessage(response.data.message || "Failed to remove permission");
       }
@@ -224,6 +229,9 @@ const PermissionModal = ({ onClose, datasetId }) => {
         </p>
         {errorMessage && (
           <div className="text-red-500 mb-4 text-center">{errorMessage}</div>
+        )}
+        {successMessage && (
+          <div className="text-green-500 mb-4 text-center">{successMessage}</div>
         )}
 
         {/* Search and Add Section */}

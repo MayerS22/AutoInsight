@@ -18,6 +18,10 @@ const PermissionModal = ({ onClose, datasetId }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // New state for permission dropdown beside the search input
+  const [selectedPermission, setSelectedPermission] = useState("view");
+  const [openRoleDropdown, setOpenRoleDropdown] = useState(false);
+
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
 
@@ -26,7 +30,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
       try {
         // Fetch permissions for the dataset
         const permissionsResponse = await axios.get(
-          `http://localhost:3000/api/v1/datasets/${datasetId}/share`,
+          `${API_BASE_URL}/datasets/${datasetId}/share`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -39,7 +43,6 @@ const PermissionModal = ({ onClose, datasetId }) => {
         const usersWithDetails = await Promise.all(
           permissionsData.map(async (perm) => {
             try {
-              // Updated endpoint: no "/user-data" segment since router is mounted on /users
               const userResponse = await axios.get(
                 `${API_BASE_URL}/users/${perm.user_id}`,
                 {
@@ -49,7 +52,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
               );
               return {
                 _id: perm.user_id,
-                ...userResponse.data.body, // Use the 'body' property if that's where the user data is
+                ...userResponse.data.body,
                 access: perm.permission,
               };
             } catch (error) {
@@ -105,9 +108,8 @@ const PermissionModal = ({ onClose, datasetId }) => {
   // Adds a new user permission and appends it to the list.
   const handleAddUser = async () => {
     if (selectedUser && !users.some((u) => u._id === selectedUser._id)) {
-      const payload = { user_id: selectedUser._id, permission: "view" };
+      const payload = { user_id: selectedUser._id, permission: selectedPermission };
       try {
-        console.log("Granting access with payload:", payload);
         const response = await axios.post(
           `${API_BASE_URL}/datasets/${datasetId}/share`,
           payload,
@@ -117,7 +119,6 @@ const PermissionModal = ({ onClose, datasetId }) => {
           }
         );
         if (response.data.status === 200) {
-          // Append the newly added user with default "view" access.
           setUsers((prev) => [
             ...prev,
             {
@@ -126,7 +127,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
                 selectedUser.username ||
                 `User ${selectedUser._id.substring(0, 6)}`,
               email: selectedUser.email || "No email available",
-              access: "view",
+              access: selectedPermission,
             },
           ]);
           setSearchQuery("");
@@ -167,10 +168,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
         setErrorMessage(response.data.message || "Failed to update permission");
       }
     } catch (error) {
-      console.error(
-        "Error updating permission:",
-        error.response?.data?.message
-      );
+      console.error("Error updating permission:", error.response?.data?.message);
       setErrorMessage("An error occurred while updating permission.");
     }
   };
@@ -188,7 +186,6 @@ const PermissionModal = ({ onClose, datasetId }) => {
         }
       );
       if (response.data.status === 200) {
-        // Remove the user from the local users list.
         setUsers((prev) => prev.filter((u) => u._id !== userIdToDelete));
         setErrorMessage("");
         setSuccessMessage("User permission removed successfully!");
@@ -197,10 +194,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
         setErrorMessage(response.data.message || "Failed to remove permission");
       }
     } catch (error) {
-      console.error(
-        "Error deleting permission:",
-        error.response?.data?.message
-      );
+      console.error("Error deleting permission:", error.response?.data?.message);
       setErrorMessage("An error occurred while deleting permission.");
     }
   };
@@ -221,12 +215,8 @@ const PermissionModal = ({ onClose, datasetId }) => {
           X
         </button>
         <h2 className="text-2xl font-bold text-purple-500 mb-2">
-          Grant Access to Users
+          Permissions
         </h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Securely share your dashboard by inviting team members and assigning
-          specific permissions.
-        </p>
         {errorMessage && (
           <div className="text-red-500 mb-4 text-center">{errorMessage}</div>
         )}
@@ -248,7 +238,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
                 placeholder="Enter user name"
                 value={searchQuery}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
               />
             </div>
             {suggestions.length > 0 && (
@@ -289,6 +279,44 @@ const PermissionModal = ({ onClose, datasetId }) => {
               </div>
             )}
           </div>
+
+          {/* Dropdown for Role Selection */}
+          <div className="relative">
+            <button
+              onClick={() => setOpenRoleDropdown((prev) => !prev)}
+              className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
+            >
+              <span>
+                {selectedPermission === "admin"
+                  ? "All"
+                  : selectedPermission === "view"
+                  ? "Can view"
+                  : "Can edit"}
+              </span>
+              <ChevronDown size={16} />
+            </button>
+            {openRoleDropdown && (
+              <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
+                {[
+                  { label: "All", value: "admin" },
+                  { label: "Can view", value: "view" },
+                  { label: "Can edit", value: "edit" },
+                ].map((role) => (
+                  <button
+                    key={role.value}
+                    onClick={() => {
+                      setSelectedPermission(role.value);
+                      setOpenRoleDropdown(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                  >
+                    {role.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleAddUser}
             disabled={!selectedUser}
@@ -336,12 +364,11 @@ const PermissionModal = ({ onClose, datasetId }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Inline Dropdown for Changing Permission */}
                   <div className="relative">
                     <button
                       onClick={() =>
-                        setOpenDropdown(
-                          openDropdown === user._id ? null : user._id
-                        )
+                        setOpenDropdown(openDropdown === user._id ? null : user._id)
                       }
                       className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
                     >

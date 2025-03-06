@@ -4,6 +4,9 @@ import { XCircle, AlertCircle, CheckCircle } from "lucide-react";
 import FileLogo from "../../assets/FileLogo.png";
 import CloudAdd from "../../assets/cloud-add.svg";
 import { uploadDataset } from "../../services/Api_Services";
+import { Loader } from "lucide-react";
+import axios from "axios";
+
 
 const UploadDatasetContent = ({
   onNext,
@@ -15,6 +18,9 @@ const UploadDatasetContent = ({
   setUploadComplete,
   uploadProgress,
   setUploadProgress,
+  showCleaningDashboard = false,
+  isCleaning,
+  setIsCleaning,
 }) => {
   const [showError, setShowError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -95,6 +101,65 @@ const UploadDatasetContent = ({
     setUploadComplete(false);
   };
 
+
+  const cleanDataset = async () => {
+    setIsCleaning("yes");
+    if (!uploadedDataset) {
+      console.error("No dataset available for cleaning.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    const sessionId = localStorage.getItem("sessionId");
+
+    if (!sessionId) {
+      console.error("Session ID is missing!");
+      setShowError(true);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadedDataset);
+
+      const response = await axios.post("http://localhost:3000/api/v1/datasets/clean-dataset/", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Cleaned dataset response:", response.data);
+      setIsCleaning("no");
+      // Handle the cleaned dataset response (if needed)
+    } catch (error) {
+      console.error("Dataset cleaning failed:", error);
+      setShowError(true);
+    }
+    setIsCleaning("no");
+  };
+
+
+  if (isCleaning === "yes") {
+    // Show a loading spinner while waiting for the API response
+    return (
+      <div className="flex justify-center flex-col items-center h-full">
+        <Loader className="animate-spin text-purple/500" size={48} />
+        <p className="text-lg text-purple/500 mt-2 font-bold">Analyzing...</p>
+      </div>
+    );
+  }
+  if (isCleaning === "no") {
+    return (
+      <div className="flex justify-center flex-col items-center h-full">
+        <CheckCircle size={59} className="text-green-600 text-bold" />
+
+        <p className="text-lg text-green-600 mt-2 font-bold"> Dataset Cleaned Successfully!</p>
+        <p className="text-sm text-gray-500">Your data is now ready for use.</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <h2 className="text-2xl font-bold text-purple/500 mb-2">
@@ -107,15 +172,13 @@ const UploadDatasetContent = ({
       </p>
 
       <div
-        className={`border-4 border-dashed ${
-          showError
-            ? "border-red-500"
-            : isDragging
+        className={`border-4 border-dashed ${showError
+          ? "border-red-500"
+          : isDragging
             ? "border-blue-400"
             : "border-gray-200"
-        } rounded-lg p-4 md:p-8 flex flex-col items-center justify-center mb-4 transition-transform duration-300 ${
-          dropAnimation ? "scale-105" : ""
-        }`}
+          } rounded-lg p-4 md:p-8 flex flex-col items-center justify-center mb-4 transition-transform duration-300 ${dropAnimation ? "scale-105" : ""
+          }`}
         onDragOver={handleDragOver}
         onDragEnter={() => setIsDragging(true)}
         onDragLeave={() => setIsDragging(false)}
@@ -130,9 +193,8 @@ const UploadDatasetContent = ({
         </p>
         <button
           onClick={() => document.getElementById("file-upload").click()}
-          className={`${
-            showError ? "bg-red-500" : "bg-purple/500"
-          } text-white px-4 py-2 rounded-md hover:opacity-90`}
+          className={`${showError ? "bg-red-500" : "bg-purple/500"
+            } text-white px-4 py-2 rounded-md hover:opacity-90`}
         >
           Browse File
         </button>
@@ -196,30 +258,33 @@ const UploadDatasetContent = ({
         </div>
       )}
 
-      <div className="flex justify-between">
-        <button
-          onClick={onPrevious}
-          className="border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
-          disabled={!uploadComplete}
-        >
-          <span className="mr-1">←</span> Previous
-        </button>
+      <div className={`flex ${showCleaningDashboard ? "justify-end" : "justify-between"}`}>
+        {!showCleaningDashboard && (
+          <button
+            onClick={onPrevious}
+            className="border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
+            disabled={!uploadComplete}
+          >
+            <span className="mr-1">←</span> Previous
+          </button>
+        )}
+
         <button
           onClick={() => {
-            if (uploadComplete) {
+            if (showCleaningDashboard) {
+              cleanDataset();
+            } else if (uploadComplete) {
               onNext();
             }
           }}
-          className={`${
-            !uploadComplete
-              ? "bg-purple-400 cursor-not-allowed"
-              : "bg-purple/500 hover:bg-purple-700"
-          } text-white px-6 py-2 rounded-md`}
+          className={`${!uploadComplete ? "bg-purple-400 cursor-not-allowed" : "bg-purple/500 hover:bg-purple-700"
+            } text-white px-6 py-2 rounded-md`}
           disabled={!uploadComplete}
         >
-          Next <span className="ml-1">→</span>
+          {showCleaningDashboard ? "Clean Dataset" : <span> Next <span className="ml-1">→</span></span>}
         </button>
       </div>
+
     </>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 // Api_Services.js
 import axios from "axios";
 

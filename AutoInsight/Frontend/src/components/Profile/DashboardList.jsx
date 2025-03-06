@@ -92,6 +92,8 @@ const DashboardListComponent = ({ onDashboardDeleted, refreshTrigger, isStandAlo
         ...(sharedDatasetsResponse.data?.body?.datasets || [])
       ];
       setDashboardList(combinedDatasets);
+      console.log(combinedDatasets);
+      
     } catch (error) {
       Swal.fire({
         icon: "error",

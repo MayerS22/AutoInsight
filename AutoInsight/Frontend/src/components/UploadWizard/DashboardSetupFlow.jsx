@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 
 import { useState, useEffect } from "react";
-import { XCircle, Loader } from "lucide-react";
+import { XCircle } from "lucide-react";
 import SetupSidebar from "./SetupSidebar";
 import BusinessDomainContent from "./BusinessDomainContent";
 import UploadDatasetContent from "./UploadDatasetContent";
@@ -13,7 +16,7 @@ import { useDispatch } from "react-redux";
 import { authActions } from "../../store";
 import { getUserData, generateInsights } from "../../services/Api_Services";
 
-const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
+const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [businessDomain, setBusinessDomain] = useState("ecommerce");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -24,9 +27,11 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCleaning, setIsCleaning] = useState("")
+
 
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token");
@@ -122,6 +127,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
           if (insightsUrls) {
             const zip = new JSZip();
             for (const chartType in insightsUrls) {
+              // eslint-disable-next-line no-prototype-builtins
               if (insightsUrls.hasOwnProperty(chartType)) {
                 const folder = zip.folder(chartType);
                 const urls = insightsUrls[chartType];
@@ -171,70 +177,87 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess }) => {
     <div className="relative bg-white rounded-lg w-full max-w-5xl p-4 md:p-12">
       <button
         onClick={handleClose}
-        className={`absolute top-4 right-4 ${
-          isProcessing
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-purple-800 hover:text-purple-900"
-        }`}
+        className={`absolute top-4 right-4 ${isProcessing
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-purple-800 hover:text-purple-900"
+          }`}
         disabled={isProcessing}
       >
-        {isProcessing ? "" : <XCircle size={24} />}
+        {isProcessing ||isCleaning==="yes"? "" : <XCircle size={24} />}
       </button>
 
       <div className="flex flex-col md:flex-row">
-        <SetupSidebar steps={steps} currentStep={currentStep} />
+        {showCleaningDashboard ? "" : <SetupSidebar steps={steps} currentStep={currentStep} />}
 
         <div className="flex-1">
-          {currentStep === 1 && (
-            <BusinessDomainContent
-              businessDomain={businessDomain}
-              onDomainChange={handleDomainChange}
-              onNext={handleNext}
-            />
-          )}
+          {showCleaningDashboard ? <UploadDatasetContent
+            isCleaning={isCleaning}
+            setIsCleaning={setIsCleaning}
+            showCleaningDashboard={showCleaningDashboard}
+            onClose={onClose}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onFileUploaded={handleFileUploaded}
+            uploadedDataset={uploadedDataset}
+            setUploadedDataset={setUploadedDataset}
+            uploadComplete={uploadComplete}
+            setUploadComplete={setUploadComplete}
+            setUploadProgress={setUploadProgress}
+            uploadProgress={uploadProgress}
+          /> :
+            <div>
+              {currentStep === 1 && (
+                <BusinessDomainContent
+                  businessDomain={businessDomain}
+                  onDomainChange={handleDomainChange}
+                  onNext={handleNext}
+                />
+              )}
 
-          {currentStep === 2 && (
-            <UploadDatasetContent
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              onFileUploaded={handleFileUploaded}
-              uploadedDataset={uploadedDataset}
-              setUploadedDataset={setUploadedDataset}
-              uploadComplete={uploadComplete}
-              setUploadComplete={setUploadComplete}
-              setUploadProgress={setUploadProgress}
-              uploadProgress={uploadProgress}
-            />
-          )}
+              {currentStep === 2 && (
+                <UploadDatasetContent
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                  onFileUploaded={handleFileUploaded}
+                  uploadedDataset={uploadedDataset}
+                  setUploadedDataset={setUploadedDataset}
+                  uploadComplete={uploadComplete}
+                  setUploadComplete={setUploadComplete}
+                  setUploadProgress={setUploadProgress}
+                  uploadProgress={uploadProgress}
+                />
+              )}
 
-          {currentStep === 3 && (
-            <CustomizeProcessingContent
-              processingOption={processingOption}
-              downloadAfterCreating={downloadAfterCreating}
-              onProcessingOptionChange={handleProcessingOptionChange}
-              onDownloadToggle={() => setDownloadAfterCreating(!downloadAfterCreating)}
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-            />
-          )}
+              {currentStep === 3 && (
+                <CustomizeProcessingContent
+                  processingOption={processingOption}
+                  downloadAfterCreating={downloadAfterCreating}
+                  onProcessingOptionChange={handleProcessingOptionChange}
+                  onDownloadToggle={() => setDownloadAfterCreating(!downloadAfterCreating)}
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                />
+              )}
 
-          {currentStep === 4 && (
-            <GrantAccessContent
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-            />
-          )}
+              {currentStep === 4 && (
+                <GrantAccessContent
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                />
+              )}
 
-          {currentStep === 5 && (
-            <SetupSummaryContent
-              businessDomain={businessDomain}
-              uploadedFile={uploadedFile}
-              processingOption={processingOption}
-              onPrevious={handlePrevious}
-              onFinish={handleFinish}
-              isProcessing={isProcessing}
-            />
-          )}
+              {currentStep === 5 && (
+                <SetupSummaryContent
+                  businessDomain={businessDomain}
+                  uploadedFile={uploadedFile}
+                  processingOption={processingOption}
+                  onPrevious={handlePrevious}
+                  onFinish={handleFinish}
+                  isProcessing={isProcessing}
+                />
+              )}
+            </div>
+          }
         </div>
       </div>
     </div>

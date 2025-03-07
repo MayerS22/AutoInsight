@@ -84,33 +84,42 @@ const RenderDashboardList = ({
               </div>
             </div>
 
-            {/* Permissions */}
-            <div className="flex flex-col md:flex-row flex-1 justify-center md:justify-start mt-4 md:mt-0 w-full items-center">
-              <button
-                className="text-purple-800 underline relative"
-                onClick={() => handlePermissionClick(dataset._id)}
-              >
-                {dataset.shared_usernames?.length || 0} users have permission
-                {clickedDashboardId === dataset._id && (
-                  <div
-                    ref={popupRef}
-                    className="absolute top-full left-0 bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full md:w-48"
-                  >
-                    {dataset.shared_usernames?.length > 0 ? (
+            {/* Permissions - render only if activeTab is not "cleaned" */}
+            {activeTab !== "cleaned" && (
+              <div className="flex flex-col md:flex-row flex-1 justify-center md:justify-start mt-4 md:mt-0 w-full items-center">
+                <button
+                  className="text-purple-800 underline relative"
+                  onClick={() => handlePermissionClick(dataset._id)}
+                >
+                  { 
+                    // If you own the dataset (not in shared_usernames), add 1 to the count.
+                    !dataset.shared_usernames?.includes(username)
+                      ? ((dataset.shared_usernames?.length || 0) + 1)
+                      : dataset.shared_usernames?.length
+                  }{" "}
+                  users have permission
+                  {clickedDashboardId === dataset._id && (
+                    <div
+                      ref={popupRef}
+                      className="absolute top-full left-0 bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full md:w-48"
+                    >
                       <ul>
-                        {dataset.shared_usernames.map((user) => (
-                          <li key={user} className="text-sm text-gray-700 py-1">
+                        {(
+                          // If you own the dataset, prepend "you" to the shared list.
+                          !dataset.shared_usernames?.includes(username)
+                            ? ["you", ...(dataset.shared_usernames || [])]
+                            : dataset.shared_usernames
+                        ).map((user, index) => (
+                          <li key={index} className="text-sm text-gray-700 py-1">
                             {user === username ? "you" : user}
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      <p className="text-sm text-gray-700">No users</p>
-                    )}
-                  </div>
-                )}
-              </button>
-            </div>
+                    </div>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center">

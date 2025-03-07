@@ -31,28 +31,62 @@ const DashboardListComponent = ({
 
   const token = localStorage.getItem("token");
 
-  // Helper function to check if a dataset is "cleaned"
+  // A dataset is considered "cleaned" if it has a cleaned_dataset_url defined.
   const isCleanedDataset = (dataset) => {
-    const insights = dataset.insights_urls;
-    if (!insights) return false;
-    const keys = [
-      "pie_chart",
-      "bar_chart",
-      "kde",
-      "histogram",
-      "correlation",
-      "others",
-    ];
-    return keys.every(
-      (key) => Array.isArray(insights[key]) && insights[key].length === 0
-    );
+    return dataset.cleaned_dataset_url != null;
+  };
+
+  // Function to handle renaming of the dashboard
+  const handleEditDashboardName = (dashboard) => {
+    Swal.fire({
+      title: "Rename Dashboard",
+      input: "text",
+      inputLabel: "New dashboard name",
+      inputValue: dashboard.dataset_name,
+      showCancelButton: true,
+      confirmButtonText: "Save",
+      preConfirm: (newName) => {
+        if (!newName || newName.trim() === "") {
+          Swal.showValidationMessage("Dashboard name cannot be empty.");
+        }
+        return newName;
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const newName = result.value;
+        try {
+          // Update the dashboard name on the backend
+          await axios.patch(
+            `http://localhost:3000/api/v1/datasets/${dashboard._id}`,
+            { dataset_name: newName, user_id: username },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          // Re-fetch the updated list of datasets
+          await fetchDatasets();
+          Swal.fire({
+            icon: "success",
+            title: "Renamed",
+            text: "Dashboard name updated successfully.",
+            confirmButtonColor: "#6B46C1",
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text:
+              error.response?.data?.message ||
+              "Failed to update dashboard name.",
+            confirmButtonColor: "#E53E3E",
+          });
+        }
+      }
+    });
   };
 
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
     dispatch(marginActions.removeUserName());
     dispatch(marginActions.addLogoutIcon());
-
     return () => {
       dispatch(marginActions.setMargin(""));
       dispatch(marginActions.setColor("bg-purple-50"));
@@ -95,30 +129,29 @@ const DashboardListComponent = ({
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-  
+
       const mainDatasets = datasetsResponse.data?.body?.datasets || [];
-  
       // Extract shared dataset IDs from the shared endpoint
       const sharedDatasetEntries = sharedDatasetsResponse.data?.body || [];
       const sharedDatasetIds = sharedDatasetEntries.map(
         (entry) => entry.dataset_id
       );
-  
+
       // Fetch shared dataset details (if needed)
       const sharedDatasetDetailsPromises = sharedDatasetIds.map((id) =>
         axios.get(`http://localhost:3000/api/v1/datasets/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
       );
-  
+
       const sharedDatasetDetailsResponses = await Promise.allSettled(
         sharedDatasetDetailsPromises
       );
-  
+
       const sharedDatasets = sharedDatasetDetailsResponses
         .filter((response) => response.status === "fulfilled")
         .map((response) => response.value.data.body.dataset);
-  
+
       // Mark shared datasets by forcing the shared_usernames field
       const updatedMainDatasets = mainDatasets.map((dataset) => {
         if (sharedDatasetIds.includes(dataset._id)) {
@@ -126,12 +159,11 @@ const DashboardListComponent = ({
         }
         return dataset;
       });
-  
+
       // Combine both sources
       const combinedDatasets = [...updatedMainDatasets, ...sharedDatasets];
       setDashboardList(combinedDatasets);
       console.log(combinedDatasets);
-      
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -143,7 +175,6 @@ const DashboardListComponent = ({
       setIsDashboardLoading(false);
     }
   };
-  
 
   // Load dashboards when component mounts
   useEffect(() => {
@@ -160,6 +191,19 @@ const DashboardListComponent = ({
   const handlePermissionClick = (datasetId) => {
     setClickedDashboardId(clickedDashboardId === datasetId ? null : datasetId);
   };
+
+  // Close the permission module when clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setClickedDashboardId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [popupRef]);
 
   // Function to download insights images organized by folders (chart types)
   const downloadInsightsByFolder = async (insights) => {
@@ -194,7 +238,6 @@ const DashboardListComponent = ({
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      // Here we assume the file is CSV; adjust the filename if needed
       saveAs(blob, "cleaned_dataset.csv");
     } catch (error) {
       console.error("Error downloading CSV:", error);
@@ -272,68 +315,11 @@ const DashboardListComponent = ({
     });
   };
 
-  // Function to open a modal to edit the dashboard name.
-  const handleEditDashboardName = (dashboard) => {
-    Swal.fire({
-      title: "Rename Dashboard",
-      input: "text",
-      inputLabel: "New dashboard name",
-      inputValue: dashboard.dataset_name,
-      showCancelButton: true,
-      confirmButtonText: "Save",
-      preConfirm: (newName) => {
-        if (!newName || newName.trim() === "") {
-          Swal.showValidationMessage("Dashboard name cannot be empty.");
-        }
-        return newName;
-      },
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const newName = result.value;
-        try {
-          // Call the backend to update the dashboard name.
-          await axios.patch(
-            `http://localhost:3000/api/v1/datasets/${dashboard._id}`,
-            {
-              dataset_name: newName,
-              user_id: username,
-            },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          
-          // Re-fetch to get updated shared metadata
-          await fetchDatasets();
-          
-          Swal.fire({
-            icon: "success",
-            title: "Renamed",
-            text: "Dashboard name updated successfully.",
-            confirmButtonColor: "#6B46C1",
-          });
-          
-        } catch (error) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text:
-              error.response?.data?.message ||
-              "Failed to update dashboard name.",
-            confirmButtonColor: "#E53E3E",
-          });
-        }
-      }
-    });
-  };
-
-  // Separate the datasets into cleaned and non-cleaned based on insights_urls
+  // Separate the datasets into cleaned and non-cleaned
+  const cleanedDatasets = dashboardList.filter(isCleanedDataset);
   const nonCleanedDashboards = dashboardList.filter(
     (dataset) => !isCleanedDataset(dataset)
   );
-  const cleanedDatasets = dashboardList.filter(isCleanedDataset);
-
-  // Further filter non-cleaned datasets into "My" and "Shared"
   const myDatasets = nonCleanedDashboards.filter(
     (dataset) => !dataset.shared_usernames?.includes(username)
   );
@@ -341,7 +327,7 @@ const DashboardListComponent = ({
     dataset.shared_usernames?.includes(username)
   );
 
-  // Array of tabs with display labels
+  // Define tabs
   const tabs = [
     { key: "all", label: "All Dashboards" },
     { key: "my", label: "My Dashboards" },
@@ -349,7 +335,7 @@ const DashboardListComponent = ({
     { key: "cleaned", label: "Cleaned Dataset" },
   ];
 
-  // Show non-cleaned datasets in the default tabs and cleaned datasets in the "cleaned" tab.
+  // Select dashboards based on active tab
   const filteredDashboards =
     activeTab === "all"
       ? nonCleanedDashboards
@@ -378,33 +364,32 @@ const DashboardListComponent = ({
                       activeTab === tab.key
                         ? "bg-purple-900 text-white"
                         : "bg-white text-purple-600 hover:bg-purple-100"
-                    } ${index === 0 ? "rounded-l-lg border-r-0" : ""} 
-                   ${
-                     index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""
-                   }`}
+                    } ${index === 0 ? "rounded-l-lg border-r-0" : ""} ${
+                      index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""
+                    }`}
                   >
                     {tab.label}
                   </button>
                 ))}
               </div>
             </div>
-            {<RenderDashboardList
-            isDashboardLoading={isDashboardLoading}
-            setHoveredDashboardId={setHoveredDashboardId}
-            handleEditDashboardName={handleEditDashboardName}
-            handlePermissionClick={setClickedDashboardId}
-            downloadCleanedDataset={downloadCleanedDataset}
-            handleDownloadModule={handleDownloadModule}
-            navigate={navigate}
-            setDashboardList={setDashboardList}
-            onDashboardDeleted={onDashboardDeleted}
-            filteredDashboards={filteredDashboards}
-            username={username}
-            activeTab={activeTab}
-            clickedDashboardId={clickedDashboardId}
-            popupRef={popupRef}
-            token={token}
-          />}
+            <RenderDashboardList
+              isDashboardLoading={isDashboardLoading}
+              setHoveredDashboardId={setHoveredDashboardId}
+              handleEditDashboardName={handleEditDashboardName}
+              handlePermissionClick={setClickedDashboardId}
+              downloadCleanedDataset={downloadCleanedDataset}
+              handleDownloadModule={handleDownloadModule}
+              navigate={navigate}
+              setDashboardList={setDashboardList}
+              onDashboardDeleted={onDashboardDeleted}
+              filteredDashboards={filteredDashboards}
+              username={username}
+              activeTab={activeTab}
+              clickedDashboardId={clickedDashboardId}
+              popupRef={popupRef}
+              token={token}
+            />
           </div>
         </Allignment>
       ) : (
@@ -421,15 +406,15 @@ const DashboardListComponent = ({
                     activeTab === tab.key
                       ? "bg-purple-900 text-white"
                       : "bg-white text-purple-600 hover:bg-purple-100"
-                  } ${index === 0 ? "rounded-l-lg border-r-0" : ""} 
-                 ${index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""}`}
+                  } ${index === 0 ? "rounded-l-lg border-r-0" : ""} ${
+                    index === tabs.length - 1 ? "rounded-r-lg border-l-0" : ""
+                  }`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
           </div>
-          
           <RenderDashboardList
             isDashboardLoading={isDashboardLoading}
             setHoveredDashboardId={setHoveredDashboardId}
@@ -447,7 +432,6 @@ const DashboardListComponent = ({
             popupRef={popupRef}
             token={token}
           />
-          
         </div>
       )}
     </>

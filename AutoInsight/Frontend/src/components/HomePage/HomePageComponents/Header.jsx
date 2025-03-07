@@ -24,7 +24,7 @@ export default function Header() {
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
   const id= useSelector((state) => state.auth.id);
-
+  const [activeOption,setActiveOption]=useState("");
  
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
@@ -77,8 +77,9 @@ export default function Header() {
     <header
       className={`w-full py-4 px-4 md:px-8 flex justify-between items-center fixed top-0 left-0 ${color} z-50`}
     >
-      {/* Logo and Title */}
-      <div className={`flex items-center space-x-2 ${margin}`}>
+     <button onClick={()=>{navigate("/home")}}>
+       {/* Logo and Title */}
+       <div className={`flex items-center space-x-2 ${margin}`}>
         <div className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center mt-5">
           <img
             src={RobotImg}
@@ -90,6 +91,7 @@ export default function Header() {
           AutoInsight
         </h1>
       </div>
+     </button>
 
       {/* Mobile Menu Button */}
       <button
@@ -115,32 +117,42 @@ export default function Header() {
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center space-x-6">
         <button
-          onClick={() => handleNavigation("/home")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
+          onClick={() => {handleNavigation("/home")
+            setActiveOption("home");
+          }}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption==='home'?"underline":""}`}
         >
           Home
         </button>
-        <button
-          onClick={() => handleNavigation("/dashboards")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
+       {isLoggedIn&& <button
+          onClick={() => {handleNavigation("/dashboards")
+            setActiveOption("dashboards")
+          }}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption==='dashboards'?"underline":""}`}
         >
           Dashboards
-        </button>
+        </button>}
         <button
-          onClick={() => handleNavigation("/about-us")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
+          onClick={() => {handleNavigation("/about-us")
+            setActiveOption("about-us")
+          }}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption==='about-us'?"underline":""}`}
         >
           About Us
         </button>
         <button
-          onClick={() => handleNavigation("/reviews")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
+          onClick={() => {handleNavigation("/reviews")
+            setActiveOption("reviews")
+          }}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption==='reviews'?"underline":""}`}
         >
           Reviews
         </button>
         <button
-          onClick={() => handleNavigation("/contact")}
-          className="text-purple-900 hover:text-purple-700 hover:underline"
+          onClick={() => {handleNavigation("/contact")
+            setActiveOption("contact")
+          }}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption==='contact'?"underline":""}`}
         >
           Contact
         </button>
@@ -151,6 +163,7 @@ export default function Header() {
               <button
                 onClick={() => {
                   handleNavigation("/profile");
+                  setActiveOption("");
                 }}
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
@@ -224,12 +237,12 @@ export default function Header() {
             >
               Home
             </button>
-            <button
+           {isLoggedIn&& <button
               onClick={() => handleNavigation("/dashboards")}
               className="text-purple-900 hover:text-purple-700 text-left"
             >
               Dashboards
-            </button>
+            </button>}
             <button
               onClick={() => handleNavigation("/about-us")}
               className="text-purple-900 hover:text-purple-700 text-left"

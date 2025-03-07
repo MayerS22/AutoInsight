@@ -6,9 +6,9 @@ import { useSelector } from "react-redux";
 import SearchIcon from "../../assets/SearchIcon.svg";
 import { searchUsers, grantAccessToUsers } from "../../services/Api_Services";
 
-const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
+const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState([]);
+
   const [openDropdown, setOpenDropdown] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -77,10 +77,10 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-purple-500 mb-2">
+      <h2 className="text-2xl font-bold text-purple/500 mb-2">
         Grant Access to Users
       </h2>
-      <p className="text-sm text-gray-600 mb-6">
+      <p className="text-sm text-orig/600 mb-6">
         Securely share your dashboard by inviting team members and assigning specific permissions.
       </p>
 
@@ -163,7 +163,7 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
+                <div className="w-10 h-10 rounded-full bg-purple-950 flex items-center justify-center text-white font-semibold">
                   {user.username
                     .split(" ")
                     .slice(0, 2)
@@ -184,12 +184,12 @@ const GrantAccessContent = ({ onNext, onPrevious, datasetId }) => {
                     openDropdown === user._id ? null : user._id
                   )
                 }
-                className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
+                className="flex items-center justify-between bg-purple-100 border border-purple-800 rounded-md px-4 py-1 text-sm font-bold text-purple-800"
               >
                 <span>
                   {user.access === "admin" ? `All` : `Can ${user.access}`}
                 </span>
-                <ChevronDown size={16} />
+                <ChevronDown size={16} className="ml-1"/>
               </button>
 
               {openDropdown === user._id && (

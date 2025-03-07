@@ -11,10 +11,10 @@ const DatasetsButton = ({ children, isLoggedIn, setShowUploadingDashboard, setSh
         if (!isLoggedIn) {
             Swal.fire({
                 title: "You must be logged in to proceed",
-                text: "Redirecting to login page...",
+                text: `please login to ${actionType} dataset`,
                 icon: "warning",
                 confirmButtonText: "OK",
-            }).then(() => navigate("/login"));
+            })
             return;
         }
     

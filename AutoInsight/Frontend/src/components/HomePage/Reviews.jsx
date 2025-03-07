@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import AddReview from "./AddReview";
 import { useSelector } from "react-redux";
@@ -11,7 +11,7 @@ const Reviews = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
   const containerRef = useRef(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     fetchReviews();
@@ -32,12 +32,10 @@ const Reviews = () => {
     } else {
       Swal.fire({
         title: "You are not logged in!",
-        text: "Redirecting to login page...",
+        text: "please login to add reviews",
         icon: "warning",
         confirmButtonText: "OK",
-      }).then(() => {
-        navigate("/login");
-      });
+      })
     }
   };
 

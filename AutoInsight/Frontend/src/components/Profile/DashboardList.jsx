@@ -32,7 +32,7 @@ const DashboardListComponent = ({
   const token = localStorage.getItem("token");
 
   // A dataset is considered "cleaned" if it has a cleaned_dataset_url defined.
-  const isCleanedDataset = (dataset) => {
+  const isCleanedDataset = (dataset) => {    
     return dataset.cleaned_dataset_url != null;
   };
 
@@ -163,7 +163,11 @@ const DashboardListComponent = ({
       // Combine both sources
       const combinedDatasets = [...updatedMainDatasets, ...sharedDatasets];
       setDashboardList(combinedDatasets);
-      console.log(combinedDatasets);
+      console.log("combined datasets",combinedDatasets);
+      console.log("shared datasets",sharedDatasets);
+      console.log("main datasets",updatedMainDatasets);
+
+
     } catch (error) {
       Swal.fire({
         icon: "error",

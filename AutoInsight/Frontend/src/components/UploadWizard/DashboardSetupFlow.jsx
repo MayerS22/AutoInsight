@@ -20,7 +20,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   const [currentStep, setCurrentStep] = useState(1);
   const [businessDomain, setBusinessDomain] = useState("ecommerce");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [processingOption, setProcessingOption] = useState("clean_only");
+  const [processingOption, setProcessingOption] = useState("clean_and_generate");
   const [downloadAfterCreating, setDownloadAfterCreating] = useState(true);
   const [showError, setShowError] = useState(false);
   const [uploadedDataset, setUploadedDataset] = useState(null);
@@ -62,14 +62,24 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       return;
     }
     setShowError(false);
+    if(processingOption==="clean_only")
+    {
+      setCurrentStep((prev) => Math.min(prev + 2, 5));
+      return;
+    }
     setCurrentStep((prev) => Math.min(prev + 1, 5));
+
   };
 
   const handlePrevious = () => {
     setShowError(false);
+    if(processingOption==="clean_only")
+      {
+        setCurrentStep((prev) => Math.min(prev-2, 5));
+        return;
+      }
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
-
   // Callback to update parent's file state upon successful upload
   const handleFileUploaded = (file) => {
     setUploadedFile(file);
@@ -187,7 +197,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       </button>
 
       <div className="flex flex-col md:flex-row">
-        {showCleaningDashboard ? "" : <SetupSidebar steps={steps} currentStep={currentStep} />}
+        {showCleaningDashboard ? "" : <SetupSidebar processingOption={processingOption} steps={steps} currentStep={currentStep} />}
 
         <div className="flex-1">
           {showCleaningDashboard ? <UploadDatasetContent
@@ -239,12 +249,14 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
                 />
               )}
 
-              {currentStep === 4 && (
+            { processingOption==="clean_and_generate" && <div>
+             {currentStep === 4 && (
                 <GrantAccessContent
                   onNext={handleNext}
                   onPrevious={handlePrevious}
                 />
               )}
+             </div>}
 
               {currentStep === 5 && (
                 <SetupSummaryContent

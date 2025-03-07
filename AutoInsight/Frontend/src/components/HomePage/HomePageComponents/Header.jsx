@@ -11,6 +11,7 @@ import axios from "axios";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -143,34 +144,41 @@ export default function Header() {
         >
           Contact
         </button>
-
+        
         {isLoggedIn ? (
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => {
-                handleNavigation("/profile");
-              }}
-              className="flex items-center space-x-2"
-            >
-              {profilePicture ? (
-                <img
-                  src={profilePicture}
-                  alt="User Photo"
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <img
-                  src={ProfileLogo}
-                  alt="Profile Icon"
-                  className="w-8 h-8 cursor-pointer"
-                />
-              )}
-              {!isRemoved && (
-                <span className="text-purple-900 font-bold text-md">
-                  {username}
-                </span>
-              )}
-            </button>
+            <div className="relative flex items-center">
+              <button
+                onClick={() => {
+                  handleNavigation("/profile");
+                }}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className="flex items-center"
+              >
+                {profilePicture ? (
+                  <img
+                    src={profilePicture}
+                    alt="User Photo"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={ProfileLogo}
+                    alt="Profile Icon"
+                    className="w-8 h-8 cursor-pointer"
+                  />
+                )}
+                
+                {/* Username appears when hovering */}
+                {isHovering && (
+                  <span className="ml-2 text-purple-900 font-bold text-md">
+                    {username}
+                  </span>
+                )}
+              </button>
+            </div>
+            
             {isAdded && (
               <button
                 onClick={handleLogout}
@@ -244,7 +252,12 @@ export default function Header() {
             {isLoggedIn ? (
               <div>
                 <div className="relative group flex items-center space-x-2">
-                  <button onClick={() => handleNavigation("/profile")}>
+                  <button 
+                    onClick={() => handleNavigation("/profile")}
+                    onMouseEnter={() => setIsHovering(true)}
+                    onMouseLeave={() => setIsHovering(false)}
+                    className="flex items-center"
+                  >
                     {profilePicture ? (
                       <img
                         src={profilePicture}
@@ -258,12 +271,14 @@ export default function Header() {
                         className="w-8 h-8 cursor-pointer"
                       />
                     )}
+                    
+                    {/* Username appears when hovering (mobile) */}
+                    {isHovering && (
+                      <span className="ml-2 text-purple-900 font-bold text-md">
+                        {username}
+                      </span>
+                    )}
                   </button>
-
-                  {/* Tooltip with full username */}
-                  <span className="text-purple-900 font-bold text-md">
-                    {username}
-                  </span>
                 </div>
 
                 <button

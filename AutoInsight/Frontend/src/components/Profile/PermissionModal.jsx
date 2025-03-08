@@ -119,17 +119,21 @@ const PermissionModal = ({ onClose, datasetId }) => {
           }
         );
         if (response.data.status === 200) {
-          setUsers((prev) => [
-            ...prev,
+          // Fetch the full user profile for the newly added user.
+          const userResponse = await axios.get(
+            `${API_BASE_URL}/users/${selectedUser._id}`,
             {
-              _id: selectedUser._id,
-              username:
-                selectedUser.username ||
-                `User ${selectedUser._id.substring(0, 6)}`,
-              email: selectedUser.email || "No email available",
-              access: selectedPermission,
-            },
-          ]);
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            }
+          );
+          const newUser = {
+            _id: selectedUser._id,
+            ...userResponse.data.body,
+            access: selectedPermission,
+          };
+
+          setUsers((prev) => [...prev, newUser]);
           setSearchQuery("");
           setSelectedUser(null);
           setErrorMessage("");

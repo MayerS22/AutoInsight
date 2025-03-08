@@ -31,9 +31,19 @@ const DashboardListComponent = ({
 
   const token = localStorage.getItem("token");
 
-  // A dataset is considered "cleaned" if it has a cleaned_dataset_url defined.
-  const isCleanedDataset = (dataset) => {    
-    return dataset.cleaned_dataset_url != null;
+  // A dataset is considered "cleaned" if it does not have any insights images.
+  // If dataset.insights_urls is null, undefined, or if every array inside it is empty,
+  // then the dataset is treated as a cleaned dataset.
+  const isCleanedDataset = (dataset) => {
+    const insights = dataset.insights_urls;
+    if (!insights) return true; // No insights available, so it's cleaned
+    // Check if any insights array has at least one image
+    for (const key in insights) {
+      if (Array.isArray(insights[key]) && insights[key].length > 0) {
+        return false; // Insights exist, so it's not cleaned
+      }
+    }
+    return true; // insights exists but all arrays are empty
   };
 
   // Function to handle renaming of the dashboard
@@ -163,11 +173,9 @@ const DashboardListComponent = ({
       // Combine both sources
       const combinedDatasets = [...updatedMainDatasets, ...sharedDatasets];
       setDashboardList(combinedDatasets);
-      console.log("combined datasets",combinedDatasets);
-      console.log("shared datasets",sharedDatasets);
-      console.log("main datasets",updatedMainDatasets);
-
-
+      console.log("combined datasets", combinedDatasets);
+      console.log("shared datasets", sharedDatasets);
+      console.log("main datasets", updatedMainDatasets);
     } catch (error) {
       Swal.fire({
         icon: "error",

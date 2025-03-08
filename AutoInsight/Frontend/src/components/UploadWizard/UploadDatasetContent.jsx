@@ -25,6 +25,7 @@ const UploadDatasetContent = ({
   const [showError, setShowError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dropAnimation, setDropAnimation] = useState(false);
+  const [cleaningError, setCleaningError] = useState(false);
 
   // Helper function to format file sizes to MB with two decimals
   const formatFileSize = (sizeInBytes) => {
@@ -104,40 +105,48 @@ const UploadDatasetContent = ({
 
   const cleanDataset = async () => {
     setIsCleaning("yes");
+    setCleaningError(false);
+  
     if (!uploadedDataset) {
       console.error("No dataset available for cleaning.");
+      setCleaningError(true);
       return;
     }
-
+  
     const token = localStorage.getItem("token");
     const sessionId = localStorage.getItem("sessionId");
-
+  
     if (!sessionId) {
       console.error("Session ID is missing!");
       setShowError(true);
+      setCleaningError(true);
       return;
     }
-
+  
     try {
       const formData = new FormData();
       formData.append("file", uploadedDataset);
-
-      const response = await axios.post("http://localhost:3000/api/v1/datasets/clean-dataset/", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+  
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/datasets/clean-dataset/",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
       console.log("Cleaned dataset response:", response.data);
       setIsCleaning("no");
-      // Handle the cleaned dataset response (if needed)
     } catch (error) {
       console.error("Dataset cleaning failed:", error);
-      setShowError(true);
+      setCleaningError(true);
+      setIsCleaning("no");
     }
-    setIsCleaning("no");
   };
+  
 
 
   if (isCleaning === "yes") {
@@ -149,6 +158,8 @@ const UploadDatasetContent = ({
       </div>
     );
   }
+
+  
   if (isCleaning === "no") {
     return (
       <div className="flex justify-center flex-col items-center h-full">
@@ -159,6 +170,21 @@ const UploadDatasetContent = ({
       </div>
     );
   }
+
+  if (cleaningError) {
+    return (
+      <div className="flex justify-center flex-col items-center h-full">
+        <XCircle size={59} className="text-red-600" />
+        <p className="text-lg text-red-600 mt-2 font-bold">
+          Dataset Cleaning Failed!
+        </p>
+        <p className="text-sm text-gray-500">
+          Please try again or check your file.
+        </p>
+      </div>
+    );
+  }
+  
 
   return (
     <>

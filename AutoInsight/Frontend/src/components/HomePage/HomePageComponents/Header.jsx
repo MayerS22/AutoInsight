@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { authActions } from "../../../store/index";
+import { fetchUserProfile } from "../../../services/Api_Services";
 import RobotImg from "../../../assets/Robot.svg";
 import LogoutLogo from "../../../assets/Logout.svg";
 import ProfileLogo from "../../../assets/Profile.svg";
@@ -16,7 +17,7 @@ export default function Header() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
-  const [username, setUserName] = useState("");
+  const username = useSelector((state) => state.auth.username);
   const [isProfileLoading, setIsProfileLoading] = useState(false)
   const [userPhoto, setUserPhoto] = useState(null); // New state for user photo
   const margin = useSelector((state) => state.margin.margin);
@@ -25,28 +26,13 @@ export default function Header() {
   const isAdded = useSelector((state) => state.margin.isAdded);
   const id= useSelector((state) => state.auth.id);
   const [activeOption,setActiveOption]=useState("");
- 
-  const fetchUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-  
-    setIsProfileLoading(true); // Set loading to true when fetching starts
-    try {
-      const response = await axios.get("http://localhost:3000/api/v1/users/user-data", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
-      setUserName(response.data.body.username);
-    } catch (error) {
-      console.error("Error fetching profile picture:", error);
-    } finally {
-      setIsProfileLoading(false); // Set loading to false when fetching is done
-    }
-  };
+  const token = localStorage.getItem("token");
+
+
   
   // Call fetchUserProfile inside useEffect when the component mounts or user logs in
   useEffect(() => {
-    fetchUser();
+    fetchUserProfile(token,authActions,dispatch);
   }, [profilePicture]);
 
 

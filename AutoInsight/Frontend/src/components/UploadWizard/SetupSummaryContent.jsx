@@ -39,7 +39,7 @@ const SetupSummaryContent = ({
     switch(accessType) {
       case "view": return "Can view";
       case "edit": return "Can edit";
-      case "admin": return "All";
+      case "admin": return "Owner";
       default: return "Can view";
     }
   };
@@ -124,7 +124,7 @@ const SetupSummaryContent = ({
           onClick={onFinish}
           className="bg-purple/500 text-white px-4 py-2 rounded-md hover:bg-purple-800 text-sm md:text-base w-full sm:w-auto"
         >
-          Finish
+        Create
         </button>
       </div>
     </div>

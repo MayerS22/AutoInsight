@@ -20,7 +20,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   const [currentStep, setCurrentStep] = useState(1);
   const [businessDomain, setBusinessDomain] = useState("ecommerce");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [processingOption, setProcessingOption] = useState("clean_and_generate");
+  const [processingOption, setProcessingOption] = useState("clean_only");
   const [downloadAfterCreating, setDownloadAfterCreating] = useState(true);
   const [showError, setShowError] = useState(false);
   const [uploadedDataset, setUploadedDataset] = useState(null);
@@ -55,7 +55,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
     { number: 2, title: "Upload Dataset" },
     { number: 3, title: "Customize Your Processing" },
     { number: 4, title: "Grant Access to Users" },
-    { number: 5, title: "Setup Summary" },
+    { number: 5, title: "Dashboard Setup Summary" },
   ];
 
   const handleNext = () => {
@@ -282,6 +282,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
 
               {currentStep === 3 && (
                 <CustomizeProcessingContent
+                  businessDomain={businessDomain}
                   processingOption={processingOption}
                   downloadAfterCreating={downloadAfterCreating}
                   onProcessingOptionChange={handleProcessingOptionChange}

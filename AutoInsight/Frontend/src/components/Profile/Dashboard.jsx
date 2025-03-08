@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams} from "react-router-dom";
 import { NotLoggedIn } from "../NotLoggedIn.jsx";
 import AddIcon from "../../assets/addIcon.svg";
 import PermissionModal from "./PermissionModal.jsx";
 import { marginActions } from "../../store/index";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import Swal from "sweetalert2";
 
 const Dashboard = () => {
-  const { id } = useParams(); // dataset ID from URL
-  const navigate = useNavigate();
+  const { id } = useParams(); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [insightsUrls, setInsightsUrls] = useState({});
@@ -37,7 +35,7 @@ const Dashboard = () => {
           `http://localhost:3000/api/v1/datasets/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
+        
         console.log("API Response urls:", response.data.body.dataset.insights_urls);
         console.log("API Response :", response.data.body.dataset);
 
@@ -85,9 +83,12 @@ const Dashboard = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const permissions = response.data.body || [];
+        console.log("permissions",permissions);
+        
         const currentUserPermission = permissions.find(
           (p) => p.user_id === loggedInUserId
         );
+        console.log("current user",currentUserPermission)
         if (currentUserPermission && currentUserPermission.permission === "admin") {
           setHasAdminAccess(true);
         }
@@ -96,9 +97,9 @@ const Dashboard = () => {
       }
     };
 
-    if (id && token && loggedInUserId) {
+    
       fetchPermissionForUser();
-    }
+    
   }, [id, token, loggedInUserId]);
 
   // Update filtered insights when active chart type or topFilter changes

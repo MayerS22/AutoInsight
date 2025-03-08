@@ -143,3 +143,18 @@ export const sendChatbotMessage = async (formData) => {
     throw error;
   }
 };
+
+export const fetchUserProfile = async (token,authActions,dispatch) => {
+  if (!token) return;
+  try {
+    const response = await axios.get(
+      "http://localhost:3000/api/v1/users/user-data",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
+    dispatch(authActions.addUsername(response.data.body.username));
+    dispatch(authActions.addID(response.data.body.id));
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+  }
+};

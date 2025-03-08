@@ -187,7 +187,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
                 className="flex items-center justify-between bg-purple-100 border border-purple-800 rounded-md px-4 py-1 text-sm font-bold text-purple-800"
               >
                 <span>
-                  {user.access === "admin" ? `All` : `Can ${user.access}`}
+                  {user.access === "admin" ? `Owner` : `Can ${user.access}`}
                 </span>
                 <ChevronDown size={16} className="ml-1"/>
               </button>
@@ -207,7 +207,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
                         setOpenDropdown(null);
                       }}
                     >
-                      {access === "admin" ? `All` : `Can ${access}`}
+                      {access === "admin" ? `Owner` : `Can ${access}`}
                     </button>
                   ))}
                 </div>

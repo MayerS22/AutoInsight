@@ -9,6 +9,7 @@ const CustomizeProcessingContent = ({
   onDownloadToggle,
   onNext,
   onPrevious,
+  businessDomain
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -78,6 +79,8 @@ const CustomizeProcessingContent = ({
             checked={processingOption === "clean_and_generate"}
             onChange={() => onProcessingOptionChange("clean_and_generate")}
             className="mt-1 accent-purple/500"
+            disabled={businessDomain==="HR"}
+            title={businessDomain === "HR" ? "This option is disabled for HR" : ""}
           />
           <div>
             <p className="font-bold text-orig/500">

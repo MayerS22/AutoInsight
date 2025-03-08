@@ -6,6 +6,7 @@ import { ChevronDown, Trash2 } from "lucide-react";
 import SearchIcon from "../../assets/SearchIcon.svg";
 import { searchUsers } from "../../services/Api_Services";
 import axios from "axios";
+import { Loader } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3000/api/v1";
 
@@ -17,6 +18,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isFetchingPermissions,setIsFetchingPermissions]=useState(false)
 
   // New state for permission dropdown beside the search input
   const [selectedPermission, setSelectedPermission] = useState("view");
@@ -27,6 +29,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
 
   useEffect(() => {
     const fetchPermissions = async () => {
+      setIsFetchingPermissions(true);
       try {
         // Fetch permissions for the dataset
         const permissionsResponse = await axios.get(
@@ -67,15 +70,16 @@ const PermissionModal = ({ onClose, datasetId }) => {
             }
           })
         );
-
+      setIsFetchingPermissions(false);
+       
         setUsers(usersWithDetails);
       } catch (error) {
         console.error("Error fetching permissions:", error);
         setErrorMessage("Error fetching permissions");
       }
     };
-
     fetchPermissions();
+    setIsFetchingPermissions(false);
   }, [datasetId, token]);
 
   const handleInputChange = async (e) => {
@@ -331,84 +335,87 @@ const PermissionModal = ({ onClose, datasetId }) => {
         </div>
 
         {/* List of Users with Permissions */}
-        {users.length === 0 ? (
+        {users.length === 0 && (
           <p className="text-gray-500 text-center mb-6">
             No users with permissions.
           </p>
-        ) : (
-          <div className="space-y-4 mb-8">
-            {users.map((user) => (
-              <div
-                key={user._id}
-                className="flex items-center justify-between pb-4 border-b border-gray-300"
-              >
-                <div className="flex items-center space-x-3">
-                  {user.profile_picture ? (
-                    <img
-                      src={user.profile_picture}
-                      alt={user.username || "No Name"}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
-                      {(user.username || "")
-                        .split(" ")
-                        .slice(0, 2)
-                        .map((n) => n.charAt(0).toUpperCase())
-                        .join("") || "U"}
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {user.username || "No Name"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {user.email || "No Email"}
-                    </p>
+        ) }
+        {isFetchingPermissions && <Loader />}
+         {
+          users.length!==0 && (<div className="space-y-4 mb-8">
+          {users.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between pb-4 border-b border-gray-300"
+            >
+              <div className="flex items-center space-x-3">
+                {user.profile_picture ? (
+                  <img
+                    src={user.profile_picture}
+                    alt={user.username || "No Name"}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
+                    {(user.username || "")
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((n) => n.charAt(0).toUpperCase())
+                      .join("") || "U"}
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Inline Dropdown for Changing Permission */}
-                  <div className="relative">
-                    <button
-                      onClick={() =>
-                        setOpenDropdown(openDropdown === user._id ? null : user._id)
-                      }
-                      className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
-                    >
-                      <span>
-                        {user.access === "admin" ? "All" : `Can ${user.access}`}
-                      </span>
-                      <ChevronDown size={16} />
-                    </button>
-                    {openDropdown === user._id && (
-                      <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
-                        {["view", "edit", "admin"].map((access) => (
-                          <button
-                            key={access}
-                            onClick={() => {
-                              toggleAccess(user._id, access);
-                              setOpenDropdown(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
-                          >
-                            {access === "admin" ? "All" : `Can ${access}`}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => handleDeleteUserPermission(user._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                )}
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {user.username || "No Name"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {user.email || "No Email"}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="flex items-center gap-2">
+                {/* Inline Dropdown for Changing Permission */}
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      setOpenDropdown(openDropdown === user._id ? null : user._id)
+                    }
+                    className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
+                  >
+                    <span>
+                      {user.access === "admin" ? "All" : `Can ${user.access}`}
+                    </span>
+                    <ChevronDown size={16} />
+                  </button>
+                  {openDropdown === user._id && (
+                    <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
+                      {["view", "edit", "admin"].map((access) => (
+                        <button
+                          key={access}
+                          onClick={() => {
+                            toggleAccess(user._id, access);
+                            setOpenDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                        >
+                          {access === "admin" ? "All" : `Can ${access}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleDeleteUserPermission(user._id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>)
+         }
+
 
         {/* Close Modal Button */}
         <div className="flex justify-end">

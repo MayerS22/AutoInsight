@@ -14,7 +14,6 @@ const RenderDashboardList = ({
   handlePermissionClick,
   downloadCleanedDataset,
   handleDownloadModule,
-  navigate,
   setDashboardList,
   onDashboardDeleted,
   filteredDashboards,
@@ -146,7 +145,7 @@ const RenderDashboardList = ({
               </button>
               {activeTab !== "cleaned" && (
                 <button
-                  onClick={() => navigate(`/dashboard/${dataset._id}`)}
+                  onClick={() => window.open(`/dashboard/${dataset._id}`)}
                   className="p-2 hover:bg-purple-100 rounded-full"
                 >
                   <img src={OpenLogo} alt="Open" className="w-8 h-8" />

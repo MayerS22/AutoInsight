@@ -6,6 +6,7 @@ const initialAuthState = {
     profilePicture: null,
     username: "",
     id:"",
+    datasetOwnerId:""
 }
 
 const initialMarginState = {
@@ -45,6 +46,9 @@ const authSlice = createSlice({
         },
         addID(state,action){
             state.id = action.payload;
+        },
+        addDatasetOwnerId(state,action){
+            state.id=action.payload;
         }
     }
 });

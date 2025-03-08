@@ -24,6 +24,8 @@ const DashboardListComponent = ({
   const [dashboardList, setDashboardList] = useState([]);
   const [isDashboardLoading, setIsDashboardLoading] = useState(false);
   const username = useSelector((state) => state.auth.username);
+  // Get logged in user id so we can check ownership
+  const userId = useSelector((state) => state.auth.id);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const popupRef = useRef(null);
   const navigate = useNavigate();
@@ -47,6 +49,7 @@ const DashboardListComponent = ({
   };
 
   // Function to handle renaming of the dashboard
+  // (You may also check dataset.canEdit before allowing editing)
   const handleEditDashboardName = (dashboard) => {
     Swal.fire({
       title: "Rename Dashboard",
@@ -140,14 +143,26 @@ const DashboardListComponent = ({
         }),
       ]);
 
+      // Get the main datasets (owned by users)
       const mainDatasets = datasetsResponse.data?.body?.datasets || [];
-      // Extract shared dataset IDs from the shared endpoint
+      // For each main dataset, mark it as editable if the owner is the logged-in user
+      const updatedMainDatasets = mainDatasets.map((dataset) => ({
+        ...dataset,
+        canEdit: dataset.user_id === userId,
+      }));
+
+      // Process shared datasets
       const sharedDatasetEntries = sharedDatasetsResponse.data?.body || [];
+      // Create a map from dataset_id to permission
+      const sharedPermissionsMap = {};
+      sharedDatasetEntries.forEach((entry) => {
+        sharedPermissionsMap[entry.dataset_id] = entry.permission;
+      });
       const sharedDatasetIds = sharedDatasetEntries.map(
         (entry) => entry.dataset_id
       );
 
-      // Fetch shared dataset details (if needed)
+      // Fetch shared dataset details and attach the permission info
       const sharedDatasetDetailsPromises = sharedDatasetIds.map((id) =>
         axios.get(`http://localhost:3000/api/v1/datasets/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -160,22 +175,23 @@ const DashboardListComponent = ({
 
       const sharedDatasets = sharedDatasetDetailsResponses
         .filter((response) => response.status === "fulfilled")
-        .map((response) => response.value.data.body.dataset);
-
-      // Mark shared datasets by forcing the shared_usernames field
-      const updatedMainDatasets = mainDatasets.map((dataset) => {
-        if (sharedDatasetIds.includes(dataset._id)) {
-          return { ...dataset, shared_usernames: [username] };
-        }
-        return dataset;
-      });
+        .map((response) => {
+          const dataset = response.value.data.body.dataset;
+          const permission = sharedPermissionsMap[dataset._id] || "view";
+          return {
+            ...dataset,
+            shared_permission: permission,
+            // Allow editing if the shared permission is "admin"
+            canEdit: permission === "admin",
+            // Optionally, you can add a flag to indicate it’s shared:
+            shared: true,
+          };
+        });
 
       // Combine both sources
       const combinedDatasets = [...updatedMainDatasets, ...sharedDatasets];
       setDashboardList(combinedDatasets);
       console.log("combined datasets", combinedDatasets);
-      console.log("shared datasets", sharedDatasets);
-      console.log("main datasets", updatedMainDatasets);
     } catch (error) {
       Swal.fire({
         icon: "error",

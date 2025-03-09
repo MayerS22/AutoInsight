@@ -11,6 +11,8 @@ import { authActions } from "./store/index.js"
 import Dashboard from "./components/Profile/Dashboard.jsx";
 import DashboardListComponent from "./components/Profile/DashboardList.jsx";
 import DashboardSetupFlow from "./components/Profile/UploadDatasetWizard.jsx";
+import ForgotPassword from "./components/Authentication/ForgotPassword.jsx";
+import ResetPassword from "./components/Authentication/ResetPassword.jsx";
 
 
 function App() {
@@ -60,8 +62,12 @@ function App() {
     },
     {
       path: "/forgot-password",
-      element: <Authentication />,
+      element: <ForgotPassword />,
     },
+    {
+      path:"/reset-password/:token",
+      element:<ResetPassword/>
+    }
   ]);
 
   return (

@@ -24,15 +24,15 @@ export default function Header() {
   const color = useSelector((state) => state.margin.color);
   const isRemoved = useSelector((state) => state.margin.isRemoved);
   const isAdded = useSelector((state) => state.margin.isAdded);
-  const id= useSelector((state) => state.auth.id);
-  const [activeOption,setActiveOption]=useState("");
+  const id = useSelector((state) => state.auth.id);
+  const [activeOption, setActiveOption] = useState("");
   const token = localStorage.getItem("token");
 
 
-  
+
   // Call fetchUserProfile inside useEffect when the component mounts or user logs in
   useEffect(() => {
-    fetchUserProfile(token,authActions,dispatch);
+    fetchUserProfile(token, authActions, dispatch);
   }, [profilePicture]);
 
 
@@ -63,21 +63,21 @@ export default function Header() {
     <header
       className={`w-full py-4 px-4 md:px-8 flex justify-between items-center fixed top-0 left-0 ${color} z-50`}
     >
-     <button onClick={()=>{navigate("/home")}}>
-       {/* Logo and Title */}
-       <div className={`flex items-center space-x-2 ${margin}`}>
-        <div className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center mt-5">
-          <img
-            src={RobotImg}
-            alt="Robot Icon"
-            className="w-full h-full object-cover mb-4"
-          />
+      <button onClick={() => { navigate("/home") }}>
+        {/* Logo and Title */}
+        <div className={`flex items-center space-x-2 ${margin}`}>
+          <div className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center mt-5">
+            <img
+              src={RobotImg}
+              alt="Robot Icon"
+              className="w-full h-full object-cover mb-4"
+            />
+          </div>
+          <h1 className="px-2 font-bold text-purple-900 text-xl md:text-2xl">
+            AutoInsight
+          </h1>
         </div>
-        <h1 className="px-2 font-bold text-purple-900 text-xl md:text-2xl">
-          AutoInsight
-        </h1>
-      </div>
-     </button>
+      </button>
 
       {/* Mobile Menu Button */}
       <button
@@ -86,10 +86,10 @@ export default function Header() {
       >
         <div className="w-6 h-6 flex flex-col justify-center items-center">
           {isMobileMenuOpen ? (
-            <div className="relative w-6 h-6">
+            <>
               <span className="absolute w-6 h-0.5 bg-purple-900 transform rotate-45"></span>
               <span className="absolute w-6 h-0.5 bg-purple-900 transform -rotate-45"></span>
-            </div>
+            </>
           ) : (
             <>
               <span className="w-6 h-0.5 bg-purple-900 mb-1"></span>
@@ -103,46 +103,51 @@ export default function Header() {
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center space-x-6">
         <button
-          onClick={() => {handleNavigation("/home")
+          onClick={() => {
+            handleNavigation("/home")
             setActiveOption("home");
           }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption==='home'?"underline":""}`}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'home' ? "underline" : ""}`}
         >
           Home
         </button>
-       {isLoggedIn&& <button
-          onClick={() => {handleNavigation("/dashboards")
+        {isLoggedIn && <button
+          onClick={() => {
+            handleNavigation("/dashboards")
             setActiveOption("dashboards")
           }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption==='dashboards'?"underline":""}`}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'dashboards' ? "underline" : ""}`}
         >
           Dashboards
         </button>}
         <button
-          onClick={() => {handleNavigation("/about-us")
+          onClick={() => {
+            handleNavigation("/about-us")
             setActiveOption("about-us")
           }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption==='about-us'?"underline":""}`}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'about-us' ? "underline" : ""}`}
         >
           About Us
         </button>
         <button
-          onClick={() => {handleNavigation("/reviews")
+          onClick={() => {
+            handleNavigation("/reviews")
             setActiveOption("reviews")
           }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption==='reviews'?"underline":""}`}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'reviews' ? "underline" : ""}`}
         >
           Reviews
         </button>
         <button
-          onClick={() => {handleNavigation("/contact")
+          onClick={() => {
+            handleNavigation("/contact")
             setActiveOption("contact")
           }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption==='contact'?"underline":""}`}
+          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'contact' ? "underline" : ""}`}
         >
           Contact
         </button>
-        
+
         {isLoggedIn ? (
           <div className="flex items-center space-x-4">
             <div className="relative flex items-center">
@@ -168,7 +173,7 @@ export default function Header() {
                     className="w-8 h-8 cursor-pointer"
                   />
                 )}
-                
+
                 {/* Username appears when hovering */}
                 {isHovering && (
                   <span className="ml-2 text-purple-900 font-bold text-md">
@@ -177,7 +182,7 @@ export default function Header() {
                 )}
               </button>
             </div>
-            
+
             {isAdded && (
               <button
                 onClick={handleLogout}
@@ -218,32 +223,48 @@ export default function Header() {
         <div className="absolute top-full left-0 right-0 bg-purple-50 shadow-lg md:hidden">
           <div className="flex flex-col p-4 space-y-4">
             <button
-              onClick={() => handleNavigation("/home")}
-              className="text-purple-900 hover:text-purple-700 text-left"
+              onClick={() => {
+                handleNavigation("/home")
+                setActiveOption("home");
+              }}
+              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'home' ? "underline" : ""}`}
             >
               Home
             </button>
-           {isLoggedIn&& <button
-              onClick={() => handleNavigation("/dashboards")}
-              className="text-purple-900 hover:text-purple-700 text-left"
+            {isLoggedIn && <button
+              onClick={() => {
+                handleNavigation("/dashboards")
+                setActiveOption("dashboards");
+
+              }}
+              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'dashboards' ? "underline" : ""}`}
             >
               Dashboards
             </button>}
             <button
-              onClick={() => handleNavigation("/about-us")}
-              className="text-purple-900 hover:text-purple-700 text-left"
+              onClick={() =>{
+                handleNavigation("/about-us");
+                setActiveOption("about-us");             
+              }}
+              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'about-us' ? "underline" : ""}`}
             >
               About Us
             </button>
             <button
-              onClick={() => handleNavigation("/reviews")}
-              className="text-purple-900 hover:text-purple-700 text-left"
+            onClick={() =>{
+              handleNavigation("/reviews");
+              setActiveOption("reviews");             
+            }}
+            className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'reviews' ? "underline" : ""}`}
             >
               Reviews
             </button>
             <button
-              onClick={() => handleNavigation("/contact")}
-              className="text-purple-900 hover:text-purple-700 text-left"
+                onClick={() =>{
+                  handleNavigation("/contact");
+                  setActiveOption("contact");             
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'contact' ? "underline" : ""}`}
             >
               Contact
             </button>
@@ -251,7 +272,7 @@ export default function Header() {
             {isLoggedIn ? (
               <div>
                 <div className="relative group flex items-center space-x-2">
-                  <button 
+                  <button
                     onClick={() => handleNavigation("/profile")}
                     onMouseEnter={() => setIsHovering(true)}
                     onMouseLeave={() => setIsHovering(false)}
@@ -270,7 +291,7 @@ export default function Header() {
                         className="w-8 h-8 cursor-pointer"
                       />
                     )}
-                    
+
                     {/* Username appears when hovering (mobile) */}
                     {isHovering && (
                       <span className="ml-2 text-purple-900 font-bold text-md">

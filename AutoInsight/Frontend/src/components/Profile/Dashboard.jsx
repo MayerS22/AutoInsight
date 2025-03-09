@@ -57,7 +57,10 @@
               histogram: dataset.insights_urls?.histogram || [],
               KDE: dataset.insights_urls?.kde || [],
               correlation: dataset.insights_urls?.correlation || [],
-              others: dataset.insights_urls?.others || [] // for report
+              forecast: dataset.insights_urls?.forecast || [], // for report
+              reports: dataset.insights_urls?.others || [], // for report
+      
+
             };
 
             setInsightsUrls(processedUrls);
@@ -169,7 +172,7 @@
     // Display name for the current chart type filter
     const getActiveChartTypeDisplay = () => {
       if (activeChartType === "all") return "All Graphs";
-      if (activeChartType === "others") return "Report";
+      if (activeChartType === "reports") return "Report";
       return activeChartType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
     };
 
@@ -245,7 +248,7 @@
                         className="w-full text-left px-4 py-2 hover:bg-purple-50 transition capitalize text-purple-800 font-bold"
                         onClick={() => selectChartType(type)}
                       >
-                        {type === "others" ? "Report" : type.replace("_", " ")}
+                        {type === "reports" ? "Report" : type.replace("_", " ")}
                       </button>
                     ))}
                   </div>
@@ -290,7 +293,7 @@
           {Object.entries(filteredInsights).map(([chartType, urls]) => (
             <div key={chartType} className="mb-10">
               <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
-                {chartType === "others" ? "Report" : `${chartType.replace("_", " ")} Insights`}
+                {chartType === "reports" ? "Report" : `${chartType.replace("_", " ")} Insights`}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {urls.length > 0 ? (
@@ -312,7 +315,7 @@
                   ))
                 ) : (
                   <div className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600">
-                    No {chartType === "others" ? "Report" : `${chartType.replace("_", " ")} Images`}
+                    No {chartType === "reports" ? "Report" : `${chartType.replace("_", " ")} Images`}
                   </div>
                 )}
               </div>

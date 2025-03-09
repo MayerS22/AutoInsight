@@ -134,7 +134,7 @@ const Login = ({ toggleForm,setUserName}) => {
             </p>
           </div>
         )}
-        <p onClick={()=>{navigate()}} className='text-purple-950 underline'>Forgot password?</p>
+        <p onClick={()=>{navigate("/forgot-password")}} className='text-purple-950 underline'>Forgot password?</p>
         <div className="flex justify-center">
           <button className="w-2/3 bg-purple-900 text-white p-2 rounded-lg hover:bg-purple-800 mt-6 font-bold">
             Login

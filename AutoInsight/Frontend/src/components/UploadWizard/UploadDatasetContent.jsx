@@ -110,6 +110,7 @@ const UploadDatasetContent = ({
     if (!uploadedDataset) {
       console.error("No dataset available for cleaning.");
       setCleaningError(true);
+      setIsCleaning(null);
       return;
     }
   
@@ -120,6 +121,7 @@ const UploadDatasetContent = ({
       console.error("Session ID is missing!");
       setShowError(true);
       setCleaningError(true);
+      setIsCleaning(null);
       return;
     }
   
@@ -134,7 +136,7 @@ const UploadDatasetContent = ({
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
-          },
+          },  
         }
       );
   
@@ -143,7 +145,7 @@ const UploadDatasetContent = ({
     } catch (error) {
       console.error("Dataset cleaning failed:", error);
       setCleaningError(true);
-      setIsCleaning("no");
+      setIsCleaning(null); // Ensure proper re-render
     }
   };
   
@@ -184,6 +186,7 @@ const UploadDatasetContent = ({
       </div>
     );
   }
+  
   
 
   return (

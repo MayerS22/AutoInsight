@@ -2,15 +2,14 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2, Loader } from "lucide-react";
 import SearchIcon from "../../assets/SearchIcon.svg";
 import { searchUsers } from "../../services/Api_Services";
 import axios from "axios";
-import { Loader } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3000/api/v1";
 
-const PermissionModal = ({ onClose, datasetId }) => {
+const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [users, setUsers] = useState([]); // Holds fetched + added users
@@ -18,11 +17,16 @@ const PermissionModal = ({ onClose, datasetId }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isFetchingPermissions,setIsFetchingPermissions]=useState(false)
+  const [isFetchingPermissions, setIsFetchingPermissions] = useState(false);
 
   // New state for permission dropdown beside the search input
   const [selectedPermission, setSelectedPermission] = useState("view");
   const [openRoleDropdown, setOpenRoleDropdown] = useState(false);
+
+  // New states for operation loaders
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
 
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
@@ -70,16 +74,15 @@ const PermissionModal = ({ onClose, datasetId }) => {
             }
           })
         );
-      setIsFetchingPermissions(false);
-       
         setUsers(usersWithDetails);
       } catch (error) {
         console.error("Error fetching permissions:", error);
         setErrorMessage("Error fetching permissions");
+      } finally {
+        setIsFetchingPermissions(false);
       }
     };
     fetchPermissions();
-    setIsFetchingPermissions(false);
   }, [datasetId, token]);
 
   const handleInputChange = async (e) => {
@@ -111,50 +114,75 @@ const PermissionModal = ({ onClose, datasetId }) => {
 
   // Adds a new user permission and appends it to the list.
   const handleAddUser = async () => {
-    if (selectedUser && !users.some((u) => u._id === selectedUser._id)) {
-      const payload = { user_id: selectedUser._id, permission: selectedPermission };
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL}/datasets/${datasetId}/share`,
-          payload,
+    if (!selectedUser) return;
+    
+    // Check if trying to add the uploader (owner)
+    if (selectedUser._id === uploaderId) {
+      setErrorMessage("You are already the owner of the dataset.");
+      return;
+    }
+
+    // Prevent adding a user who already has permission.
+    if (users.some((u) => u._id === selectedUser._id)) {
+      setErrorMessage("This user already has permissions.");
+      return;
+    }
+
+    const payload = { user_id: selectedUser._id, permission: selectedPermission };
+    setIsAddingUser(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/datasets/${datasetId}/share`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+      if (response.data.status === 200) {
+        // Fetch the full user profile for the newly added user.
+        const userResponse = await axios.get(
+          `${API_BASE_URL}/users/${selectedUser._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
           }
         );
-        if (response.data.status === 200) {
-          // Fetch the full user profile for the newly added user.
-          const userResponse = await axios.get(
-            `${API_BASE_URL}/users/${selectedUser._id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              withCredentials: true,
-            }
-          );
-          const newUser = {
-            _id: selectedUser._id,
-            ...userResponse.data.body,
-            access: selectedPermission,
-          };
+        const newUser = {
+          _id: selectedUser._id,
+          ...userResponse.data.body,
+          access: selectedPermission,
+        };
 
-          setUsers((prev) => [...prev, newUser]);
-          setSearchQuery("");
-          setSelectedUser(null);
-          setErrorMessage("");
-          setSuccessMessage("User added successfully!");
-          setTimeout(() => setSuccessMessage(""), 3000);
-        } else {
-          setErrorMessage(response.data.message || "Failed to grant access");
-        }
-      } catch (error) {
-        console.error("Error granting access:", error.response?.data?.message);
-        setErrorMessage("An error occurred while granting access.");
+        setUsers((prev) => [...prev, newUser]);
+        setSearchQuery("");
+        setSelectedUser(null);
+        setErrorMessage("");
+        setSuccessMessage("User added successfully!");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        setErrorMessage(response.data.message || "Failed to grant access");
       }
+    } catch (error) {
+      console.error("Error granting access:", error.response?.data?.message);
+      setErrorMessage("An error occurred while granting access.");
+    } finally {
+      setIsAddingUser(false);
     }
   };
 
   // Updates an existing user's permission.
   const toggleAccess = async (userIdToToggle, newAccess) => {
+    const userToEdit = users.find((u) => u._id === userIdToToggle);
+    if (!userToEdit) return;
+
+    // Prevent updating if the permission is already the same.
+    if (userToEdit.access === newAccess) {
+      setErrorMessage(`User already has the "${newAccess}" permission.`);
+      return;
+    }
+
+    setUpdatingUserId(userIdToToggle);
     const payload = { user_id: userIdToToggle, permission: newAccess };
     try {
       const response = await axios.post(
@@ -178,11 +206,14 @@ const PermissionModal = ({ onClose, datasetId }) => {
     } catch (error) {
       console.error("Error updating permission:", error.response?.data?.message);
       setErrorMessage("An error occurred while updating permission.");
+    } finally {
+      setUpdatingUserId(null);
     }
   };
 
   // Deletes a user's permission for the dataset.
   const handleDeleteUserPermission = async (userIdToDelete) => {
+    setDeletingUserId(userIdToDelete);
     const payload = { user_id: userIdToDelete };
     try {
       const response = await axios.delete(
@@ -204,6 +235,8 @@ const PermissionModal = ({ onClose, datasetId }) => {
     } catch (error) {
       console.error("Error deleting permission:", error.response?.data?.message);
       setErrorMessage("An error occurred while deleting permission.");
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -222,7 +255,7 @@ const PermissionModal = ({ onClose, datasetId }) => {
         >
           X
         </button>
-        <h2 className="text-2xl font-bold text-purple-500 mb-2">
+        <h2 className="text-2xl font-bold text-purple/500 mb-2">
           Permissions
         </h2>
         {errorMessage && (
@@ -327,95 +360,109 @@ const PermissionModal = ({ onClose, datasetId }) => {
 
           <button
             onClick={handleAddUser}
-            disabled={!selectedUser}
+            disabled={!selectedUser || isAddingUser}
             className="bg-purple-900 text-white px-8 py-2 rounded-md hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add
+            {isAddingUser ? "Adding..." : "Add"}
           </button>
         </div>
 
         {/* List of Users with Permissions */}
-        {users.length === 0 && (
-          <p className="text-gray-500 text-center mb-6">
+        {isFetchingPermissions ? (
+          <div className="flex justify-center items-center mb-6">
+            <Loader />
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-gray-500 text-center mb-6 animate-pulse">
             No users with permissions.
-          </p>
-        ) }
-        {isFetchingPermissions && <Loader />}
-         {
-          users.length!==0 && (<div className="space-y-4 mb-8">
-          {users.map((user) => (
-            <div
-              key={user._id}
-              className="flex items-center justify-between pb-4 border-b border-gray-300"
-            >
-              <div className="flex items-center space-x-3">
-                {user.profile_picture ? (
-                  <img
-                    src={user.profile_picture}
-                    alt={user.username || "No Name"}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
-                    {(user.username || "")
-                      .split(" ")
-                      .slice(0, 2)
-                      .map((n) => n.charAt(0).toUpperCase())
-                      .join("") || "U"}
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {user.username || "No Name"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {user.email || "No Email"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Inline Dropdown for Changing Permission */}
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setOpenDropdown(openDropdown === user._id ? null : user._id)
-                    }
-                    className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
-                  >
-                    <span>
-                      {user.access === "admin" ? "All" : `Can ${user.access}`}
-                    </span>
-                    <ChevronDown size={16} />
-                  </button>
-                  {openDropdown === user._id && (
-                    <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
-                      {["view", "edit", "admin"].map((access) => (
-                        <button
-                          key={access}
-                          onClick={() => {
-                            toggleAccess(user._id, access);
-                            setOpenDropdown(null);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
-                        >
-                          {access === "admin" ? "All" : `Can ${access}`}
-                        </button>
-                      ))}
+          </div>
+        ) : (
+          <div className="space-y-4 mb-8">
+            {users.map((user) => (
+              <div
+                key={user._id}
+                className="flex items-center justify-between pb-4 border-b border-gray-300"
+              >
+                <div className="flex items-center space-x-3">
+                  {user.profile_picture ? (
+                    <img
+                      src={user.profile_picture}
+                      alt={user.username || "No Name"}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-semibold">
+                      {(user.username || "")
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((n) => n.charAt(0).toUpperCase())
+                        .join("") || "U"}
                     </div>
                   )}
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {user.username || "No Name"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {user.email || "No Email"}
+                    </p>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleDeleteUserPermission(user._id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Inline Dropdown for Changing Permission */}
+                  <div className="relative">
+                    {updatingUserId === user._id ? (
+                      <div className="flex items-center justify-center bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm">
+                        <Loader size={16} />
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          setOpenDropdown(
+                            openDropdown === user._id ? null : user._id
+                          )
+                        }
+                        className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
+                      >
+                        <span>
+                          {user.access === "admin" ? "All" : `Can ${user.access}`}
+                        </span>
+                        <ChevronDown size={16} />
+                      </button>
+                    )}
+                    {openDropdown === user._id && updatingUserId !== user._id && (
+                      <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
+                        {["view", "edit", "admin"].map((access) => (
+                          <button
+                            key={access}
+                            onClick={() => {
+                              toggleAccess(user._id, access);
+                              setOpenDropdown(null);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                          >
+                            {access === "admin" ? "All" : `Can ${access}`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleDeleteUserPermission(user._id)}
+                    disabled={deletingUserId === user._id}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    {deletingUserId === user._id ? (
+                      <Loader size={16} />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>)
-         }
-
+            ))}
+          </div>
+        )}
 
         {/* Close Modal Button */}
         <div className="flex justify-end">

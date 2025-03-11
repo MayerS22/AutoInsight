@@ -65,16 +65,18 @@ const RenderDashboardList = ({
               <div className="flex flex-col">
                 <div className="flex items-center">
                   <h4 className="font-medium">{dataset.dataset_name}</h4>
-                  <button
-                    onClick={() => {
-                      const itemType =
-                        activeTab === "cleaned" ? "Dataset" : "Dashboard";
-                      handleEditDashboardName(dataset, itemType);
-                    }}
-                    className="ml-2 p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
-                  >
-                    <img src={EditIcon} alt="Edit" />
-                  </button>
+                  {dataset.canRename && (
+                    <button
+                      onClick={() => {
+                        const itemType =
+                          activeTab === "cleaned" ? "Dataset" : "Dashboard";
+                        handleEditDashboardName(dataset, itemType);
+                      }}
+                      className="ml-2 p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
+                    >
+                      <img src={EditIcon} alt="Edit" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500">
                   {new Date(dataset.createdAt).toLocaleString()}
@@ -89,7 +91,6 @@ const RenderDashboardList = ({
               </div>
             </div>
 
-            {/* Permissions - render only if activeTab is not "cleaned" */}
             {activeTab !== "cleaned" && (
               <div className="flex flex-col md:flex-row flex-1 justify-center md:justify-start mt-4 md:mt-0 w-full items-center">
                 <button
@@ -121,7 +122,6 @@ const RenderDashboardList = ({
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex items-center">
               <button
                 onClick={() => {
@@ -152,54 +152,56 @@ const RenderDashboardList = ({
                   <img src={OpenLogo} alt="Open" className="w-8 h-8" />
                 </button>
               )}
-              <button
-                onClick={() => {
-                  Swal.fire({
-                    title: "Are you sure?",
-                    text: "This action cannot be undone!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#E53E3E",
-                    cancelButtonColor: "#4A266A",
-                  }).then(async (result) => {
-                    if (result.isConfirmed) {
-                      try {
-                        await axios.delete(
-                          `http://localhost:3000/api/v1/datasets/${dataset._id}`,
-                          {
-                            headers: { Authorization: `Bearer ${token}` },
+              {dataset.canDelete && (
+                <button
+                  onClick={() => {
+                    Swal.fire({
+                      title: "Are you sure?",
+                      text: "This action cannot be undone!",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#E53E3E",
+                      cancelButtonColor: "#4A266A",
+                    }).then(async (result) => {
+                      if (result.isConfirmed) {
+                        try {
+                          await axios.delete(
+                            `http://localhost:3000/api/v1/datasets/${dataset._id}`,
+                            {
+                              headers: { Authorization: `Bearer ${token}` },
+                            }
+                          );
+                          setDashboardList((prev) =>
+                            prev.filter((d) => d._id !== dataset._id)
+                          );
+                          if (typeof onDashboardDeleted === "function") {
+                            onDashboardDeleted(dataset._id);
                           }
-                        );
-                        setDashboardList((prev) =>
-                          prev.filter((d) => d._id !== dataset._id)
-                        );
-                        if (typeof onDashboardDeleted === "function") {
-                          onDashboardDeleted(dataset._id);
+                          const itemType =
+                            activeTab === "cleaned" ? "Dataset" : "Dashboard";
+                          Swal.fire({
+                            icon: "success",
+                            title: "Deleted!",
+                            text: `The ${itemType} has been removed successfully.`,
+                            confirmButtonColor: "#4A266A",
+                          });
+                        } catch (error) {
+                          Swal.fire({
+                            icon: "error",
+                            title: "Delete Error",
+                            text:
+                              error.response?.data?.message || "Deletion failed",
+                            confirmButtonColor: "#E53E3E",
+                          });
                         }
-                        const itemType =
-                          activeTab === "cleaned" ? "Dataset" : "Dashboard";
-                        Swal.fire({
-                          icon: "success",
-                          title: "Deleted!",
-                          text: `The ${itemType} has been removed successfully.`,
-                          confirmButtonColor: "#4A266A",
-                        });
-                      } catch (error) {
-                        Swal.fire({
-                          icon: "error",
-                          title: "Delete Error",
-                          text:
-                            error.response?.data?.message || "Deletion failed",
-                          confirmButtonColor: "#E53E3E",
-                        });
                       }
-                    }
-                  });
-                }}
-                className="p-2 hover:bg-red-100 rounded-full"
-              >
-                <img src={TrashLogo} alt="Delete" className="w-8 h-8" />
-              </button>
+                    });
+                  }}
+                  className="p-2 hover:bg-red-100 rounded-full"
+                >
+                  <img src={TrashLogo} alt="Delete" className="w-8 h-8" />
+                </button>
+              )}
             </div>
           </li>
         ))}

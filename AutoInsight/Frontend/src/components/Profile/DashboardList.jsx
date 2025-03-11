@@ -49,8 +49,7 @@ const DashboardListComponent = ({
   };
 
   // Function to handle renaming of the dashboard
-  // (You may also check dataset.canEdit before allowing editing)
-  const handleEditDashboardName = (dashboard,itemType) => {
+  const handleEditDashboardName = (dashboard, itemType) => {
     Swal.fire({
       title: `Rename ${itemType}`,
       input: "text",
@@ -59,7 +58,6 @@ const DashboardListComponent = ({
       showCancelButton: true,
       confirmButtonText: "Save",
       confirmButtonColor: "#4A266A",
-
       preConfirm: (newName) => {
         if (!newName || newName.trim() === "") {
           Swal.showValidationMessage("Dashboard name cannot be empty.");
@@ -70,13 +68,11 @@ const DashboardListComponent = ({
       if (result.isConfirmed) {
         const newName = result.value;
         try {
-          // Update the dashboard name on the backend
           await axios.patch(
             `http://localhost:3000/api/v1/datasets/${dashboard._id}`,
             { dataset_name: newName, user_id: username },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          // Re-fetch the updated list of datasets
           await fetchDatasets();
           Swal.fire({
             icon: "success",
@@ -144,19 +140,20 @@ const DashboardListComponent = ({
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-       dispatch(authActions.addDatasetOwnerId(datasetsResponse.data.body.user._id));
+      dispatch(authActions.addDatasetOwnerId(datasetsResponse.data.body.user._id));
        
-      // Get the main datasets (owned by users)
+      // Mark main datasets as owned by the user
       const mainDatasets = datasetsResponse.data?.body?.datasets || [];
-      // For each main dataset, mark it as editable if the owner is the logged-in user
       const updatedMainDatasets = mainDatasets.map((dataset) => ({
         ...dataset,
-        canEdit: dataset.user_id === userId,
+        permission: "owner",
+        canRename: true,
+        canManagePermissions: true,
+        canDelete: true,
       }));
 
-      // Process shared datasets
+      // Process shared datasets and assign permission flags
       const sharedDatasetEntries = sharedDatasetsResponse.data?.body || [];
-      // Create a map from dataset_id to permission
       const sharedPermissionsMap = {};
       sharedDatasetEntries.forEach((entry) => {
         sharedPermissionsMap[entry.dataset_id] = entry.permission;
@@ -164,18 +161,14 @@ const DashboardListComponent = ({
       const sharedDatasetIds = sharedDatasetEntries.map(
         (entry) => entry.dataset_id
       );
-
-      // Fetch shared dataset details and attach the permission info
       const sharedDatasetDetailsPromises = sharedDatasetIds.map((id) =>
         axios.get(`http://localhost:3000/api/v1/datasets/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
       );
-
       const sharedDatasetDetailsResponses = await Promise.allSettled(
         sharedDatasetDetailsPromises
       );
-
       const sharedDatasets = sharedDatasetDetailsResponses
         .filter((response) => response.status === "fulfilled")
         .map((response) => {
@@ -184,14 +177,12 @@ const DashboardListComponent = ({
           return {
             ...dataset,
             shared_permission: permission,
-            // Allow editing if the shared permission is "admin"
-            canEdit: permission === "admin",
-            // Optionally, you can add a flag to indicate it’s shared:
+            canRename: (permission === "admin" || permission === "edit"),
+            canManagePermissions: (permission === "admin" || permission === "edit"),
+            canDelete: false,
             shared: true,
           };
         });
-
-      // Combine both sources
       const combinedDatasets = [...updatedMainDatasets, ...sharedDatasets];
       setDashboardList(combinedDatasets);
       console.log("combined datasets", combinedDatasets);
@@ -207,12 +198,10 @@ const DashboardListComponent = ({
     }
   };
 
-  // Load dashboards when component mounts
   useEffect(() => {
     fetchDatasets();
   }, []);
 
-  // Refresh dashboards when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger) {
       fetchDatasets();
@@ -223,7 +212,6 @@ const DashboardListComponent = ({
     setClickedDashboardId(clickedDashboardId === datasetId ? null : datasetId);
   };
 
-  // Close the permission module when clicking outside of it
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -236,7 +224,6 @@ const DashboardListComponent = ({
     };
   }, [popupRef]);
 
-  // Function to download insights images organized by folders (chart types)
   const downloadInsightsByFolder = async (insights) => {
     const zip = new JSZip();
     const chartTypes = Object.keys(insights);
@@ -264,7 +251,6 @@ const DashboardListComponent = ({
     });
   };
 
-  // Function to download the cleaned dataset as CSV
   const downloadCleanedDataset = async (url) => {
     try {
       const response = await fetch(url);
@@ -281,8 +267,6 @@ const DashboardListComponent = ({
     }
   };
 
-  // Function to open download options modal using radio buttons.
-  // Used only when not in the "cleaned" tab.
   const handleDownloadModule = (dataset) => {
     Swal.fire({
       title: "Download Options",
@@ -346,7 +330,6 @@ const DashboardListComponent = ({
     });
   };
 
-  // Separate the datasets into cleaned and non-cleaned
   const cleanedDatasets = dashboardList.filter(isCleanedDataset);
   const nonCleanedDashboards = dashboardList.filter(
     (dataset) => !isCleanedDataset(dataset)
@@ -358,7 +341,6 @@ const DashboardListComponent = ({
     dataset.shared_usernames?.includes(username)
   );
 
-  // Define tabs
   const tabs = [
     { key: "all", label: "All Dashboards" },
     { key: "my", label: "My Dashboards" },
@@ -366,7 +348,6 @@ const DashboardListComponent = ({
     { key: "cleaned", label: "Cleaned Datasets" },
   ];
 
-  // Select dashboards based on active tab
   const filteredDashboards =
     activeTab === "all"
       ? nonCleanedDashboards

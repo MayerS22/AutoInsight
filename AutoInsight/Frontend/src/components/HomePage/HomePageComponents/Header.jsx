@@ -35,7 +35,6 @@ export default function Header() {
     fetchUserProfile(token, authActions, dispatch);
   }, [profilePicture]);
 
-
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
     navigate("/login", { state: { isSignUp: false } });

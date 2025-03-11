@@ -32,6 +32,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
 
+
   useEffect(() => {
     const fetchPermissions = async () => {
       setIsFetchingPermissions(true);
@@ -75,7 +76,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
             }
           })
         );
-        setUsers(usersWithDetails);
+        setUsers(usersWithDetails.filter((user) => user._id !== userId));
       } catch (error) {
         console.error("Error fetching permissions:", error);
         setErrorMessage("Error fetching permissions");
@@ -84,7 +85,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
       }
     };
     fetchPermissions();
-  }, [datasetId, token]);
+  }, [datasetId, token,userId]);
 
   const handleInputChange = async (e) => {
     const query = e.target.value;
@@ -330,7 +331,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
             >
               <span>
                 {selectedPermission === "admin"
-                  ? "All"
+                  ? "Owner"
                   : selectedPermission === "view"
                   ? "Can view"
                   : "Can edit"}
@@ -340,7 +341,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
             {openRoleDropdown && (
               <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
                 {[
-                  { label: "All", value: "admin" },
+                  { label: "Owner", value: "admin" },
                   { label: "Can view", value: "view" },
                   { label: "Can edit", value: "edit" },
                 ].map((role) => (
@@ -371,7 +372,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
         {/* List of Users with Permissions */}
         {isFetchingPermissions ? (
           <div className="flex justify-center items-center mb-6">
-            <Loader />
+            <Loader className="animate-spin text-purple-900"/>
           </div>
         ) : users.length === 0 ? (
           <div className="text-gray-500 text-center mb-6 animate-pulse">
@@ -426,7 +427,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                         className="flex items-center justify-between bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm"
                       >
                         <span>
-                          {user.access === "admin" ? "All" : `Can ${user.access}`}
+                          {user.access === "admin" ? "Owner" : `Can ${user.access}`}
                         </span>
                         <ChevronDown size={16} />
                       </button>
@@ -442,7 +443,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                             }}
                             className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
                           >
-                            {access === "admin" ? "All" : `Can ${access}`}
+                            {access === "admin" ? "Owner" : `Can ${access}`}
                           </button>
                         ))}
                       </div>

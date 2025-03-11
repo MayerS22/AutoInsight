@@ -153,7 +153,8 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
     );
     dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
     dispatch(authActions.addUsername(response.data.body.username));
-    dispatch(authActions.addID(response.data.body.id));
+    dispatch(authActions.addID(response.data.body._id));
+    localStorage.setItem("userId", response.data.body._id);    
   } catch (error) {
     console.error("Error fetching user profile:", error);
   }

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { NotLoggedIn } from "../NotLoggedIn.jsx";
@@ -23,13 +22,10 @@ const Dashboard = () => {
   const [isMonthsFilterOpen, setIsMonthsFilterOpen] = useState(false);
   const [barChartFilter, setBarChartFilter] = useState(10);
   const [forecastMonthsFilter, setForecastMonthsFilter] = useState(12);
-  // Track current user's permission on this dataset.
   const [userPermission, setUserPermission] = useState(null);
   const [availableBarFilters, setAvailableBarFilters] = useState([]);
   const [availableForecastMonths, setAvailableForecastMonths] = useState([]);
-  // Track dataset owner (uploader)
   const [ownerId, setOwnerId] = useState(null);
-  // Shared usernames from dataset (array of strings)
   const [sharedUsernames, setSharedUsernames] = useState([]);
 
   const dispatch = useDispatch();
@@ -37,20 +33,12 @@ const Dashboard = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const loggedInUserId = useSelector((state) => state.auth.id);
 
-  
-
-  useEffect(() => {
-    console.log("Current userPermission:", userPermission);
-  }, [userPermission]);
-
   const fetchDatasetDetails = async () => {
-    console.log("Fetching dataset with id:", id);
     try {
       const response = await axios.get(
         `http://localhost:3000/api/v1/datasets/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Dataset details:", response.data.body.dataset);
       if (response.data.body && response.data.body.dataset) {
         const dataset = response.data.body.dataset;
         setDatasetName(dataset.dataset_name || "Unnamed Dataset");
@@ -60,12 +48,13 @@ const Dashboard = () => {
             : "Unknown"
         );
         setOwnerId(dataset.user_id);
-        // Save shared usernames (array of usernames)
         setSharedUsernames(dataset.shared_usernames || []);
+
         // If the logged-in user is the owner, set permission to "owner"
         if (dataset.user_id === loggedInUserId) {
           setUserPermission("owner");
         }
+
         const processedUrls = {
           bar_chart: [],
           pie_chart: dataset.insights_urls?.pie_chart || [],
@@ -137,48 +126,46 @@ const Dashboard = () => {
     fetchUserProfile(token, authActions, dispatch);
   }, [loggedInUserId, id]);
 
-  useEffect(() => {
-    if (!ownerId) return;
+  const fetchPermissionForUser = async () => {
+    if (!token) return;
+
+    // If the user is the owner, skip fetching permissions
     if (ownerId === loggedInUserId) {
       console.log("User is owner; skipping share permissions fetch.");
       setUserPermission("owner");
-    } else if (sharedUsernames && sharedUsernames.length > 0) {
-      console.log("Shared usernames found; setting permission to edit.");
-      setUserPermission("edit");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/v1/datasets/shared/`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log(response.data.body);
+      const permissions = response.data.body;
+      const currentUserPermission = permissions.find(
+        (p) => p.user_id === loggedInUserId
+      )?.permission;
+      console.log(currentUserPermission);
+
+      setUserPermission(currentUserPermission);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!ownerId) return;
+
+    // If the user is the owner, set permission to "owner"
+    if (ownerId === loggedInUserId) {
+      console.log("User is owner; skipping share permissions fetch.");
+      setUserPermission("owner");
     } else {
+      // Otherwise, fetch permissions
       fetchPermissionForUser();
     }
   }, [loggedInUserId, id, ownerId, sharedUsernames]);
-
-  const fetchPermissionForUser = async () => {
-    if (!token) return;
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/v1/datasets/${id}/share`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const permissions = response.data.body || [];
-      console.log("Share API permissions:", permissions);
-      const currentPerm = permissions.find((p) => p.user_id === loggedInUserId);
-      console.log("Current User Permission from API:", currentPerm?.permission);
-      if (currentPerm?.permission === "admin") {
-        setUserPermission("admin");
-      } else if (currentPerm?.permission === "edit") {
-        setUserPermission("edit");
-      } else {
-        setUserPermission("view");
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 403) {
-        setUserPermission("edit");
-      } else {
-        console.error(
-          "Error fetching permissions for dataset:",
-          error.response ? error.response.data : error.message
-        );
-      }
-    }
-  };
 
   useEffect(() => {
     const filtered = {};
@@ -252,10 +239,6 @@ const Dashboard = () => {
     return activeChartType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  if(!isLoggedIn){
-    return<NotLoggedIn/>
-  }
-
   return (
     <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-16">
       <div className="flex flex-col sm:flex-row justify-between items-center w-full">
@@ -326,14 +309,15 @@ const Dashboard = () => {
             </div>
           )}
           <div className="flex gap-4">
-            <div className="flex gap-4">
-              {(userPermission === "owner" || userPermission === "admin" || userPermission === "edit") && (
-                <button className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition" onClick={() => setIsModalOpen(true)}>
-                  <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
-                  <span className="text-sm font-medium">Permissions</span>
-                </button>
-              )}
-            </div>
+            {(userPermission === "owner" || userPermission === "admin" || userPermission === "edit") && (
+              <button
+                className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
+                <span className="text-sm font-medium">Permissions</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

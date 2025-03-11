@@ -269,7 +269,9 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          {(activeChartType === "all" || activeChartType === "bar_chart" || activeChartType === "histogram") &&
+          {(activeChartType === "all" ||
+            activeChartType === "bar_chart" ||
+            activeChartType === "histogram") &&
             availableBarFilters.length > 0 && (
               <div className="relative">
                 <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsBarFilterOpen(!isBarFilterOpen)}>
@@ -289,27 +291,30 @@ const Dashboard = () => {
                 )}
               </div>
             )}
-          {availableForecastMonths.length > 0 && (
-            <div className="relative">
-              <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}>
-                {forecastMonthsFilter} Months
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMonthsFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
-                </svg>
-              </button>
-              {isMonthsFilterOpen && (
-                <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
-                  {availableForecastMonths.map((value) => (
-                    <button key={value} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold" onClick={() => handleMonthsFilterChange(value)}>
-                      {value} Months
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {(activeChartType === "all" || activeChartType === "forecast") &&
+            availableForecastMonths.length > 0 && (
+              <div className="relative">
+                <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}>
+                  {forecastMonthsFilter} Months
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMonthsFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
+                  </svg>
+                </button>
+                {isMonthsFilterOpen && (
+                  <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
+                    {availableForecastMonths.map((value) => (
+                      <button key={value} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold" onClick={() => handleMonthsFilterChange(value)}>
+                        {value} Months
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           <div className="flex gap-4">
-            {(userPermission === "owner" || userPermission === "admin" || userPermission === "edit") && (
+            {(userPermission === "owner" ||
+              userPermission === "admin" ||
+              userPermission === "edit") && (
               <button
                 className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
                 onClick={() => setIsModalOpen(true)}
@@ -322,7 +327,12 @@ const Dashboard = () => {
         </div>
       </div>
       <h3 className="text-sm text-gray-600 mt-2">
-        Date Created: {new Date(creationDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        Date Created:{" "}
+        {new Date(creationDate).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
       </h3>
       <div className="mt-12">
         {Object.entries(filteredInsights).map(([chartType, urls]) => (

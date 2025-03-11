@@ -43,15 +43,24 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
   };
 
   const handleAddUser = () => {
-    if (selectedUser && !users.some(u => u._id === selectedUser._id)) {
-      setUsers(prev => [
-        ...prev,
-        { ...selectedUser, access: "view" } // Default access level
-      ]);
-      setSearchQuery("");
-      setSelectedUser(null);
+    if (!selectedUser) return;
+  
+    // Check if the selected user is already added
+    if (users.some(u => u._id === selectedUser._id)) {
+      setErrorMessage("This user is already added");
+      return;
     }
+  
+    // If the user is not added, add the user and clear any error message
+    setUsers(prev => [
+      ...prev,
+      { ...selectedUser, access: "view" } // Default access level
+    ]);
+    setSearchQuery("");
+    setSelectedUser(null);
+    setErrorMessage("");
   };
+  
 
   const handleNext = async () => {
     setErrorMessage("");

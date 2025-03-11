@@ -141,7 +141,7 @@ const Dashboard = () => {
   
   useEffect(() => {
     fetchDatasetDetails();
-    fetchUserProfile(token, authActions, dispatch)
+    fetchUserProfile(token, authActions, dispatch);
   }, [loggedInUserId, id]);
 
   // If not the owner, check if the user has been shared admin permission
@@ -161,9 +161,11 @@ const Dashboard = () => {
       console.log("loggedIn userId", loggedInUserId);
 
       // Ensure we return the full object
-      const currentUserPermission = permissions.find((p) => p.user_id === loggedInUserId);
+      const currentUserPermission = permissions.find(
+        (p) => p.user_id === loggedInUserId
+      );
 
-      console.log("Current User Permission:", currentUserPermission?.permission); // ✅ Avoids crashes
+      console.log("Current User Permission:", currentUserPermission?.permission);
 
       if (currentUserPermission?.permission === "admin") {
         setHasAdminAccess(true);
@@ -171,7 +173,10 @@ const Dashboard = () => {
         setHasAdminAccess(false);
       }
     } catch (error) {
-      console.error("Error fetching permissions for dataset:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error fetching permissions for dataset:",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -186,30 +191,37 @@ const Dashboard = () => {
     if (activeChartType === "all") {
       Object.keys(insightsUrls).forEach((type) => {
         if (type === "bar_chart" || type === "histogram") {
-          const filteredCharts = insightsUrls[`${type}_data`]
-            ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
-            .map((chart) => chart.url) || [];
+          const filteredCharts =
+            insightsUrls[`${type}_data`]
+              ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
+              .map((chart) => chart.url) || [];
           filtered[type] = filteredCharts;
         } else if (type === "forecast") {
-          // For "all" view, use the default forecastMonthsFilter value
-          // without showing the filter UI
-          const filteredCharts = insightsUrls["forecast_data"]
-            ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
-            .map((chart) => chart.url) || [];
+          // For "all" view, use the default forecastMonthsFilter value without showing the filter UI
+          const filteredCharts =
+            insightsUrls["forecast_data"]
+              ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
+              .map((chart) => chart.url) || [];
           filtered[type] = filteredCharts;
-        } else if (type !== "bar_chart_data" && type !== "histogram_data" && type !== "forecast_data") {
+        } else if (
+          type !== "bar_chart_data" &&
+          type !== "histogram_data" &&
+          type !== "forecast_data"
+        ) {
           filtered[type] = insightsUrls[type] || [];
         }
       });
     } else if (activeChartType === "bar_chart" || activeChartType === "histogram") {
-      const filteredCharts = insightsUrls[`${activeChartType}_data`]
-        ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
-        .map((chart) => chart.url) || [];
+      const filteredCharts =
+        insightsUrls[`${activeChartType}_data`]
+          ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
+          .map((chart) => chart.url) || [];
       filtered[activeChartType] = filteredCharts;
     } else if (activeChartType === "forecast") {
-      const filteredCharts = insightsUrls["forecast_data"]
-        ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
-        .map((chart) => chart.url) || [];
+      const filteredCharts =
+        insightsUrls["forecast_data"]
+          ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
+          .map((chart) => chart.url) || [];
       filtered[activeChartType] = filteredCharts;
     } else {
       filtered[activeChartType] = insightsUrls[activeChartType] || [];
@@ -246,7 +258,7 @@ const Dashboard = () => {
     setBarChartFilter(value);
     setIsBarFilterOpen(false);
   };
-  
+
   const handleMonthsFilterChange = (value) => {
     setForecastMonthsFilter(value);
     setIsMonthsFilterOpen(false);
@@ -353,44 +365,44 @@ const Dashboard = () => {
                 )}
               </div>
             )}
-            
-          {/* Forecast Months Filter - Only show when forecast is specifically selected */}
-          {activeChartType === "forecast" && availableForecastMonths.length > 0 && (
-              <div className="relative">
-                <button
-                  className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold"
-                  onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}
+
+          {/* Forecast Months Filter - Always shown if forecast months are available */}
+          {availableForecastMonths.length > 0 && (
+            <div className="relative">
+              <button
+                className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold"
+                onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}
+              >
+                {forecastMonthsFilter} Months
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {forecastMonthsFilter} Months
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d={isMonthsFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                    ></path>
-                  </svg>
-                </button>
-                {isMonthsFilterOpen && (
-                  <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
-                    {availableForecastMonths.map((value) => (
-                      <button
-                        key={value}
-                        className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold"
-                        onClick={() => handleMonthsFilterChange(value)}
-                      >
-                        {value} Months
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d={isMonthsFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+                  ></path>
+                </svg>
+              </button>
+              {isMonthsFilterOpen && (
+                <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
+                  {availableForecastMonths.map((value) => (
+                    <button
+                      key={value}
+                      className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold"
+                      onClick={() => handleMonthsFilterChange(value)}
+                    >
+                      {value} Months
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Permissions Button */}
           <div className="flex gap-4">

@@ -44,8 +44,9 @@ const RenderDashboardList = ({
       </div>
     ) : filteredDashboards.length === 0 ? (
       <div className="text-center text-gray-500 mt-8">
-        { activeTab==="cleaned"?"No datasets available.":"No dashboards available."}
-        
+        {activeTab === "cleaned"
+          ? "No datasets available."
+          : "No dashboards available."}
       </div>
     ) : (
       <ul className="space-y-4 mt-4">
@@ -64,11 +65,12 @@ const RenderDashboardList = ({
               <div className="flex flex-col">
                 <div className="flex items-center">
                   <h4 className="font-medium">{dataset.dataset_name}</h4>
-                  <button 
-                    onClick={() =>{
-                      const itemType=activeTab==="cleaned"?"Dataset":"Dashboard";
-                       handleEditDashboardName(dataset,itemType)
-                      }}
+                  <button
+                    onClick={() => {
+                      const itemType =
+                        activeTab === "cleaned" ? "Dataset" : "Dashboard";
+                      handleEditDashboardName(dataset, itemType);
+                    }}
                     className="ml-2 p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
                   >
                     <img src={EditIcon} alt="Edit" />
@@ -94,30 +96,25 @@ const RenderDashboardList = ({
                   className="text-purple-800 underline relative"
                   onClick={() => handlePermissionClick(dataset._id)}
                 >
-                  { 
-                    // If you own the dataset (not in shared_usernames), add 1 to the count.
-                    !dataset.shared_usernames?.includes(username)
-                      ? ((dataset.shared_usernames?.length || 0) + 1)
-                      : dataset.shared_usernames?.length
-                  }{" "}
-                  users have permission
+                  {dataset.shared_usernames?.length || 0} users have permission
                   {clickedDashboardId === dataset._id && (
                     <div
                       ref={popupRef}
                       className="absolute top-full left-0 bg-purple-100 p-4 rounded-lg shadow-md z-50 w-full md:w-48"
                     >
-                      <ul>
-                        {(
-                          // If you own the dataset, prepend "you" to the shared list.
-                          !dataset.shared_usernames?.includes(username)
-                            ? ["you", ...(dataset.shared_usernames || [])]
-                            : dataset.shared_usernames
-                        ).map((user, index) => (
-                          <li key={index} className="text-sm text-gray-700 py-1">
-                            {user === username ? "you" : user}
-                          </li>
-                        ))}
-                      </ul>
+                      {dataset.shared_usernames && dataset.shared_usernames.length > 0 ? (
+                        <ul>
+                          {dataset.shared_usernames.map((user, index) => (
+                            <li key={index} className="text-sm text-gray-700 py-1">
+                              {user}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="text-sm text-gray-700 py-1">
+                          No users
+                        </div>
+                      )}
                     </div>
                   )}
                 </button>
@@ -179,7 +176,8 @@ const RenderDashboardList = ({
                         if (typeof onDashboardDeleted === "function") {
                           onDashboardDeleted(dataset._id);
                         }
-                        const itemType = activeTab==="cleaned"?"Dataset":"Dashboard"
+                        const itemType =
+                          activeTab === "cleaned" ? "Dataset" : "Dashboard";
                         Swal.fire({
                           icon: "success",
                           title: "Deleted!",

@@ -52,7 +52,7 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
             onChange={() => onDomainChange('HR')}
             className="accent-purple/500"
           />
-          <span>HR</span>
+          <span>Education</span>
         </label>
       </div>
 

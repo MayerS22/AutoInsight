@@ -6,7 +6,7 @@ import { authActions } from "../store";
 import { useDispatch } from "react-redux";
 
 // eslint-disable-next-line react/prop-types
-const RootLayout = ({userName}) => {
+const RootLayout = () => {
   const dispatch=useDispatch();
   const token = localStorage.getItem("token");
   useEffect(()=>{
@@ -15,7 +15,7 @@ const RootLayout = ({userName}) => {
 
   return (
     <div>
-      <Header userName={userName}/>
+      <Header />
       <Outlet />
     </div>
   );

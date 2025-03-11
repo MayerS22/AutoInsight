@@ -37,6 +37,8 @@ const Dashboard = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const loggedInUserId = useSelector((state) => state.auth.id);
 
+  
+
   useEffect(() => {
     console.log("Current userPermission:", userPermission);
   }, [userPermission]);
@@ -135,7 +137,6 @@ const Dashboard = () => {
     fetchUserProfile(token, authActions, dispatch);
   }, [loggedInUserId, id]);
 
-  // For non-owners: if sharedUsernames exist, assume "edit" permission; otherwise, try fetching.
   useEffect(() => {
     if (!ownerId) return;
     if (ownerId === loggedInUserId) {
@@ -250,6 +251,10 @@ const Dashboard = () => {
     if (activeChartType === "reports") return "Report";
     return activeChartType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  if(!isLoggedIn){
+    return<NotLoggedIn/>
+  }
 
   return (
     <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-16">

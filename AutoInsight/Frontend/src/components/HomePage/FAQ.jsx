@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import openedFAQ from '../../assets/openedFAQ.svg'
 import closedFAQ from '../../assets/closedFAQ.svg'
 
@@ -40,7 +40,7 @@ export default function FAQ() {
   return (
     <div
       id="faq"
-      className=" min-h-screen py-12 pt-20"
+      className=" min-h-screen py-12 pt-0"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header Section */}

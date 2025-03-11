@@ -257,7 +257,7 @@ const UploadDatasetContent = ({
                 </span>
                 <span className="text-xs md:text-sm text-gray-500">
                   {uploadComplete
-                    ? "Upload Complete ✅"
+                    ? "Upload Completed ✅"
                     : `Uploading... (${uploadProgress}%)`}
                 </span>
               </div>
@@ -279,7 +279,7 @@ const UploadDatasetContent = ({
         {!showCleaningDashboard && (
           <button
             onClick={onPrevious}
-            className={`border bg-purple/500 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center 
+            className={`border bg-purple/500  text-white px-4 py-2 rounded-md flex items-center 
           ${uploadedDataset && !uploadComplete ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={uploadedDataset && !uploadComplete} // Disable only while uploading
           >

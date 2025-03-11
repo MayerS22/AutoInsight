@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import DashboardLogo from "../../assets/Dashboard.svg";
 import DownloadLogo from "../../assets/Download.svg";
@@ -155,13 +156,17 @@ const RenderDashboardList = ({
               {dataset.canDelete && (
                 <button
                   onClick={() => {
+                    const itemType =
+                    activeTab === "cleaned" ? "Dataset" : "Dashboard";
                     Swal.fire({
-                      title: "Are you sure?",
-                      text: "This action cannot be undone!",
+                      title: `Delete ${itemType}!`,
+                      text: `Are you sure you want to delete this ${itemType}? This action cannot be undone!`,
                       icon: "warning",
                       showCancelButton: true,
                       confirmButtonColor: "#E53E3E",
                       cancelButtonColor: "#4A266A",
+                      confirmButtonText: "Delete", 
+                      cancelButtonText: "Cancel",
                     }).then(async (result) => {
                       if (result.isConfirmed) {
                         try {
@@ -181,16 +186,15 @@ const RenderDashboardList = ({
                             activeTab === "cleaned" ? "Dataset" : "Dashboard";
                           Swal.fire({
                             icon: "success",
-                            title: "Deleted!",
+                            title: `${itemType} Deleted!`,
                             text: `The ${itemType} has been removed successfully.`,
                             confirmButtonColor: "#4A266A",
                           });
                         } catch (error) {
                           Swal.fire({
                             icon: "error",
-                            title: "Delete Error",
-                            text:
-                              error.response?.data?.message || "Deletion failed",
+                            title: "Deletion failed",
+                            text: "Unable failed to delete the dataset.",
                             confirmButtonColor: "#E53E3E",
                           });
                         }

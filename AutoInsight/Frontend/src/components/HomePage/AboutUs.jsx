@@ -1,7 +1,7 @@
 export default function AboutUs() {
   return (
     <section id="aboutUs" className="bg-white min-h-screen flex items-center justify-center">
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4 pt-16">
         {/* Section Heading */}
         <h2 className="text-4xl md:text-5xl font-bold text-purple-900 mb-8 text-center">
           About Us

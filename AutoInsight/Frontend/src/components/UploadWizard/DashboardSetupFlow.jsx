@@ -30,7 +30,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCleaning, setIsCleaning] = useState("")
   const [users, setUsers] = useState([]);
-  const [success,setSuccess]=useState(false)
+  const [success, setSuccess] = useState(false)
 
 
 
@@ -66,7 +66,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       return;
     }
     setShowError(false);
-  
+
     setCurrentStep((prev) => {
       if (processingOption === "clean_only" && prev === 3) {
         return 5; // Skip step 4
@@ -74,10 +74,10 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       return Math.min(prev + 1, 5);
     });
   };
-  
+
   const handlePrevious = () => {
     setShowError(false);
-  
+
     setCurrentStep((prev) => {
       if (processingOption === "clean_only" && prev === 5) {
         return 3; // Skip step 4 in reverse
@@ -85,7 +85,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       return Math.max(prev - 1, 1);
     });
   };
-  
+
   // Callback to update parent's file state upon successful upload
   const handleFileUploaded = (file) => {
     setUploadedFile(file);
@@ -138,11 +138,11 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           }
         } else if (processingOption === "clean_and_generate") {
           // Download the cleaned dataset
-          const cleanedUrl = 
-            response.data.body?.dataset?.cleaned_dataset_url || 
-            response.data.cleaned_dataset_url || 
+          const cleanedUrl =
+            response.data.body?.dataset?.cleaned_dataset_url ||
+            response.data.cleaned_dataset_url ||
             response.data.body?.cleaned_dataset_url;
-        
+
           if (cleanedUrl) {
             try {
               const fileResponse = await fetch(cleanedUrl);
@@ -154,10 +154,10 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           } else {
             console.error("cleaned_dataset_url not found in response:", response.data);
           }
-        
+
           // Download insights images as ZIP
           const insightsUrls = response.data.body?.dataset?.insights_urls || response.data.body?.insights_urls;
-        
+
           if (insightsUrls) {
             const zip = new JSZip();
             for (const chartType in insightsUrls) {
@@ -183,7 +183,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
             console.error("insights_urls not found in response:", response.data);
           }
         }
-        
+
       }
 
       setIsProcessing(false);
@@ -215,12 +215,12 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           <button
             onClick={handleClose}
             className={`absolute top-4 right-4 ${isProcessing
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:text-purple-900"
+              ? "text-gray-400 cursor-not-allowed"
+              : "hover:text-purple-900"
               }`}
             disabled={isProcessing}
           >
-            {isProcessing || isCleaning === "yes" ? "" : <img src={CloseICon} alt="close-x-icon"/>}
+            {isProcessing || isCleaning === "yes" ? "" : <img src={CloseICon} alt="close-x-icon" />}
           </button>
 
           <UploadDatasetContent
@@ -244,21 +244,22 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           <button
             onClick={handleClose}
             className={`absolute top-4 right-4 ${isProcessing
-                ? "text-gray-400 cursor-not-allowed"
-                : " rounded-xl text-white hover:text-purple-900 border-none"
+              ? "text-gray-400 cursor-not-allowed"
+              : " rounded-xl text-white hover:text-purple-900 border-none"
               }`}
             disabled={isProcessing}
           >
-            {isProcessing || isCleaning === "yes" ? "" : <img src={CloseICon} alt="close-x-icon"/>}
+            {isProcessing || isCleaning === "yes" ? "" : <img src={CloseICon} alt="close-x-icon" />}
           </button>
 
           <div className="flex flex-col md:flex-row">
-            <SetupSidebar
-              processingOption={processingOption}
-              steps={steps}
-              currentStep={currentStep}
-            />
-
+            {!isProcessing && !success && (
+              <SetupSidebar
+                processingOption={processingOption}
+                steps={steps}
+                currentStep={currentStep}
+              />
+            )}
             <div className="flex-1">
               {currentStep === 1 && (
                 <BusinessDomainContent

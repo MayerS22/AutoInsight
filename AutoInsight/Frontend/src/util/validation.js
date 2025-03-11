@@ -2,9 +2,10 @@ export function isEmail(value) {
     return value.includes('@');
   }
   export function isEmailValid(value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[cC][oO][mM]$/;
+    const emailRegex = /^[^\s@]+@(gmail|hotmail|yahoo)\.com$/i;
     return emailRegex.test(value);
   }
+  
   export function isPasswordValid(value) {
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$/;
     return passwordRegex.test(value)

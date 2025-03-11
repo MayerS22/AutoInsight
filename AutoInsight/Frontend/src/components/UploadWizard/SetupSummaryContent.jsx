@@ -62,7 +62,7 @@ const SetupSummaryContent = ({
       <div className="text-bold mb-3 md:mb-4 flex flex-row items-center flex-wrap">
         <img src={DomainIcon} alt="Domain Icon" className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
         <strong className="text-purple/500">Business Domain: </strong>  
-        <span className="ml-1 md:ml-2 break-all">{businessDomain==="ecommerce"?"Ecommerce":"HR"}</span>
+        <span className="ml-1 md:ml-2 break-all">{businessDomain==="ecommerce"?"Ecommerce":"Education"}</span>
       </div>
 
       <div className="mb-3 md:mb-4 flex flex-row items-center flex-wrap">

@@ -76,17 +76,15 @@ const DashboardListComponent = ({
           await fetchDatasets();
           Swal.fire({
             icon: "success",
-            title: "Updated!",
-            text: `${itemType} name updated successfully.`,
+            title: `${itemType} Renamed!`,
+            text: `The ${itemType} name has been updated successfully.`,
             confirmButtonColor: "#4A266A",
           });
         } catch (error) {
           Swal.fire({
             icon: "error",
-            title: "Error",
-            text:
-              error.response?.data?.message ||
-              "Failed to update dashboard name.",
+            title: "Rename Failed",
+            text: `The ${itemType} could not be renamed.`,
             confirmButtonColor: "#E53E3E",
           });
         }

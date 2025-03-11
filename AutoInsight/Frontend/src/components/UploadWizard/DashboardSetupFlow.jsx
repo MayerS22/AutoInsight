@@ -3,6 +3,7 @@
 /* eslint-disable react/prop-types */
 
 import { useState, useEffect } from "react";
+import { CheckCircle } from "lucide-react";
 import CloseICon from "../../assets/Close.svg"
 import SetupSidebar from "./SetupSidebar";
 import BusinessDomainContent from "./BusinessDomainContent";
@@ -29,6 +30,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCleaning, setIsCleaning] = useState("")
   const [users, setUsers] = useState([]);
+  const [success,setSuccess]=useState(false)
 
 
 
@@ -185,7 +187,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
       }
 
       setIsProcessing(false);
-      onClose(false);
+      setSuccess(true)
       if (onUploadSuccess) {
         onUploadSuccess();
       } else {
@@ -312,6 +314,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
                   onPrevious={handlePrevious}
                   onFinish={handleFinish}
                   isProcessing={isProcessing}
+                  success={success}
                 />
               )}
             </div>

@@ -50,14 +50,16 @@ const DashboardListComponent = ({
 
   // Function to handle renaming of the dashboard
   // (You may also check dataset.canEdit before allowing editing)
-  const handleEditDashboardName = (dashboard) => {
+  const handleEditDashboardName = (dashboard,itemType) => {
     Swal.fire({
-      title: "Rename Dashboard",
+      title: `Rename ${itemType}`,
       input: "text",
-      inputLabel: "New dashboard name",
+      inputLabel: `New ${itemType} name`,
       inputValue: dashboard.dataset_name,
       showCancelButton: true,
       confirmButtonText: "Save",
+      confirmButtonColor: "#4A266A",
+
       preConfirm: (newName) => {
         if (!newName || newName.trim() === "") {
           Swal.showValidationMessage("Dashboard name cannot be empty.");
@@ -78,9 +80,9 @@ const DashboardListComponent = ({
           await fetchDatasets();
           Swal.fire({
             icon: "success",
-            title: "Renamed",
-            text: "Dashboard name updated successfully.",
-            confirmButtonColor: "#6B46C1",
+            title: "Updated!",
+            text: `${itemType} name updated successfully.`,
+            confirmButtonColor: "#4A266A",
           });
         } catch (error) {
           Swal.fire({
@@ -360,7 +362,7 @@ const DashboardListComponent = ({
     { key: "all", label: "All Dashboards" },
     { key: "my", label: "My Dashboards" },
     { key: "shared", label: "Shared Dashboards" },
-    { key: "cleaned", label: "Cleaned Dataset" },
+    { key: "cleaned", label: "Cleaned Datasets" },
   ];
 
   // Select dashboards based on active tab

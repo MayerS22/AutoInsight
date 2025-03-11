@@ -44,7 +44,8 @@ const RenderDashboardList = ({
       </div>
     ) : filteredDashboards.length === 0 ? (
       <div className="text-center text-gray-500 mt-8">
-        No dashboards available.
+        { activeTab==="cleaned"?"No datasets available.":"No dashboards available."}
+        
       </div>
     ) : (
       <ul className="space-y-4 mt-4">
@@ -63,8 +64,11 @@ const RenderDashboardList = ({
               <div className="flex flex-col">
                 <div className="flex items-center">
                   <h4 className="font-medium">{dataset.dataset_name}</h4>
-                  <button
-                    onClick={() => handleEditDashboardName(dataset)}
+                  <button 
+                    onClick={() =>{
+                      const itemType=activeTab==="cleaned"?"Dataset":"Dashboard";
+                       handleEditDashboardName(dataset,itemType)
+                      }}
                     className="ml-2 p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
                   >
                     <img src={EditIcon} alt="Edit" />
@@ -159,7 +163,7 @@ const RenderDashboardList = ({
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#E53E3E",
-                    cancelButtonColor: "#6B46C1",
+                    cancelButtonColor: "#4A266A",
                   }).then(async (result) => {
                     if (result.isConfirmed) {
                       try {
@@ -175,11 +179,12 @@ const RenderDashboardList = ({
                         if (typeof onDashboardDeleted === "function") {
                           onDashboardDeleted(dataset._id);
                         }
+                        const itemType = activeTab==="cleaned"?"Dataset":"Dashboard"
                         Swal.fire({
                           icon: "success",
                           title: "Deleted!",
-                          text: "The dataset has been removed.",
-                          confirmButtonColor: "#6B46C1",
+                          text: `The ${itemType} has been removed successfully.`,
+                          confirmButtonColor: "#4A266A",
                         });
                       } catch (error) {
                         Swal.fire({

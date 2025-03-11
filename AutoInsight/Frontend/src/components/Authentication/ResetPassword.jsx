@@ -79,12 +79,6 @@ const ResetPassword = () => {
             // Clear form
             setPassword("");
             setConfirmPassword("");
-
-            // After successful reset, navigate to login
-            setTimeout(() => {
-                navigate("/login");
-            }, 3000);
-
         } catch (error) {
             const errorMessage = error.response?.data?.message ||
                 error.response?.message ||

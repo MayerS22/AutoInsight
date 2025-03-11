@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { Loader, Users } from "lucide-react";
+import { Loader, Users,CheckCircle } from "lucide-react";
 import UsersIcon from "../../assets/Users.svg";
 import OptionIcon from "../../assets/Option.svg";
 import DatasetIcon from "../../assets/DatasetName.svg";
 import DomainIcon from "../../assets/Domain.svg";
+import SuccessMessage from "./SuccessMessage.jsx"
 
 const SetupSummaryContent = ({
   businessDomain,
@@ -13,16 +14,22 @@ const SetupSummaryContent = ({
   onPrevious,
   onFinish,
   isProcessing,
-  users
+  users,
+  success
 }) => {
 
   if (isProcessing) {
-    return (
-      <div className="flex justify-center flex-col items-center h-full">
-        <Loader className="animate-spin text-purple/500" size={48} />
-        <p className="text-lg text-purple/500 mt-2 font-bold">Analyzing...</p>
-      </div>
-    );
+    return <SuccessMessage header={processingOption==="clean_only"?"Cleaning...":"Analyzing..."} lucide="analyzing"/>
+
+  }
+
+  if (success) {
+    return <SuccessMessage header={processingOption==="clean_only"?"Dataset Cleaned Successfully!":"Dashboard Generated Successfully!"} 
+    description={processingOption==="clean_only"?
+      "Your data is now ready for use, head to Dashboards tab and select cleaned Datasets."
+      :"Your data is now ready for use, head to Dashboards tab."} 
+    lucide="completed"/>
+
   }
 
   // Helper function to get user initials

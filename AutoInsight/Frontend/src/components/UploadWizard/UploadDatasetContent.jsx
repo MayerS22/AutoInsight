@@ -3,9 +3,10 @@ import { useState } from "react";
 import { XCircle, AlertCircle, CheckCircle } from "lucide-react";
 import FileLogo from "../../assets/FileLogo.png";
 import CloudAdd from "../../assets/cloud-add.svg";
+import CloseIcon from "../../assets/Close.svg"
 import { uploadDataset } from "../../services/Api_Services";
-import { Loader } from "lucide-react";
 import axios from "axios";
+import SuccessMessage from "./SuccessMessage.jsx"
 
 
 const UploadDatasetContent = ({
@@ -152,25 +153,12 @@ const UploadDatasetContent = ({
 
 
   if (isCleaning === "yes") {
-    // Show a loading spinner while waiting for the API response
-    return (
-      <div className="flex justify-center flex-col items-center h-full">
-        <Loader className="animate-spin text-purple/500" size={48} />
-        <p className="text-lg text-purple/500 mt-2 font-bold">Analyzing...</p>
-      </div>
-    );
+    return <SuccessMessage header="Cleaning..." lucide="analyzing"/>
   }
 
   
   if (isCleaning === "no") {
-    return (
-      <div className="flex justify-center flex-col items-center h-full">
-        <CheckCircle size={59} className="text-green-600 text-bold" />
-
-        <p className="text-lg text-green-600 mt-2 font-bold"> Dataset Cleaned Successfully!</p>
-        <p className="text-sm text-gray-500">Your data is now ready for use.</p>
-      </div>
-    );
+    return <SuccessMessage header="Dataset Cleaned Successfully!" description="Your data is now ready for use, head to Dashboards tab and select cleaned Datasets." lucide="completed"/>
   }
 
   if (cleaningError) {
@@ -275,7 +263,7 @@ const UploadDatasetContent = ({
               </div>
             </div>
             <button className="text-gray-500" onClick={handleRemoveFile}>
-              <XCircle size={20} />
+           <img src={CloseIcon} alt="close-icon" className="w-[25px]" />
             </button>
           </div>
           <div className="h-2 bg-gray-200 rounded-full">
@@ -308,7 +296,7 @@ const UploadDatasetContent = ({
               onNext();
             }
           }}
-          className={`${!uploadComplete ? "bg-purple-400 cursor-not-allowed" : "bg-purple/500 hover:bg-purple-700"
+          className={`${!uploadComplete ? "bg-purple/500 opacity-50 cursor-not-allowed" : "bg-purple/500 hover:bg-purple-700"
             } text-white px-6 py-2 rounded-md`}
           disabled={!uploadComplete}
         >

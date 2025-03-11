@@ -20,7 +20,7 @@ export default function Home() {
               Empowering companies with instant data analytics.
             </h2>
             <p className="mt-4 text-purple-900 text-lg">
-              Advanced analytics made simple for everyone—from data analysts to non-technical users.
+              Advanced analytics made simple for everyone from data analysts to non-technical users.
             </p>
             <div className="mt-6 flex justify-center md:justify-start">
               <DatasetsButton
@@ -37,7 +37,7 @@ export default function Home() {
                 setShowUploadingDashboard={setShowUploadingDashboard}
                 setShowCleaningDashboard={setShowCleaningDashboard}
                 actionType="clean"
-                className="bg-white ml-2 border border-purple-800 text-purple-800 px-6 py-3 rounded hover:bg-purple-600 hover:text-white"
+                className="bg-transparent ml-2 border border-purple-800 text-purple-800 px-6 py-3 rounded hover:bg-purple-600 hover:text-white"
               >
                 Clean Dataset
               </DatasetsButton>

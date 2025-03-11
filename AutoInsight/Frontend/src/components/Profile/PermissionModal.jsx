@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { ChevronDown, Trash2, Loader } from "lucide-react";
 import SearchIcon from "../../assets/SearchIcon.svg";
+import CloseIcon from "../../assets/Close.svg"
 import { searchUsers } from "../../services/Api_Services";
 import axios from "axios";
 
@@ -253,7 +254,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
         >
-          X
+        <img src={CloseIcon} alt="close-icon" className="w-[25px]" />
         </button>
         <h2 className="text-2xl font-bold text-purple/500 mb-2">
           Permissions
@@ -276,7 +277,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
               />
               <input
                 type="text"
-                placeholder="Enter user name"
+                placeholder="Enter username"
                 value={searchQuery}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"

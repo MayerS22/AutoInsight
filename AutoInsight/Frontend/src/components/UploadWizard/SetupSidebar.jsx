@@ -1,10 +1,35 @@
 /* eslint-disable react/prop-types */
 import { Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // eslint-disable-next-line no-unused-vars
 const SetupSidebar = ({ steps, currentStep, processingOption = 'clean_and_generate' }) => {
+  const [isVisible, setIsVisible] = useState(true);
+  
+  useEffect(() => {
+    // Function to check window width and update visibility
+    const checkWidth = () => {
+      setIsVisible(window.innerWidth >= 768); // 768px is the md breakpoint in Tailwind
+    };
+    
+    // Set initial visibility
+    checkWidth();
+    
+    // Listen for resize events
+    window.addEventListener('resize', checkWidth);
+    
+    // Clean up event listener
+    return () => window.removeEventListener('resize', checkWidth);
+  }, []);
+  
+  // Return null (render nothing) if not visible
+  if (!isVisible) {
+    return null;
+  }
+  
+  // Otherwise render the sidebar normally
   return (
-    <div className="flex md:flex-col md:space-y-4 space-x-4 md:space-x-0 w-full md:w-64 mb-6 md:mb-0 md:mr-8 overflow-x-auto md:overflow-visible border-r">
+    <div className="flex flex-col space-y-4 w-64 mb-0 mr-8 overflow-visible border-r">
       {steps.map((step) => {
         // Check if this step is the "Grant Access to Users" step
         const isGrantAccessStep = step.title === 'Grant Access to Users';

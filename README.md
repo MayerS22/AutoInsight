@@ -18,7 +18,7 @@ Follow these steps to set up the project locally:
 
 ### 1️⃣ Clone the Repository  
 ```bash
-git clone https://github.com/yourusername/AutoInsight-GP.git
+git clone https://github.com/MayerS22/AutoInsight.git
 cd AutoInsight
 cd frontend
 npm install

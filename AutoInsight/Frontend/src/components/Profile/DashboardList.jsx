@@ -441,6 +441,8 @@ const DashboardListComponent = ({
             clickedDashboardId={clickedDashboardId}
             popupRef={popupRef}
             token={token}
+            userId={userId}
+
           />
         </div>
       )}

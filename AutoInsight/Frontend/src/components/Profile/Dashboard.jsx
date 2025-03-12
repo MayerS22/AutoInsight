@@ -27,7 +27,6 @@ const Dashboard = () => {
   const [availableForecastMonths, setAvailableForecastMonths] = useState([]);
   const [ownerId, setOwnerId] = useState(null);
   const [sharedUsernames, setSharedUsernames] = useState([]);
-  
 
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
@@ -122,11 +121,6 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDatasetDetails();
-    fetchUserProfile(token, authActions, dispatch);
-  }, [loggedInUserId, id]);
-
   const fetchPermissionForUser = async () => {
     if (!token) return;
 
@@ -139,10 +133,12 @@ const Dashboard = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/v1/datasets/shared/`,
+        `http://localhost:3000/api/v1/datasets/${id}/share`, // Use datasetId in the endpoint
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log(response.data.body);
+
+      // Check if the user has permissions for this dataset
       const permissions = response.data.body;
       const currentUserPermission = permissions.find(
         (p) => p.user_id === loggedInUserId
@@ -156,6 +152,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    fetchDatasetDetails();
+    fetchUserProfile(token, authActions, dispatch);
+  }, [loggedInUserId, id]);
+
+  useEffect(() => {
     if (!ownerId) return;
 
     // If the user is the owner, set permission to "owner"
@@ -163,7 +164,7 @@ const Dashboard = () => {
       console.log("User is owner; skipping share permissions fetch.");
       setUserPermission("owner");
     } else {
-      // Otherwise, fetch permissions
+      // Otherwise, fetch permissions for the specific dataset
       fetchPermissionForUser();
     }
   }, [loggedInUserId, id, ownerId, sharedUsernames]);

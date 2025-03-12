@@ -20,16 +20,18 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
     const query = e.target.value;
     setSearchQuery(query);
     setSelectedUser(null);
-
+  
     if (!query.trim()) {
       setSuggestions([]);
       return;
     }
-
+  
     try {
       const response = await searchUsers(query);
-      // Filter out the current user
-      const filteredUsers = response.data.data.filter(u => u._id !== userId);
+      // Filter out the current user and users who already have access
+      const filteredUsers = response.data.data.filter(
+        (u) => u._id !== userId && !users.some((user) => user._id === u._id)
+      );
       setSuggestions(filteredUsers || []);
     } catch (error) {
       setSuggestions([]);
@@ -202,7 +204,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
               </button>
 
               {openDropdown === user._id && (
-                <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10">
+                <div className="absolute right-0 mt-1 w-32 bg-purple-100 font-bold text-purple-900 border border-gray-200 rounded-md shadow-lg z-10">
                   {["view", "edit", "admin"].map((access) => (
                     <button
                       key={access}

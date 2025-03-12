@@ -8,6 +8,7 @@ import EditIcon from "../../assets/EditLogo.svg";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
 const RenderDashboardList = ({
   isDashboardLoading,
   setHoveredDashboardId,
@@ -23,7 +24,10 @@ const RenderDashboardList = ({
   clickedDashboardId,
   popupRef,
   token,
-}) => (
+}) => {
+
+  
+  return(
   <>
     {isDashboardLoading ? (
       <div className="flex justify-center items-center h-40">
@@ -108,7 +112,7 @@ const RenderDashboardList = ({
                         <ul>
                           {dataset.shared_usernames.map((user, index) => (
                             <li key={index} className="text-sm text-gray-700 py-1">
-                              {user}
+                              {user===username?"you":user}
                             </li>
                           ))}
                         </ul>
@@ -194,7 +198,7 @@ const RenderDashboardList = ({
                           Swal.fire({
                             icon: "error",
                             title: "Deletion failed",
-                            text: "Unable failed to delete the dataset.",
+                            text: "Unable to delete the dataset.",
                             confirmButtonColor: "#E53E3E",
                           });
                         }
@@ -212,6 +216,6 @@ const RenderDashboardList = ({
       </ul>
     )}
   </>
-);
-
+)
+  }
 export default RenderDashboardList;

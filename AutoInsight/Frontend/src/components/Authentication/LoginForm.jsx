@@ -78,7 +78,7 @@ const Login = ({ toggleForm,setUserName}) => {
       const redirectUrl = localStorage.getItem("redirectUrl") || "/";
       localStorage.removeItem("redirectUrl");
   
-      navigate(redirectUrl);
+      navigate(redirectUrl||"/home");
       dispatch(authActions.login({email,token}));
       console.log("Login Form token"+token);
     } catch (error) {

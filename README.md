@@ -11,8 +11,6 @@ AutoInsight is a platform designed to help businesses navigate challenges during
 
 ## 🛠️ Tech Stack  
 - **Frontend**: React, Vite, Tailwind CSS  
-- **Backend**: Node.js, Express.js  
-- **Database**: MongoDB  
 - **State Management**: Redux  
 
 ## 🔧 Installation & Setup  

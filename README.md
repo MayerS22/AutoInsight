@@ -21,17 +21,10 @@ Follow these steps to set up the project locally:
 ### 1️⃣ Clone the Repository  
 ```bash
 git clone https://github.com/yourusername/AutoInsight-GP.git
-cd AutoInsight-GP
+cd AutoInsight
 cd frontend
+npm install
 npm run dev
 
 
 
-
-📄 License
-This project is licensed under the MIT License.
-
-🤝 Contributors
-Mazen568
-MayerFrieg
-For any inquiries, feel free to open an issue or contribute to the project! 🚀

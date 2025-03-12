@@ -13,14 +13,6 @@ AutoInsight is a platform designed to help businesses navigate challenges during
 - **Frontend**: React, Vite, Tailwind CSS  
 - **State Management**: Redux
 
-##📄 License
-- **This project is licensed under the MIT License.
-
-##🤝 Contributors
-- **Mazen568
-- **MayerFrieg
-For any inquiries, feel free to open an issue or contribute to the project! 🚀
-
 ## 🔧 Installation & Setup  
 Follow these steps to set up the project locally:  
 

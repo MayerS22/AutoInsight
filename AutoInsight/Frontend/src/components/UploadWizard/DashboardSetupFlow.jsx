@@ -198,6 +198,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
         "Request failed:",
         error.response?.data?.message || error.response?.data || error.message
       );
+      setShowError(true)
       setIsProcessing(false);
     }
   };
@@ -253,13 +254,14 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           </button>
 
           <div className="flex flex-col md:flex-row">
-            {!isProcessing && !success && (
+            {!isProcessing && !success && !showError && (
               <SetupSidebar
                 processingOption={processingOption}
                 steps={steps}
                 currentStep={currentStep}
               />
             )}
+
             <div className="flex-1">
               {currentStep === 1 && (
                 <BusinessDomainContent
@@ -316,6 +318,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
                   onFinish={handleFinish}
                   isProcessing={isProcessing}
                   success={success}
+                  showError={showError}
                 />
               )}
             </div>

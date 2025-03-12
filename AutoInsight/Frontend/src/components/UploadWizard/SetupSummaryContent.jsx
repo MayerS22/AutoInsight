@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { Loader, Users,CheckCircle } from "lucide-react";
+import { XCircle, AlertCircle} from "lucide-react";
 import UsersIcon from "../../assets/Users.svg";
 import OptionIcon from "../../assets/Option.svg";
 import DatasetIcon from "../../assets/DatasetName.svg";
@@ -15,7 +16,8 @@ const SetupSummaryContent = ({
   onFinish,
   isProcessing,
   users,
-  success
+  success,
+  showError
 }) => {
 
   if (isProcessing) {
@@ -30,6 +32,20 @@ const SetupSummaryContent = ({
       :"Your data is now ready for use, head to Dashboards tab."} 
     lucide="completed"/>
 
+  }
+  if(showError)
+  {
+    return (
+      <div className="flex justify-center flex-col items-center h-full">
+        <XCircle size={59} className="text-red-600" />
+        <p className="text-lg text-red-600 mt-2 font-bold">
+          Dashboard generation Failed!
+        </p>
+        <p className="text-sm text-gray-500">
+          Please try again or check your file.
+        </p>
+      </div>
+    );
   }
 
   // Helper function to get user initials

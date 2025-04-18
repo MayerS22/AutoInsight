@@ -78,7 +78,7 @@ const Login = ({ toggleForm,setUserName}) => {
       const redirectUrl = localStorage.getItem("redirectUrl") || "/";
       localStorage.removeItem("redirectUrl");
   
-      navigate(redirectUrl||"/home");
+      navigate("/home");
       dispatch(authActions.login({email,token}));
       console.log("Login Form token"+token);
     } catch (error) {
@@ -134,7 +134,7 @@ const Login = ({ toggleForm,setUserName}) => {
             </p>
           </div>
         )}
-        <p onClick={()=>{navigate("/forgot-password")}} className='text-purple-950 underline'>Forgot password?</p>
+        <button onClick={()=>{navigate("/forgot-password")}} className='text-purple-950 underline'>Forgot password?</button>
         <div className="flex justify-center">
           <button className="w-2/3 bg-purple-900 text-white p-2 rounded-lg hover:bg-purple-800 mt-6 font-bold">
             Login

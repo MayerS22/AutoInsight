@@ -151,9 +151,13 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
       "http://localhost:3000/api/v1/users/user-data",
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    
     dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
     dispatch(authActions.addUsername(response.data.body.username));
+    dispatch(authActions.addEmail(response.data.body.email));
     dispatch(authActions.addID(response.data.body._id));
+    console.log(response.data.body);
+    
     localStorage.setItem("userId", response.data.body._id);    
   } catch (error) {
     console.error("Error fetching user profile:", error);

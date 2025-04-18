@@ -5,6 +5,7 @@ const initialAuthState = {
     isLoggedIn: false,
     profilePicture: null,
     username: "",
+    email:"",
     id:"",
     datasetOwnerId:""
 }
@@ -46,6 +47,9 @@ const authSlice = createSlice({
         },
         addID(state,action){
             state.id = action.payload;
+        },
+        addEmail(state,action){
+            state.email = action.payload;
         },
         addDatasetOwnerId(state,action){
             state.id=action.payload;

@@ -29,7 +29,7 @@ const UploadDatasetComponent = ({onUploadSuccess}) => {
     <div className="mt-3 w-full flex justify-center">
       <button
         onClick={handleLoadDataset}
-        className="bg-purple-900 h-[50px] text-white px-5 font-bold py-2 rounded-md hover:bg-purple-700 w-full md:w-auto flex items-center justify-center"
+        className="bg-purple-950 h-[50px] text-white px-5 font-bold py-2 rounded-md hover:bg-purple-700 w-full md:w-auto flex items-center justify-center"
       >
         Upload Dataset
       </button>

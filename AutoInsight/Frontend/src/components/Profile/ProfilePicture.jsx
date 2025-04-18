@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { authActions } from "../../store/index";
+
 
 const ProfilePictureComponent = ({ 
   profilePicture, 
@@ -11,6 +13,7 @@ const ProfilePictureComponent = ({
 }) => {
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+  const dispatch = useDispatch();
   const profileInputRef = useRef(null);
   const username = useSelector((state) => state.auth.username);
   // Helper function to get initials from name
@@ -60,7 +63,7 @@ const ProfilePictureComponent = ({
 
     try {
       setIsUploadingProfile(true);
-      await axios.put(
+      const response = await axios.put(
         "http://localhost:3000/api/v1/users/profile-picture",
         formData,
         {
@@ -71,9 +74,11 @@ const ProfilePictureComponent = ({
         }
       );
       
-      if (typeof onProfileUpdate === 'function') {
-        onProfileUpdate();
-      }
+      const newImageUrl = response.data.profilePicture;
+      console.log("New Image URL:", newImageUrl);
+      
+      dispatch(authActions.addProfilePicture(newImageUrl));      
+      
       
       Swal.fire({
         icon: "success",

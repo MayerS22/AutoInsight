@@ -13,6 +13,7 @@ import DashboardListComponent from "./components/Profile/DashboardList.jsx";
 import DashboardSetupFlow from "./components/Profile/UploadDatasetWizard.jsx";
 import ForgotPassword from "./components/Authentication/ForgotPassword.jsx";
 import ResetPassword from "./components/Authentication/ResetPassword.jsx";
+import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 
 
 function App() {
@@ -47,7 +48,9 @@ function App() {
         { path: "profile", element: <Profile /> },
         { path: "dashboards", element: <DashboardListComponent isStandAlone={true}/> },
         { path: "dashboard/:id", element: <Dashboard /> },
-        { path: "wizard", element: <DashboardSetupFlow /> }
+        { path: "wizard", element: <DashboardSetupFlow /> },
+        { path: "adminDashboard", element: <AdminDashboard /> }
+
         
        
       ],

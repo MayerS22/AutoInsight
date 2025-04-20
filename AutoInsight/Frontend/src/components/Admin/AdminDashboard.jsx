@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
 import RecentAccounts from "./DashBoardComponents/RecentAccounts.jsx";
 import BusinessDomainChart from "./DashBoardComponents/BusinessDomainChart.jsx";
@@ -9,6 +9,8 @@ import TopJobTitles from "./DashBoardComponents/TopJobTitles.jsx";
 import totalDatasets from "../../assets/totalDatasets.svg";
 import totalUsers from "../../assets/totalUsers.svg";
 import totalDashboard from "../../assets/totalDashboard.svg";
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 const AdminDashboard = () => {
   const userGrowthData = [
@@ -93,6 +95,7 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
           <div className="md:col-span-7 bg-white p-4 rounded-lg shadow-md">
             <AudienceLocation setTooltipContent={setContent} content={content} />
+            <Tooltip id="map-tooltip">{content}</Tooltip>
           </div>
           <div className="md:col-span-5 space-y-6">
             <TopJobTitles />

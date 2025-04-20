@@ -33,9 +33,6 @@ const AudienceLocation = ({ setTooltipContent }) => {
                                 geographies.map((geo) => {
                                     const countryCode = countryNameToCode[geo.properties.name]; // ex: "USA"
                                     const isHighlighted = topCountries.some(c => c.id === countryCode); // is it one of our top?
-
-
-
                                     return (
                                         <Geography
                                             key={geo.rsmKey}

@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 
 const UserGrowthChart = ({ data }) => {

@@ -1,10 +1,12 @@
-import React from "react";
 import Card from "./DashBoardComponents/Card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import Header from "../HomePage/HomePageComponents/Header";
 import totalDatasets from "../../assets/totalDatasets.svg";
 import totalUsers from "../../assets/totalUsers.svg";
 import totalDashboard from "../../assets/totalDashboard.svg";
+import AudienceLocation from "./AudienceLocation";
+import { Tooltip } from 'react-tooltip';
+import { useState } from "react";
+
 
 const AdminDashboard = () => {
   const userGrowthData = [
@@ -17,9 +19,11 @@ const AdminDashboard = () => {
     { name: "Jul", value: 42 },
   ];
 
+  const [content, setContent] = useState("");
+
+
   return (
     <div className="min-h-screen bg-purple-50">
-      <Header />
 
       <div className="pt-28 container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -159,89 +163,12 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
           {/* Audience Location */}
           <div className="md:col-span-7 bg-white p-4 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Audience Location</h2>
-            <div className="h-64 bg-gray-100 rounded-lg relative overflow-hidden">
-              {/* World Map SVG */}
-              <svg className="w-full h-full" viewBox="0 0 1000 500">
-                <g>
-                  <path
-                    d="M150,120 L350,120 L350,220 L150,220 Z"
-                    fill="#4C1D95"
-                  />
-                  <path
-                    d="M380,150 L450,150 L450,200 L380,200 Z"
-                    fill="#4C1D95"
-                  />
-                  <path
-                    d="M500,100 L550,100 L550,150 L500,150 Z"
-                    fill="#4C1D95"
-                  />
-                  <path
-                    d="M600,150 L650,150 L650,180 L600,180 Z"
-                    fill="#4C1D95"
-                  />
-                  <path
-                    d="M200,250 L300,250 L300,300 L200,300 Z"
-                    fill="#6D28D9"
-                    opacity="0.5"
-                  />
-                  <path
-                    d="M450,220 L500,220 L500,250 L450,250 Z"
-                    fill="#6D28D9"
-                    opacity="0.5"
-                  />
-                  <path
-                    d="M320,170 L350,170 L350,200 L320,200 Z"
-                    fill="#6D28D9"
-                    opacity="0.3"
-                  />
-                </g>
-              </svg>
-            </div>
-
-            <div className="mt-4">
-              <h3 className="text-md font-semibold mb-2">Top Countries</h3>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <div
-                    className="w-6 h-4"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, red 33%, white 33%, white 66%, black 66%)",
-                    }}
-                  ></div>
-                  <span className="ml-2">Egypt</span>
-                </div>
-                <div className="flex items-center">
-                  <div
-                    className="w-6 h-4"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, red 33%, white 33%, white 66%, black 66%)",
-                    }}
-                  ></div>
-                  <span className="ml-2">UAE</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-6 h-4 bg-blue-500 relative">
-                    <div className="absolute w-full h-1 bg-white top-2"></div>
-                    <div className="absolute w-full h-1 bg-white top-4"></div>
-                  </div>
-                  <span className="ml-2">USA</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-6 h-4 bg-white relative">
-                    <div
-                      className="absolute inset-0 bg-red-500"
-                      style={{
-                        clipPath:
-                          "polygon(0 0, 25% 0, 25% 100%, 0 100%, 75% 0, 100% 0, 100% 100%, 75% 100%)",
-                      }}
-                    ></div>
-                  </div>
-                  <span className="ml-2">Canada</span>
-                </div>
-              </div>
+            <h2 className="text-lg font-semibold">Audience Location</h2>
+            <div>
+              <AudienceLocation setTooltipContent={setContent} />
+              <Tooltip id="map-tooltip">
+                {content}
+              </Tooltip>
             </div>
           </div>
 

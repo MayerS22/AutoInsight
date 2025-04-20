@@ -49,9 +49,7 @@ function App() {
         { path: "dashboards", element: <DashboardListComponent isStandAlone={true}/> },
         { path: "dashboard/:id", element: <Dashboard /> },
         { path: "wizard", element: <DashboardSetupFlow /> },
-        { path: "adminDashboard", element: <AdminDashboard /> }
-
-        
+        { path: "admin", element: <AdminDashboard /> }
        
       ],
     },

@@ -2,7 +2,7 @@
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { memo } from "react";
 import CountryFlag from "./CountryFlag";
-import countryNameToCode from "../../services/countryCode"
+import countryNameToCode from "../../../services/countryCode"
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 // DUMMY ARRAY OF TOP COUNTRIES

@@ -1,106 +1,79 @@
+"use client";
+
+import { TrendingUp } from "lucide-react";
+import { Pie, PieChart, Tooltip, Cell } from "recharts";
+import { useState } from "react";
+
+const chartData = [
+  { jobTitle: "Data Analyst", users: 100, fill: "#7C3AED" },
+  { jobTitle: "Data Engineer", users: 73, fill: "#8B5CF6" },
+  { jobTitle: "Data Scientist", users: 48, fill: "#A78BFA" },
+  { jobTitle: "Manager", users: 29, fill: "#C4B5FD" },
+  { jobTitle: "Others", users: 10, fill: "#DDD6FE" },
+];
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-2 rounded shadow-sm border text-sm">
+        <p className="font-medium">{payload[0].name}</p>
+        <p>{payload[0].value} Users</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const TopJobTitles = () => {
+  const [activeIndex, setActiveIndex] = useState(null);
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Top Job Titles of Our Users</h2>
-      <div className="flex">
-        <div className="w-1/2">
-          <div className="w-28 h-28 mx-auto">
-            {/* Donut chart */}
-            <svg className="w-full h-full" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="#7C3AED"
-                strokeWidth="15"
-                strokeDasharray="75 180"
-                strokeDashoffset="0"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="#8B5CF6"
-                strokeWidth="15"
-                strokeDasharray="60 180"
-                strokeDashoffset="-75"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="#A78BFA"
-                strokeWidth="15"
-                strokeDasharray="45 180"
-                strokeDashoffset="-135"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="#C4B5FD"
-                strokeWidth="15"
-                strokeDasharray="25 180"
-                strokeDashoffset="-180"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="#DDD6FE"
-                strokeWidth="15"
-                strokeDasharray="15 180"
-                strokeDashoffset="-205"
-              />
-            </svg>
-          </div>
+    <div className="bg-white rounded-lg">
+      <div>
+        <h2 className="text-lg font-bold">Top Job Titles of Our Users</h2>
+        <p className="text-sm text-gray-500">January - June 2024</p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        {/* Chart Section - Left aligned */}
+        <div className="flex-shrink-0">
+          <PieChart  width={300} height={300}>
+            <Tooltip content={<CustomTooltip />} />
+            <Pie
+              data={chartData}
+              dataKey="users"
+              nameKey="jobTitle"
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={80}
+              strokeWidth={0}
+              activeIndex={activeIndex}
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
+            >
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.fill}
+                  className="transition-all duration-200"
+                />
+              ))}
+            </Pie>
+          </PieChart>
         </div>
-        <div className="w-1/2 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-purple-600"></div>
-              <span className="ml-2 text-sm">Data Analyst</span>
-            </div>
-            <span className="text-xs text-gray-500">100 Users</span>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <span className="ml-2 text-sm">Data Engineer</span>
+        {/* Legend Section - Right aligned */}
+        <div className="space-y-2 pr-8">
+          {chartData.map((item) => (
+            <div key={item.jobTitle} className="flex items-center">
+              <div
+                className="w-3 h-3 rounded-full mr-3"
+                style={{ backgroundColor: item.fill }}
+              />
+              <span className="text-lg font-bold">{item.jobTitle}</span>
             </div>
-            <span className="text-xs text-gray-500">73 Users</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-purple-600"></div>
-              <span className="ml-2 text-sm">Data Scientist</span>
-            </div>
-            <span className="text-xs text-gray-500">48 Users</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-              <span className="ml-2 text-sm">Manager</span>
-            </div>
-            <span className="text-xs text-gray-500">29 Users</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-purple-300"></div>
-              <span className="ml-2 text-sm">Others</span>
-            </div>
-            <span className="text-xs text-gray-500">10 Users</span>
-          </div>
+          ))}
         </div>
       </div>
     </div>

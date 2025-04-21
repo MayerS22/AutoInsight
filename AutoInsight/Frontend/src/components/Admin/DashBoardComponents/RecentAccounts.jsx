@@ -2,8 +2,8 @@ import React from "react";
 
 const RecentAccounts = ({ accounts }) => {
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-semibold mb-4">Recent Created Accounts</h2>
+    <div>
+      <h2 className="text-lg font-bold mb-4">Recent Created Accounts</h2>
       <div className="space-y-4">
         {accounts.map((user, idx) => (
           <div key={idx} className="flex items-center justify-between">

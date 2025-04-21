@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
 import RecentAccounts from "./DashBoardComponents/RecentAccounts.jsx";
 import BusinessDomainChart from "./DashBoardComponents/BusinessDomainChart.jsx";
@@ -9,8 +9,8 @@ import TopJobTitles from "./DashBoardComponents/TopJobTitles.jsx";
 import totalDatasets from "../../assets/totalDatasets.svg";
 import totalUsers from "../../assets/totalUsers.svg";
 import totalDashboard from "../../assets/totalDashboard.svg";
-import { Tooltip } from 'react-tooltip';
-import 'react-tooltip/dist/react-tooltip.css';
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
 const AdminDashboard = () => {
   const userGrowthData = [
@@ -53,54 +53,76 @@ const AdminDashboard = () => {
   const [content, setContent] = useState("");
 
   return (
-    <div className="bg-purple-50 min-h-screen">
-      <div className="pt-32 container mx-auto px-4 py-6">
-        {/* Cards Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* First Row: Two Cards */}
-            <Card
-              icon={totalUsers}
-              label="Total Users"
-              value="25"
-              badge="↑ 25%"
-            />
-            <Card
-              icon={totalDatasets}
-              label="Total Datasets Uploaded"
-              value="9,933"
-            />
-            {/* Second Row: One Card */}
-            <div className="md:col-span-2">
-              <Card
-                icon={totalDashboard}
-                label="Total Dashboards Generated"
-                value="9,933"
+    <div className="bg-purple-50 min-h-screen pt-20">
+      <div className="max-w-8xl mx-auto p-8">
+        {/* Parent Container with Flexbox */}
+        <div className="flex gap-8 items-stretch">
+          {/* Left Column */}
+          <div className="flex-1 flex flex-col gap-6">
+            {/* Top Section: Cards & Recent Accounts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Cards Section */}
+              <div className="flex flex-col gap-4">
+                {/* Top Row: Two Cards side-by-side */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Card
+                    icon={totalUsers}
+                    label="Total Users"
+                    value="25"
+                    badge="↑ 25%"
+                  />
+                  <Card
+                    icon={totalDatasets}
+                    label="Total Datasets Uploaded"
+                    value="9,933"
+                  />
+                </div>
+                {/* Second Row: Third Card spanning full width */}
+                <div>
+                  <Card
+                    icon={totalDashboard}
+                    label="Total Dashboards Generated"
+                    value="9,933"
+                  />
+                </div>
+              </div>
+              {/* Recent Accounts Section */}
+              <div className="bg-white p-4 rounded-lg shadow-md h-full">
+                <RecentAccounts accounts={accounts} />
+              </div>
+            </div>
+            {/* Bottom Section: Audience Location */}
+            <div className="bg-white p-4 rounded-lg shadow-md">
+              <AudienceLocation
+                setTooltipContent={setContent}
+                content={content}
               />
+              <Tooltip id="map-tooltip">{content}</Tooltip>
             </div>
           </div>
 
-          {/* Recent Accounts */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <RecentAccounts accounts={accounts} />
-          </div>
-
-          {/* Business Domain Chart */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <BusinessDomainChart />
-          </div>
-        </div>
-
-        {/* Other Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
-          <div className="md:col-span-7 bg-white p-4 rounded-lg shadow-md">
-            <AudienceLocation setTooltipContent={setContent} content={content} />
-            <Tooltip id="map-tooltip">{content}</Tooltip>
-          </div>
-          <div className="md:col-span-5 space-y-6">
-            <TopJobTitles />
-            <ReviewsAnalysis />
-            <UserGrowthChart data={userGrowthData} />
+          {/* Right Column */}
+          <div className="flex-1 flex flex-col gap-6">
+            {/* Top Section: Business Domain, Reviews Analysis, User Growth */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Business Domain Chart */}
+              <div className="bg-white p-4 rounded-lg shadow-md">
+                <BusinessDomainChart />
+              </div>
+              {/* Right Side: Reviews Analysis & User Growth in a vertical stack */}
+              <div className="flex flex-col gap-2">
+                <div className="bg-white p-2 rounded-lg shadow-md">
+                  <ReviewsAnalysis />
+                </div>
+                <div className="bg-white p-2 rounded-lg shadow-md">
+                  <UserGrowthChart data={userGrowthData} />
+                </div>
+              </div>
+            </div>
+            {/* Bottom Section: Top Job Titles */}
+            <div className="bg-white p-4 rounded-lg shadow-md">
+              <TopJobTitles />
+            </div>
           </div>
         </div>
       </div>

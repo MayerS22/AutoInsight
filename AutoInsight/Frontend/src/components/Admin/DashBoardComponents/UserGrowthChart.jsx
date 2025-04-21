@@ -3,12 +3,20 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 
 const UserGrowthChart = ({ data }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-2">User Growth Over Time</h2>
-      <div className="h-40">
+    <div className="bg-white rounded-lg">
+      <h2 className="text-lg font-bold mb-2">User Growth Over Time</h2>
+      <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+          <LineChart
+            data={data}
+            // Use a negative left margin to shift the chart further left
+            margin={{ top: 10, right: 10, left: -40, bottom: 10 }}
+          >
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 10 }}
+              padding={{ left: 0, right: 0 }}
+            />
             <YAxis tick={{ fontSize: 10 }} domain={[0, 60]} />
             <Line
               type="monotone"

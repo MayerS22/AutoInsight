@@ -1,4 +1,6 @@
+/* eslint-disable react/prop-types */
 "use client";
+import { useNavigate } from "react-router-dom";
 
 import {
   RadialBar,
@@ -13,6 +15,8 @@ const ReviewsAnalysis = () => {
   const reviewData = [
     { name: "current", positive: 60, neutral: 20, negative: 20 },
   ];
+
+  const navigate=useNavigate();
 
   const sentiments = {
     positive: {
@@ -79,7 +83,7 @@ const ReviewsAnalysis = () => {
     <div className="bg-white rounded-lg p-2">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-bold">Reviews Analysis</h2>
-        <button className="mt-2 sm:mt-0 bg-purple-950 hover:bg-purple-700 text-white text-xs px-6 py-2 rounded-lg flex items-center self-start sm:self-auto">
+        <button onClick={()=>{navigate("/admin/reviews-analysis")}} className="mt-2 sm:mt-0 bg-purple-950 hover:bg-purple-700 text-white text-xs px-6 py-2 rounded-lg flex items-center self-start sm:self-auto">
           View
         </button>
       </div>

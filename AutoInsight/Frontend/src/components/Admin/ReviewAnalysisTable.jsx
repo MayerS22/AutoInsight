@@ -29,8 +29,8 @@ export default function ReviewsAnalysis() {
     <div className="bg-white min-h-screen mt-32">
       <div className="max-w-[1200px] mx-auto">
         <div className="p-4">
-          <div className="flex items-center cursor-pointer text-purple-950 font-bold text-3xl mb-12 w-[270px]">
-            <img src={BackIcon} alt="back-button" className="w-5 h-5 mt-1 mr-3" />
+          <div onClick={()=>{navigate("/admin")}} className="flex items-center cursor-pointer text-purple-950 font-bold text-3xl mb-12 w-[270px]">
+            <img src={BackIcon}  alt="back-button" className="w-5 h-5 mt-1 mr-3" />
             <h1>Reviews Analysis</h1>
           </div>
 

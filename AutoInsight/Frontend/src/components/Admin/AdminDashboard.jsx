@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
 import RecentAccounts from "./DashBoardComponents/RecentAccounts.jsx";
 import BusinessDomainChart from "./DashBoardComponents/BusinessDomainChart.jsx";
@@ -11,6 +11,11 @@ import totalUsers from "../../assets/totalUsers.svg";
 import totalDashboard from "../../assets/totalDashboard.svg";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
+import {
+  fetchTotalCleanedDatasets,
+  fetchTotalGeneratedDashboards,
+  fetchNumberOfUsers,
+} from "./Services/Admin_API.js";
 
 const AdminDashboard = () => {
   const userGrowthData = [
@@ -51,11 +56,56 @@ const AdminDashboard = () => {
   ];
 
   const [content, setContent] = useState("");
+  const [totalCleanedDatasets, setTotalCleanedDatasets] = useState("0");
+  const [totalGeneratedDashboards, setTotalGeneratedDashboards] = useState("0");
+  const [totalUsersCount, setTotalUsersCount] = useState("0");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fallback static data in case API fetch fails
+  const useStaticData = () => {
+    setTotalCleanedDatasets("9,933");
+    setTotalGeneratedDashboards("852");
+    setTotalUsersCount("25");
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch the data from the API
+        const cleanedDatasetsCount = await fetchTotalCleanedDatasets();
+        const dashboardsCount = await fetchTotalGeneratedDashboards();
+        const usersCount = await fetchNumberOfUsers();
+
+        setTotalCleanedDatasets(String(cleanedDatasetsCount));
+        setTotalGeneratedDashboards(String(dashboardsCount));
+        setTotalUsersCount(String(usersCount));
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        if (err.message.includes("No authentication token")) {
+          console.warn(
+            "No authentication token found. Using static data instead."
+          );
+          useStaticData();
+        } else if (err.response && err.response.status === 401) {
+          setError("Authentication failed. Please login again.");
+          useStaticData();
+        } else {
+          setError("Failed to load dashboard data");
+          useStaticData();
+        }
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="bg-purple-50 min-h-screen pt-20">
       <div className="max-w-8xl mx-auto p-8">
-        {/* Parent Container with Flexbox */}
         <div className="flex gap-8 items-stretch">
           {/* Left Column */}
           <div className="flex-1 flex flex-col gap-6">
@@ -68,13 +118,16 @@ const AdminDashboard = () => {
                   <Card
                     icon={totalUsers}
                     label="Total Users"
-                    value="25"
-                    badge="↑ 25%"
+                    value={isLoading ? "Loading..." : totalUsersCount}
+                    error={error ? "Failed to load" : null}
+                    badge={<span className="text-green-500">+25%</span>}
                   />
+
                   <Card
                     icon={totalDatasets}
                     label="Total Datasets Uploaded"
-                    value="9,933"
+                    value={isLoading ? "Loading..." : totalCleanedDatasets}
+                    error={error ? "Failed to load" : null}
                   />
                 </div>
                 {/* Second Row: Third Card spanning full width */}
@@ -82,7 +135,8 @@ const AdminDashboard = () => {
                   <Card
                     icon={totalDashboard}
                     label="Total Dashboards Generated"
-                    value="9,933"
+                    value={isLoading ? "Loading..." : totalGeneratedDashboards}
+                    error={error ? "Failed to load" : null}
                   />
                 </div>
               </div>
@@ -109,7 +163,7 @@ const AdminDashboard = () => {
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <BusinessDomainChart />
               </div>
-              {/* Right Side: Reviews Analysis & User Growth in a vertical stack */}
+              {/* Reviews Analysis & User Growth */}
               <div className="flex flex-col gap-2">
                 <div className="bg-white p-2 rounded-lg shadow-md">
                   <ReviewsAnalysis />

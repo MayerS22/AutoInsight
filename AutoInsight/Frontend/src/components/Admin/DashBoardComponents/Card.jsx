@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-
 const Card = ({ icon, label, value, badge }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-start">

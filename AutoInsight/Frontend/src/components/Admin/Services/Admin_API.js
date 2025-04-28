@@ -66,20 +66,58 @@ export const fetchNumberOfUsers = async () => {
   }
 };
 
+
+// Updated fetchRecentUsers function - replace your current implementation with this
+
+export const fetchRecentUsers = async () => {
+  try {
+    const config = createAuthConfig();
+    const response = await axios.get(
+      `${API_URL}/api/v1/users/recent-4-users`,
+      config
+    );
+    
+    console.log("Full API response:", response);
+    
+    // Handle different API response structures
+    let userData;
+    
+    if (response.data && response.data.body) {
+      // If response has a body property (common pattern in Express APIs)
+      userData = response.data.body;
+    } else if (response.data && Array.isArray(response.data)) {
+      // If response data is directly an array
+      userData = response.data;
+    } else if (response.data) {
+      // If response data is something else
+      userData = response.data;
+    } else {
+      console.error("Unexpected API response structure:", response);
+      return [];
+    }
+    
+    console.log("Extracted user data:", userData);
+    return userData;
+  } catch (error) {
+    console.error("Error fetching recent users:", error);
+    throw error;
+  }
+};
+
 // Fetch domain counts for business domains from API
 export const fetchDomainCount = async () => {
   try {
     const config = createAuthConfig();
-    //console.log("Fetching domain counts...");
     const response = await axios.get(
       `${API_URL}/api/v1/datasets/domains-count`,
       config
     );
-    //console.log("Domain count response:", response.data);
     return response.data?.body ?? { ecommerce: 0, education: 0 };
   } catch (error) {
-    console.error("Error fetching domain counts:", error.response?.data || error.message);
-    // Still throw to be handled by the component
+    console.error(
+      "Error fetching domain counts:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

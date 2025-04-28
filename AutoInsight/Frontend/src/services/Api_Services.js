@@ -175,8 +175,7 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
     );
 
     console.log(response.data.body);
-    
-    
+    console.log(token);
     dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
     dispatch(authActions.addUsername(response.data.body.username));
     dispatch(authActions.addEmail(response.data.body.email));

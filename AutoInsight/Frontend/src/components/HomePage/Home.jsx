@@ -53,7 +53,7 @@ export default function Home() {
           </div>
         </main>
 
-        <div
+        {chatbotIsOpen ? "" : <div
           onClick={() => setChatbotIsOpen(true)}
           className="fixed bottom-5 right-5 md:bottom-10 md:right-10 z-50 cursor-pointer animate-bounce"
           aria-label="Open Chatbot"
@@ -63,13 +63,13 @@ export default function Home() {
             alt="Chatbot"
             className="w-32 h-32 md:w-40 md:h-40 hover:scale-110 transition-transform duration-100"
           />
-        </div>
+        </div>}
 
         {chatbotIsOpen && <Chatbot open={chatbotIsOpen} setOpen={setChatbotIsOpen} />}
 
         {showUploadingDashboard && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <DashboardSetupFlow onClose={setShowUploadingDashboard} showCleaningDashboard={showCleaningDashboard}/>
+            <DashboardSetupFlow onClose={setShowUploadingDashboard} showCleaningDashboard={showCleaningDashboard} />
           </div>
         )}
       </div>

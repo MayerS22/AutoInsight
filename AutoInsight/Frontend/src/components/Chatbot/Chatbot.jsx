@@ -2,21 +2,23 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
-import { X, Maximize2, Minimize2, Image as ImageIcon } from "lucide-react";
+import { X, Maximize2, Minimize2, Image as ImageIcon, XCircle } from "lucide-react";
 import ChatbotResponse from "../../assets/ChatbotResponse.svg";
 import ChatbotIcon from "../../assets/cute robot.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store";
 import SendIcon from "../../assets/SendButton.svg";
-import { sendChatbotMessage, getUserData } from "../../services/Api_Services"; // Import API functions
+import { sendChatbotMessage, getUserData } from "../../services/Api_Services";
 
 const Chatbot = ({ open, setOpen }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [typingDots, setTypingDots] = useState("");
+  const [expandedImage, setExpandedImage] = useState(null);
 
   const email = localStorage.getItem("email");
   const sessionId = useRef(Date.now().toString());
@@ -28,10 +30,11 @@ const Chatbot = ({ open, setOpen }) => {
   useEffect(() => {
     if (email) {
       const storedMessages = localStorage.getItem(`chatMessages_${email}`);
-      setMessages(storedMessages ? JSON.parse(storedMessages) : []);
-      console.log("username: " + username);
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      }
     }
-  }, [open]);
+  }, [open, email]);
 
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
@@ -43,6 +46,16 @@ const Chatbot = ({ open, setOpen }) => {
       console.error("Error fetching user data:", error);
     }
   };
+
+  useEffect(() => {
+    if (!loading) return;
+
+    const interval = setInterval(() => {
+      setTypingDots((prev) => (prev.length < 3 ? prev + "." : ""));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [loading]);
 
   useEffect(() => {
     fetchUser();
@@ -65,47 +78,57 @@ const Chatbot = ({ open, setOpen }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      setImages([file]);
+      setImagePreviews([URL.createObjectURL(file)]);
     }
   };
 
+  const removeImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index));
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() && !image) return;
-    const imageCopy = imagePreview;
+    if (!input.trim() && images.length === 0) return;
 
     const newMessage = {
       sender: "user",
       text: input,
-      image: imageCopy,
+      images: [...imagePreviews],
+      timestamp: new Date().toISOString()
     };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setImages([]);
+    setImagePreviews([]);
+    setLoading(true);
 
     setMessages((prev) => [
       ...prev,
-      newMessage,
-      { sender: "bot", text: "Generating response..." },
+      { sender: "bot", text: "Typing...", isTyping: true, timestamp: new Date().toISOString() }
     ]);
-    setInput("");
-    setImage(null);
-    setImagePreview(null);
-    setLoading(true);
 
     try {
       const formData = new FormData();
       formData.append("message", input);
       formData.append("sessionId", sessionId.current);
-      if (image instanceof File) {
-        formData.append("image", image);
+
+      if (images.length > 0) {
+        formData.append("image", images[0]);
       }
-      console.log("Sending request with:", {
-        message: input,
-        image: image instanceof File ? image.name : "No Image",
-      });
+
       const response = await sendChatbotMessage(formData);
+
       setMessages((prev) =>
         prev
           .slice(0, -1)
-          .concat({ sender: "bot", text: response.data.response.text })
+          .concat({ 
+            sender: "bot", 
+            text: response.data.response.text,
+            timestamp: new Date().toISOString()
+          })
       );
     } catch (error) {
       console.error("Error sending request:", error);
@@ -113,6 +136,7 @@ const Chatbot = ({ open, setOpen }) => {
         prev.slice(0, -1).concat({
           sender: "bot",
           text: "Error: Could not connect to chatbot.",
+          timestamp: new Date().toISOString()
         })
       );
     } finally {
@@ -124,10 +148,7 @@ const Chatbot = ({ open, setOpen }) => {
   const getInitials = (username) => {
     if (!username) return "U";
     const nameParts = username.trim().split(/\s+/);
-    if (
-      nameParts.length === 0 ||
-      (nameParts.length === 1 && nameParts[0] === "")
-    ) {
+    if (nameParts.length === 0 || (nameParts.length === 1 && nameParts[0] === "")) {
       return "U";
     }
     const initials = nameParts
@@ -137,8 +158,33 @@ const Chatbot = ({ open, setOpen }) => {
     return initials || "U";
   };
 
+  const openImage = (imageSrc) => {
+    setExpandedImage(imageSrc);
+  };
+
+  const closeExpandedImage = () => {
+    setExpandedImage(null);
+  };
+
   return (
     <>
+      {/* Expanded Image Modal */}
+      {expandedImage && (
+        <div className="fixed inset-0 z-[10001] bg-black bg-opacity-90 flex items-center justify-center p-4">
+          <button 
+            onClick={closeExpandedImage}
+            className="absolute top-4 right-4 text-white p-2 rounded-full hover:bg-gray-700"
+          >
+            <X size={24} />
+          </button>
+          <img 
+            src={expandedImage} 
+            alt="Expanded preview" 
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      )}
+
       {/* Animated robot appears only when chat is closed */}
       {!open && (
         <div className="fixed bottom-0 right-0 z-0">
@@ -153,14 +199,12 @@ const Chatbot = ({ open, setOpen }) => {
 
       {/* Chat window and static robot appear only when open */}
       {open && (
-        <div className="fixed bottom-0 right-0 z-[10000] flex flex-col items-end">
+        <div className="fixed bottom-3 right-4 z-[10000] flex flex-col items-end">
           {/* Chat window container */}
           <div
-            className={`${
-              isFullscreen ? "fixed inset-0" : "w-full md:w-[490px] h-[550px]"
-            } bg-chatbot-bg-color shadow-lg flex flex-col border border-gray-300 transition-all duration-300 ${
-              isFullscreen ? "rounded-none" : "rounded-xl"
-            }`}
+            className={`${isFullscreen ? "fixed inset-0" : "w-full md:w-[490px] h-[550px]"
+              } bg-chatbot-bg-color shadow-lg flex flex-col border border-gray-300 transition-all duration-300 ${isFullscreen ? "rounded-none" : "rounded-xl"
+              }`}
           >
             {/* Header */}
             <div className="bg-chatbot-bg-color text-black p-3 flex justify-between items-center rounded-t-xl">
@@ -193,12 +237,11 @@ const Chatbot = ({ open, setOpen }) => {
               ) : (
                 messages.map((msg, index) => (
                   <div
-                    key={index}
-                    className={`flex ${
-                      msg.sender === "user"
-                        ? "justify-end items-center"
-                        : "justify-start items-start"
-                    }`}
+                    key={`${msg.timestamp || index}-${msg.sender}`}
+                    className={`flex ${msg.sender === "user"
+                      ? "justify-end items-end"
+                      : "justify-start items-start"
+                      }`}
                   >
                     {/* Bot avatar aligned at the top */}
                     {msg.sender === "bot" && (
@@ -211,20 +254,42 @@ const Chatbot = ({ open, setOpen }) => {
                       </div>
                     )}
                     <div
-                      className={`px-4 py-2 text-sm rounded-lg ${
-                        msg.sender === "user"
-                          ? "bg-purple-200 text-purple-950 shadow-lg"
-                          : "bg-transparent text-purple-950 shadow-xl"
-                      } max-w-[75%] break-words`}
+                      className={`flex flex-col ${msg.sender === "user"
+                          ? "items-end"
+                          : "items-start"
+                        } max-w-[75%]`}
                     >
-                      {msg.text}
-                      {msg.image && (
-                        <img
-                          src={msg.image}
-                          alt="Uploaded"
-                          className="mt-2 rounded-lg w-40 h-auto"
-                        />
+                      {/* Images above the message */}
+                      {msg.images && msg.images.length > 0 && (
+                        <div className="mb-1 grid gap-2">
+                          {msg.images.map((imgSrc, imgIndex) => (
+                            <div 
+                              key={imgIndex} 
+                              className="relative cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => openImage(imgSrc)}
+                            >
+                              <img
+                                src={imgSrc}
+                                alt={`Uploaded ${imgIndex + 1}`}
+                                className="rounded-lg max-w-[280px] max-h-[280px] object-contain border border-gray-200"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       )}
+                      {/* Message text */}
+                      <div
+                        className={`text-sm rounded-lg ${msg.sender === "user"
+                            ? "bg-purple-200 text-purple-950 shadow-lg"
+                            : "bg-transparent text-purple-950 shadow-xl"
+                          } break-words px-4 py-2`}
+                      >
+                        {msg.isTyping ? (
+                          <span>Typing{typingDots}</span>
+                        ) : (
+                          msg.text
+                        )}
+                      </div>
                     </div>
                     {msg.sender === "user" && (
                       <div className="w-8 h-8 rounded-full ml-2 flex-shrink-0 flex items-center justify-center bg-purple-900 text-white font-bold">
@@ -246,13 +311,25 @@ const Chatbot = ({ open, setOpen }) => {
             </div>
             {/* Input area */}
             <div className="p-3 flex flex-col">
-              {imagePreview && (
-                <div className="relative mb-2 p-2 border rounded-lg bg-gray-100 flex items-center">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-16 h-16 rounded-lg mr-2"
-                  />
+              {/* Image preview area */}
+              {imagePreviews.length > 0 && (
+                <div className="mb-2 p-2 border rounded-lg bg-gray-100 flex flex-wrap gap-2">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-16 h-16 rounded-lg object-cover cursor-pointer"
+                        onClick={() => openImage(preview)}
+                      />
+                      <button
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 rounded-full p-0.5"
+                      >
+                        <XCircle size={16} color="white" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
               <div className="flex items-center gap-2 border border-gray-400 rounded-lg bg-transparent overflow-hidden">
@@ -265,6 +342,7 @@ const Chatbot = ({ open, setOpen }) => {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   className="hidden"
                   id="imageUpload"
                   onChange={handleImageUpload}

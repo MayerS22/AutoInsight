@@ -15,7 +15,7 @@ const HomePage = () => {
   const contactRef = useRef(null);
   const faqRef = useRef(null);
   const location = useLocation();
-
+ 
   useEffect(() => {
     if (location.pathname === "/home") {
       homeRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,6 +31,9 @@ const HomePage = () => {
       faqRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [location.pathname]);
+
+ 
+
 
   return (
     <div className=" min-h-screen relative flex flex-col">

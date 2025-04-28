@@ -10,6 +10,8 @@ const RootLayout = () => {
   const dispatch=useDispatch();
   const token = localStorage.getItem("token");
   useEffect(()=>{
+    console.log(token);
+    
     fetchUserProfile(token,authActions,dispatch);
   },[])
 

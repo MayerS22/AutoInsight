@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import ToggleIcon from "../../assets/Toggle.svg"
 import BackIcon from "../../assets/Back.svg"
 import { Reviews } from '../../util/reviews';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { marginActions } from '../../store/index.js';
 
 export default function ReviewsAnalysis() {
   const [reviews, setReviews] = useState(Reviews);
@@ -12,6 +15,7 @@ export default function ReviewsAnalysis() {
   const [filter, setFilter] = useState(["Positive", "Negative"]);
   const [showFilter, setShowFilter] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const toggleFilterOption = (classification) => {
     setFilter(prev =>
@@ -20,6 +24,21 @@ export default function ReviewsAnalysis() {
         : [...prev, classification]
     );
   };
+
+
+  
+    useEffect(() => {
+      dispatch(marginActions.setColor("bg-white"));
+      dispatch(marginActions.removeUserName());
+      dispatch(marginActions.addLogoutIcon());
+  
+      return () => {
+        dispatch(marginActions.setMargin(""));
+        dispatch(marginActions.setColor("bg-purple-50"));
+        dispatch(marginActions.addUserName());
+        dispatch(marginActions.removeLogoutIcon());
+      };
+    }, [dispatch]);
 
   const filteredReviews = filter.length > 0
     ? reviews.filter(review => filter.includes(review.classification))

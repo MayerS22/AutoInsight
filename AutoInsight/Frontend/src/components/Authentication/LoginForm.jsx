@@ -19,7 +19,7 @@ import { authActions } from "../../store/index"
 import axios from "axios";
 
 
-const Login = ({ toggleForm,setUserName}) => {
+const Login = ({ toggleForm, setUserName }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -37,7 +37,7 @@ const Login = ({ toggleForm,setUserName}) => {
   });
   const token = localStorage.getItem("token");
   // console.log(token);
-  
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -57,36 +57,50 @@ const Login = ({ toggleForm,setUserName}) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     if (!isEmailValid(formData.email) || !hasMinLength(formData.password, 8)) {
       setErrors({
         loginError: "Please fix the form errors before submitting."
       });
       return;
     }
-  
+
+    const adminEmail = "admin@gmail.com";   // <-- Admin Email
+    const adminPassword = "admin1234";         // <-- Admin Password
+
+    // Check if Admin
+    if (formData.email === adminEmail && formData.password === adminPassword) {
+      toast.success("Admin Login successful!");
+
+      const token = "admin-static-token"; // You can assign a dummy token or handle admin differently
+      const email = formData.email;
+      localStorage.setItem("isAdmin", "true"); 
+      navigate("/admin"); // Redirect to admin page
+      return; // ⬅️ Exit the function early
+    }
+
     try {
       const response = await axios.post("http://localhost:3000/api/v1/auth/login", formData, {
         headers: { "Content-Type": "application/json" },
       });
-  
+
       const { token } = response.data.body; // ✅ Extract token from response
       console.log(response.data);
-      
-     const email=formData.email;
-  
+
+      const email = formData.email;
+
       toast.success("Login successful");
       const redirectUrl = localStorage.getItem("redirectUrl") || "/";
       localStorage.removeItem("redirectUrl");
-  
+
       navigate("/home");
-      dispatch(authActions.login({email,token}));
-      console.log("Login Form token"+token);
+      dispatch(authActions.login({ email, token }));
+      console.log("Login Form token" + token);
     } catch (error) {
       console.error("Login error:", error);
-      
+
       if (error.response) {
-        setErrors({ loginError:"Invalid email or password. Please try again." });
+        setErrors({ loginError: "Invalid email or password. Please try again." });
       } else {
         setErrors({ loginError: "Something went wrong. Please try again later." });
       }
@@ -135,7 +149,7 @@ const Login = ({ toggleForm,setUserName}) => {
             </p>
           </div>
         )}
-        <button onClick={()=>{navigate("/forgot-password")}} className='text-purple-950 underline'>Forgot password?</button>
+        <button onClick={() => { navigate("/forgot-password") }} className='text-purple-950 underline'>Forgot password?</button>
         <div className="flex justify-center">
           <button className="w-2/3 bg-purple-900 text-white p-2 rounded-lg hover:bg-purple-800 mt-6 font-bold">
             Login
@@ -147,8 +161,8 @@ const Login = ({ toggleForm,setUserName}) => {
 
       <div className="mt-4 space-y-2">
         <SocialButton icon={GoogleLogo} text="Continue with Google" type="google" />
-        <SocialButton icon={FacebookLogo} text="Continue with Facebook" type="facebook"/>
-        <SocialButton icon={GithubLogo} text="Continue with Github" type="github"/>
+        <SocialButton icon={FacebookLogo} text="Continue with Facebook" type="facebook" />
+        <SocialButton icon={GithubLogo} text="Continue with Github" type="github" />
       </div>
 
       <ToggleButton isSignUp={false} onClick={toggleForm} />

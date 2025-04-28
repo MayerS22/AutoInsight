@@ -10,6 +10,7 @@ const initialAuthState = {
     datasetOwnerId:"",
     country:"",
     jobTitle:"",
+    isAdmin: false,
 }
 
 const initialMarginState = {
@@ -62,6 +63,10 @@ const authSlice = createSlice({
         addJobTitle(state,action){
             state.jobTitle=action.payload;
         },
+        isAdmin(state){
+            state.isAdmin = true;
+
+        }
     }
 });
 

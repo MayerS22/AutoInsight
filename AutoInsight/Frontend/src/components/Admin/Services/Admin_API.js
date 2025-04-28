@@ -83,3 +83,18 @@ export const fetchDomainCount = async () => {
     throw error;
   }
 };
+
+// Fetch top job titles from API
+export const fetchTopJobTitles = async () => {
+  try {
+    const config = createAuthConfig();
+    const response = await axios.get(
+      `${API_URL}/api/v1/users/jobs-count`,
+      config
+    );
+    return response.data?.body ?? [];
+  } catch (error) {
+    console.error("Error fetching top job titles:", error);
+    throw error;
+  }
+};

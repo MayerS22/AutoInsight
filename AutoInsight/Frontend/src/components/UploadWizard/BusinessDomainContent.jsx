@@ -47,9 +47,9 @@ const BusinessDomainContent = ({ businessDomain, onDomainChange, onNext }) => {
           <input 
             type="radio" 
             name="domain" 
-            value="HR"
-            checked={businessDomain === 'HR'}
-            onChange={() => onDomainChange('HR')}
+            value="education"
+            checked={businessDomain === 'education'}
+            onChange={() => onDomainChange('education')}
             className="accent-purple/500"
           />
           <span>Education</span>

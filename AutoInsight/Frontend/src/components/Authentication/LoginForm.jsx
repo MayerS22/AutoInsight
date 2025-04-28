@@ -65,20 +65,7 @@ const Login = ({ toggleForm, setUserName }) => {
       return;
     }
 
-    const adminEmail = "admin@gmail.com";   // <-- Admin Email
-    const adminPassword = "admin1234";         // <-- Admin Password
-
-    // Check if Admin
-    if (formData.email === adminEmail && formData.password === adminPassword) {
-      toast.success("Admin Login successful!");
-
-      const token = "admin-static-token"; // You can assign a dummy token or handle admin differently
-      const email = formData.email;
-      localStorage.setItem("isAdmin", "true"); 
-      navigate("/admin"); // Redirect to admin page
-      return; // ⬅️ Exit the function early
-    }
-
+   
     try {
       const response = await axios.post("http://localhost:3000/api/v1/auth/login", formData, {
         headers: { "Content-Type": "application/json" },

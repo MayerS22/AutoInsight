@@ -5,10 +5,13 @@ import { ChevronDown } from "lucide-react";
 import EditLogo from "../../assets/EditLogo.svg";
 import axios from "axios";
 
-const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
+const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const dropdownRef = useRef(null);
+
+    
+  
 
     const getInitials = (name) => {
         return name
@@ -56,10 +59,10 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
 
         return (
             <button
-                className="flex items-center gap-1 bg-purple-100 text-purple-950 font-medium px-3 py-1 border-2 border-purple-950 rounded-md text-sm"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                disabled={isUpdating}
-            >
+            className={`flex items-center gap-1 text-purple-950 font-medium px-3 py-1 border-2 rounded-md text-sm bg-purple-100 border-purple-950 ${memberPermissions[team._id]!== "owner" ? ' cursor-not-allowed' : ''}`}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            disabled={memberPermissions[team._id] !== "owner"}
+          >
                 {isUpdating ? (
                     <div className="flex justify-center items-center ">
                         <svg className="animate-spin h-6 w-6 text-purple-600" viewBox="0 0 24 24">
@@ -108,9 +111,10 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
                 </div>
                 <span className="font-medium truncate max-w-[150px] sm:max-w-none">{team.name}</span>
                 <button
-                    className="p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
+                    className={`p-1 bg-purple-200  rounded-full ${memberPermissions[team._id]!== "owner" ? ' cursor-not-allowed' : ''}`}
                     onClick={() => onEditTeam(team)}
-                >
+                    disabled={memberPermissions[team._id] !== "owner" } // Access the permission for the current team
+                    >
                     <img src={EditLogo} alt="Edit" className="h-3 w-3" />
                 </button>
             </div>
@@ -143,7 +147,7 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
     );
 };
 
-const TeamsList = ({ teams, setTeams, onEditTeam, loading }) => {
+const TeamsList = ({ teams, setTeams, onEditTeam, loading,memberPermissions }) => {
 
     const handlePermissionChange = async (teamId, newPermission) => {
         try {
@@ -174,6 +178,9 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading }) => {
         }
     };
 
+
+    
+
     return (
         <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
             <div className="space-y-3">
@@ -202,6 +209,7 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading }) => {
                             team={team}
                             onPermissionChange={handlePermissionChange}
                             onEditTeam={onEditTeam}
+                            memberPermissions={memberPermissions}
                         />
                     ))
                 ) : (

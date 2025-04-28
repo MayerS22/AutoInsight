@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useEffect } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
@@ -100,14 +102,6 @@ const transformUserData = (users) => {
   });
 };
 
-  // Fallback static data in case API fetch fails.
-  const useStaticData = () => {
-    setTotalCleanedDatasets("9,933");
-    setTotalGeneratedDashboards("852");
-    setTotalUsersCount("25");
-    setRecentAccounts(staticRecentAccounts);
-    setIsLoading(false);
-  };
 
  // Replace your useEffect in AdminDashboard.jsx with this updated version
 
@@ -126,6 +120,8 @@ useEffect(() => {
         fetchNumberOfUsers(),
         fetchRecentUsers()
       ]);
+
+      
 
       setTotalCleanedDatasets(String(cleanedDatasetsCount));
       setTotalGeneratedDashboards(String(dashboardsCount));

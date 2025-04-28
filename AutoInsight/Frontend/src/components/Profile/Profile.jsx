@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { marginActions, authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
@@ -7,7 +8,7 @@ import ProfilePictureComponent from "./ProfilePicture";
 import UploadDatasetComponent from "./UploadDataset";
 import { Allignment } from "./Allignment";
 import InfoField from "./InfoField";
-import { fetchUserProfile,getUserTeams } from "../../services/Api_Services";
+import { fetchUserProfile, getUserTeams } from "../../services/Api_Services";
 import PasswordIcon from "../../assets/PasswordIcon.svg";
 import EmailIcon from "../../assets/EmailIcon.svg";
 import DateIcon from "../../assets/DateIcon.svg";
@@ -33,7 +34,9 @@ const DatasetPage = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const loggedInUserEmail = useSelector((state) => state.auth.email);
+  const [memberPermissions, setMemberPermissions] = useState({});
 
   const [selectedTeam, setSelectedTeam] = useState(null);
 
@@ -56,26 +59,61 @@ const DatasetPage = () => {
     }
   }, [isLoggedIn, dispatch, token]);
 
-   useEffect(() => {
-          const fetchDatasets = async () => {
-            setLoading(true);  // Set loading to true when fetch starts
 
-              try {
-                  const response = await getUserTeams(token);
-                  console.log(response.data);
-                  
-                  setTeams(response.data.body || []);  // Store datasets in state
-                  console.log(response.data.body.datasets);
+  useEffect(() => {
+    const fetchDatasets = async () => {
+      setLoading(true);  // Set loading to true when fetch starts
   
-              } catch (error) {
-                  console.error("Error fetching datasets:", error);
-              }finally {
-                setLoading(false);  
-            }        
+      try {
+        const response = await getUserTeams(token);
+        const teamsData = response.data.body;
+        console.log("Fetched teams data:", teamsData);
+  
+        const permissionsRef = {};  // Use useRef to store permissions
+  
+        const teams = teamsData.map((team) => {
+          const ownerEmail = team.owner.email;
+  
+          // Filter out the logged-in user and owner from the team members
+          const filteredMembers = team.members.filter(
+            (member) => member.email !== ownerEmail && member.email !== loggedInUserEmail
+          );
+  
+          // Set permissions for the logged-in user
+          if (team.owner.email === loggedInUserEmail) {
+            permissionsRef[team._id] = "owner";
+          } else {
+            const userMember = team.members.find((member) => member.email === loggedInUserEmail);
+            if (userMember) {
+              permissionsRef[team._id] = team.memberPermission;
+            }
+          }
+  
+          return {
+            ...team,
+            members: filteredMembers, // Include only relevant members
           };
+        });
   
-              fetchDatasets();
-      }, [token,teams.length]); // Fetch datasets when token changes or on component mount
+        // Update the teams state
+        setTeams(teams);
+  
+        // Directly update the permissions without waiting for re-renders
+        setMemberPermissions(permissionsRef);  
+  
+      } catch (error) {
+        console.error("Error fetching datasets:", error);
+      } finally {
+        setLoading(false);  // Set loading to false when fetch finishes
+      }
+    };
+  
+    fetchDatasets();
+  }, [token, loggedInUserEmail]);  // Dependency on token and logged-in user email
+  
+  
+  
+  
 
   const handleCreateTeam = () => {
     setShowCreateTeamModal(true);
@@ -142,7 +180,7 @@ const DatasetPage = () => {
                   value="••••••••••••••"
                 />
                 <button
-                  onClick={()=>{navigate("/forgot-password")}}
+                  onClick={() => { navigate("/forgot-password") }}
                   className="mt-2 sm:mt-0 bg-purple-950 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded flex items-center self-start sm:self-auto"
                 >
                   <img src={EditPasswordIcon} alt="Edit" className="h-3 w-3 mr-2" />
@@ -179,6 +217,7 @@ const DatasetPage = () => {
                 setTeams={setTeams} // Pass setTeams to allow updating permissions
                 onEditTeam={handleEditTeam}
                 loading={loading} // Pass loading state to Teams component
+                memberPermissions={memberPermissions} // Pass memberPermissions to Teams component
               />
             </div>
           </div>
@@ -197,7 +236,7 @@ const DatasetPage = () => {
           onClose={() => setSelectedTeam(null)}
           onCreateTeam={handleCreateTeamSubmit}
           teamData={selectedTeam}
-          setTeams={setTeams} 
+          setTeams={setTeams}
           disableDashboardInput={true}
         />
       )}

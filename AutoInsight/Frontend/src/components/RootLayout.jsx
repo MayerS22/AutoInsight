@@ -10,7 +10,6 @@ const RootLayout = () => {
   const dispatch=useDispatch();
   const token = localStorage.getItem("token");
   useEffect(()=>{
-    console.log(token);
     const isAdmin = localStorage.getItem("isAdmin") === "true";
     if(isAdmin){
       dispatch(authActions.isAdmin())

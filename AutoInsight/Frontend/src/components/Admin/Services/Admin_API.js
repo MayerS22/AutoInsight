@@ -77,7 +77,7 @@ export const fetchRecentUsers = async () => {
       config
     );
     
-    console.log("Full API response:", response);
+    console.log("Recent users:", response);
     
     // Handle different API response structures
     let userData;

@@ -370,7 +370,15 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
         } catch (error) {
             console.error(`Error ${isEditing ? 'updating' : 'creating'} team:`, error);
 
-            setErrors(prev => ({ ...prev, teamName: error.response?.data?.message || "An error occurred" }));
+            const errorMessage = error.response?.data?.message || "An error occurred";
+
+            if (errorMessage.includes("Access denied") || errorMessage.includes("Permission")) {
+                setErrors(prev => ({ ...prev, general: errorMessage }));
+            } else if (errorMessage.includes("already taken") || errorMessage.includes("name exists")) {
+                setErrors(prev => ({ ...prev, teamName: errorMessage }));
+            } else {
+                setErrors(prev => ({ ...prev, general: errorMessage })); // fallback general error
+            }
         }
     };
 
@@ -510,7 +518,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                 >
                                     {users.map((user, index) => (
                                         loggedInUserEmail === user.email ? null : (
-                                            <div key={user.id} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
+                                            <div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
                                                 {user.name}
                                                 {user._id}
                                                 <button onClick={() => handleRemoveUser(user)} className="ml-1 text-purple-950">

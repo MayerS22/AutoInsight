@@ -15,6 +15,7 @@ import ForgotPassword from "./components/Authentication/ForgotPassword.jsx";
 import ResetPassword from "./components/Authentication/ResetPassword.jsx";
 import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import ReviewsAnalysis from "./components/Admin/ReviewAnalysisTable.jsx";
+import Notification from "./components/HomePage/Notification.jsx"
 
 function App() {
 
@@ -50,6 +51,7 @@ function App() {
         { path: "dashboard/:id", element: <Dashboard /> },
         { path: "wizard", element: <DashboardSetupFlow /> },
         { path: "admin", element: <AdminDashboard /> },
+        { path:"notification", element:<Notification/>},
         {
           path: "admin",
           element: <AdminDashboard />

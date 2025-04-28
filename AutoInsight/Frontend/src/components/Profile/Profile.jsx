@@ -13,15 +13,19 @@ import EmailIcon from "../../assets/EmailIcon.svg";
 import DateIcon from "../../assets/DateIcon.svg";
 import TeamsIcon from "../../assets/TeamsIcon.svg";
 import EditPasswordIcon from "../../assets/EditPasswordIcon.svg";
+import JobIcon from "../../assets/Job.svg";
 import CreateTeamIcon from "../../assets/CreateTeamIcon.svg";
 import CreateTeamModal from "./CreateTeamModal";
 import Teams from "./Teams";
+
 
 const DatasetPage = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const email = useSelector((state) => state.auth.email);
+  const country = useSelector((state) => state.auth.country);
+  const jobTitle = useSelector((state) => state.auth.jobTitle);
   const token = localStorage.getItem("token");
 
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -129,7 +133,7 @@ const DatasetPage = () => {
           <div className="w-full lg:w-3/4 flex flex-col gap-4 sm:gap-6">
             <div className="bg-white p-4 sm:p-6 flex flex-col gap-4 rounded-lg">
               <InfoField icon={EmailIcon} label="Email" value={email} />
-
+              <InfoField icon={JobIcon} label="Job title" value={jobTitle} />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                 <InfoField
                   icon={PasswordIcon}

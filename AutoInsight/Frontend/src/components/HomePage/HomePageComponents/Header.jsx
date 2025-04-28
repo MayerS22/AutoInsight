@@ -8,6 +8,7 @@ import { fetchUserProfile } from "../../../services/Api_Services";
 import RobotImg from "../../../assets/Robot.svg";
 import LogoutLogo from "../../../assets/Logout.svg";
 import ProfileLogo from "../../../assets/Profile.svg";
+import notificationLogo from "../../../assets/notification.svg";
 import axios from "axios";
 
 export default function Header() {
@@ -149,6 +150,12 @@ export default function Header() {
 
         {isLoggedIn ? (
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => handleNavigation("/notification")}
+              className="flex items-center space-x-2"
+            >
+              <img src={notificationLogo} alt="notification-logo" className="w-8 h-8"/>
+            </button>
             <div className="relative flex items-center">
               <button
                 onClick={() => {
@@ -181,6 +188,8 @@ export default function Header() {
                 )}
               </button>
             </div>
+
+
 
             {isAdded && (
               <button
@@ -241,29 +250,29 @@ export default function Header() {
               Dashboards
             </button>}
             <button
-              onClick={() =>{
+              onClick={() => {
                 handleNavigation("/about-us");
-                setActiveOption("about-us");             
+                setActiveOption("about-us");
               }}
               className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'about-us' ? "underline" : ""}`}
             >
               About Us
             </button>
             <button
-            onClick={() =>{
-              handleNavigation("/reviews");
-              setActiveOption("reviews");             
-            }}
-            className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'reviews' ? "underline" : ""}`}
+              onClick={() => {
+                handleNavigation("/reviews");
+                setActiveOption("reviews");
+              }}
+              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'reviews' ? "underline" : ""}`}
             >
               Reviews
             </button>
             <button
-                onClick={() =>{
-                  handleNavigation("/contact");
-                  setActiveOption("contact");             
-                }}
-                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'contact' ? "underline" : ""}`}
+              onClick={() => {
+                handleNavigation("/contact");
+                setActiveOption("contact");
+              }}
+              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'contact' ? "underline" : ""}`}
             >
               Contact
             </button>

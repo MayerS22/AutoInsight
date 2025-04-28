@@ -7,7 +7,9 @@ const initialAuthState = {
     username: "",
     email:"",
     id:"",
-    datasetOwnerId:""
+    datasetOwnerId:"",
+    country:"",
+    jobTitle:"",
 }
 
 const initialMarginState = {
@@ -53,7 +55,13 @@ const authSlice = createSlice({
         },
         addDatasetOwnerId(state,action){
             state.id=action.payload;
-        }
+        },
+        addCountry(state,action){
+            state.country=action.payload;
+        },
+        addJobTitle(state,action){
+            state.jobTitle=action.payload;
+        },
     }
 });
 

@@ -52,6 +52,8 @@ const SignUp = ({ toggleForm }) => {
         email: formData.email,
         password: formData.password,
         confirm_password: formData.confirmPassword,
+        job: formData.jobTitle,
+        country: formData.country,
         // jobTitle is intentionally NOT sent to the API
       };
 
@@ -98,7 +100,14 @@ const SignUp = ({ toggleForm }) => {
           value={formData.userName}
           error={errors.userName}
         />
-
+        
+        <InputField
+          label="Email"
+          placeholder="Enter your Email"
+          onChange={(e) => handleInputChange("email", e.target.value)}
+          value={formData.email}
+          error={errors.email}
+        />
         <OptionsSelector
           value={formData.jobTitle}
           onChange={(value) => handleInputChange("jobTitle", value)}
@@ -112,13 +121,7 @@ const SignUp = ({ toggleForm }) => {
           error={errors.country}
         />
 
-        <InputField
-          label="Email"
-          placeholder="Enter your Email"
-          onChange={(e) => handleInputChange("email", e.target.value)}
-          value={formData.email}
-          error={errors.email}
-        />
+      
 
         <InputField
           label="Password"

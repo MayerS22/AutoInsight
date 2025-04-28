@@ -7,7 +7,7 @@ import ProfilePictureComponent from "./ProfilePicture";
 import UploadDatasetComponent from "./UploadDataset";
 import { Allignment } from "./Allignment";
 import InfoField from "./InfoField";
-import { fetchUserProfile } from "../../services/Api_Services";
+import { fetchUserProfile,getUserTeams } from "../../services/Api_Services";
 import PasswordIcon from "../../assets/PasswordIcon.svg";
 import EmailIcon from "../../assets/EmailIcon.svg";
 import DateIcon from "../../assets/DateIcon.svg";
@@ -26,26 +26,8 @@ const DatasetPage = () => {
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
-  const [teams, setTeams] = useState([
-    {
-      id: 1,
-      name: "Backend Team",
-      permission: "Can edit",
-      users: [{ id: 1, name: "Mazen Mostafa" }, { id: 2, name: "Bishoy Sedra" }],
-    },
-    {
-      id: 2,
-      name: "Machine Team",
-      permission: "Admin",
-      users: [{ id: 3, name: "Farah Moataz" }, { id: 4, name: "Maya Mohamed" }],
-    },
-    {
-      id: 3,
-      name: "Frontend Team",
-      permission: "Can view",
-      users: [{ id: 5, name: "Mazen Raafat" }, { id: 6, name: "Mayer Soliman" }],
-    },
-  ]);
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(false); 
 
   const [selectedTeam, setSelectedTeam] = useState(null);
 
@@ -67,6 +49,27 @@ const DatasetPage = () => {
       fetchUserProfile(token, authActions, dispatch);
     }
   }, [isLoggedIn, dispatch, token]);
+
+   useEffect(() => {
+          const fetchDatasets = async () => {
+            setLoading(true);  // Set loading to true when fetch starts
+
+              try {
+                  const response = await getUserTeams(token);
+                  console.log(response.data);
+                  
+                  setTeams(response.data.body || []);  // Store datasets in state
+                  console.log(response.data.body.datasets);
+  
+              } catch (error) {
+                  console.error("Error fetching datasets:", error);
+              }finally {
+                setLoading(false);  
+            }        
+          };
+  
+              fetchDatasets();
+      }, [token,teams.length]); // Fetch datasets when token changes or on component mount
 
   const handleCreateTeam = () => {
     setShowCreateTeamModal(true);
@@ -170,6 +173,7 @@ const DatasetPage = () => {
                 teams={teams}
                 setTeams={setTeams} // Pass setTeams to allow updating permissions
                 onEditTeam={handleEditTeam}
+                loading={loading} // Pass loading state to Teams component
               />
             </div>
           </div>
@@ -180,7 +184,7 @@ const DatasetPage = () => {
       {showCreateTeamModal && (
         <CreateTeamModal
           onClose={() => setShowCreateTeamModal(false)}
-          onCreateTeam={handleCreateTeamSubmit}
+          setTeams={setTeams}
         />
       )}
       {selectedTeam && (
@@ -188,6 +192,7 @@ const DatasetPage = () => {
           onClose={() => setSelectedTeam(null)}
           onCreateTeam={handleCreateTeamSubmit}
           teamData={selectedTeam}
+          setTeams={setTeams} 
         />
       )}
     </Allignment>

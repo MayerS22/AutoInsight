@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import EditLogo from "../../assets/EditLogo.svg";
+import axios from "axios";
 
 const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const dropdownRef = useRef(null);
 
     const getInitials = (name) => {
@@ -28,17 +31,23 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
         };
     }, []);
 
+    const permissions = [
+        { label: 'Admin', value: 'admin' },
+        { label: 'Can edit', value: 'edit' },
+        { label: 'Can view', value: 'view' },
+    ];
+
     const renderPermissionButton = () => {
         let label = "";
 
-        switch (team.permission) {
-            case 'Can edit':
+        switch (team.memberPermission) {
+            case 'edit':
                 label = "Can edit";
                 break;
-            case 'Can view':
+            case 'view':
                 label = "Can view";
                 break;
-            case 'Admin':
+            case 'admin':
                 label = "Admin";
                 break;
             default:
@@ -46,14 +55,49 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
         }
 
         return (
-            <button 
+            <button
                 className="flex items-center gap-1 bg-purple-100 text-purple-950 font-medium px-3 py-1 border-2 border-purple-950 rounded-md text-sm"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                disabled={isUpdating}
             >
-                {label}
-                <ChevronDown size={14} className="ml-1" />
+                {isUpdating ? (
+                    <div className="flex justify-center items-center ">
+                        <svg className="animate-spin h-6 w-6 text-purple-600" viewBox="0 0 24 24">
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            ></circle>
+                            <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                        </svg>
+                    </div>
+                ) : label}
+                {isUpdating ? "" : <ChevronDown size={14} className="ml-1" />}
             </button>
         );
+    };
+
+    const handlePermissionSelect = async (permValue) => {
+        if (team.memberPermission === permValue) {
+            setIsDropdownOpen(false);
+            return; // Exit early if the same permission is selected
+        }
+        setIsUpdating(true);
+        try {
+            await onPermissionChange(team._id, permValue);
+            setIsDropdownOpen(false);
+        } catch (error) {
+            console.error("Failed to update permission:", error);
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     return (
@@ -63,11 +107,11 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
                     {getInitials(team.name)}
                 </div>
                 <span className="font-medium truncate max-w-[150px] sm:max-w-none">{team.name}</span>
-                <button 
-                    className="p-[5px] bg-purple-200 hover:bg-purple-100 rounded-full"
+                <button
+                    className="p-1 bg-purple-200 hover:bg-purple-100 rounded-full"
                     onClick={() => onEditTeam(team)}
                 >
-                    <img src={EditLogo} alt="Edit" className="h-2 w-2" />
+                    <img src={EditLogo} alt="Edit" className="h-3 w-3" />
                 </button>
             </div>
 
@@ -78,17 +122,15 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
                 {isDropdownOpen && (
                     <div className="absolute right-0 mt-1 w-40 bg-purple-100 rounded-md shadow-lg z-10 border text-purple-950 font-medium border-gray-200">
                         <div className="py-1">
-                            {['Admin', 'Can edit', 'Can view'].map((perm) => (
+                            {permissions.map((perm) => (
                                 <button
-                                    key={perm}
-                                    onClick={() => {
-                                        onPermissionChange(team.id, perm);
-                                        setIsDropdownOpen(false);
-                                    }}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left"
+                                    key={perm.value}
+                                    onClick={() => handlePermissionSelect(perm.value)}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-purple-200"
+                                    disabled={isUpdating}
                                 >
-                                    {perm === 'Admin' ? 'Admin' : perm === 'Can edit' ? 'Can edit' : 'Can view'}
-                                    {team.permission === perm && (
+                                    {perm.label}
+                                    {team.memberPermission === perm.value && (
                                         <span className="ml-auto text-purple-950 font-medium">✓</span>
                                     )}
                                 </button>
@@ -101,26 +143,70 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam }) => {
     );
 };
 
-const TeamsList = ({ teams, setTeams, onEditTeam }) => {
-    const handlePermissionChange = (teamId, newPermission) => {
-        setTeams((prev) =>
-            prev.map((team) =>
-                team.id === teamId ? { ...team, permission: newPermission } : team
-            )
-        );
+const TeamsList = ({ teams, setTeams, onEditTeam, loading }) => {
+
+    const handlePermissionChange = async (teamId, newPermission) => {
+        try {
+
+            // Make the API call using axios
+            const response = await axios.patch(
+                `http://localhost:3000/api/v1/teams/${teamId}/permission`,
+                { memberPermission: newPermission },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    }
+                }
+            );
+
+
+            setTeams(prev =>
+                prev.map(team =>
+                    team._id === teamId ? { ...team, memberPermission: newPermission } : team
+                )
+            );
+
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Failed to update permission';
+            console.error('Error updating team permission:', error);
+            throw error;
+        }
     };
 
     return (
         <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
             <div className="space-y-3">
-                {teams.map((team) => (
-                    <TeamItem
-                        key={team.id}
-                        team={team}
-                        onPermissionChange={handlePermissionChange}
-                        onEditTeam={onEditTeam}
-                    />
-                ))}
+                {loading ? (
+                    <div className="flex justify-center items-center ">
+                        <svg className="animate-spin h-8 w-8 text-purple-600" viewBox="0 0 24 24">
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            ></circle>
+                            <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                        </svg>
+                    </div>
+                ) : teams.length > 0 ? (
+                    teams.map((team) => (
+                        <TeamItem
+                            key={team._id}
+                            team={team}
+                            onPermissionChange={handlePermissionChange}
+                            onEditTeam={onEditTeam}
+                        />
+                    ))
+                ) : (
+                    <p className="text-gray-500 text-center py-4">No teams available</p>
+                )}
             </div>
         </div>
     );

@@ -55,6 +55,28 @@ export const getUserData = async (token) => {
   }
 };
 
+export const getUserTeams = async (token) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/teams`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getUserDatasets = async (token) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/datasets`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const generateInsights = async (token) => {
   try {
     const response = await axios.post(

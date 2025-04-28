@@ -10,6 +10,7 @@ import Robot from "../../assets/Robot.svg";
 import AppleLogo from "../../assets/Apple.svg";
 import GoogleLogo from "../../assets/Google.svg";
 import FacebookLogo from "../../assets/Facebook.svg";
+import GithubLogo from "../../assets/Github.png";
 import HideLogo from "../../assets/Hide.svg";
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -145,9 +146,9 @@ const Login = ({ toggleForm,setUserName}) => {
       <Divider />
 
       <div className="mt-4 space-y-2">
-        <SocialButton icon={GoogleLogo} text="Continue with Google" />
-        <SocialButton icon={FacebookLogo} text="Continue with Facebook" />
-        <SocialButton icon={AppleLogo} text="Continue with Apple" />
+        <SocialButton icon={GoogleLogo} text="Continue with Google" type="google" />
+        <SocialButton icon={FacebookLogo} text="Continue with Facebook" type="facebook"/>
+        <SocialButton icon={GithubLogo} text="Continue with Github" type="github"/>
       </div>
 
       <ToggleButton isSignUp={false} onClick={toggleForm} />

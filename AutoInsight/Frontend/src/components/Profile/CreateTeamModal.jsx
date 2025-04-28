@@ -8,8 +8,8 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 // eslint-disable-next-line react/prop-types
-export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, setTeams }) {
-    
+export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, setTeams, disableDashboardInput }) {
+
     const [teamName, setTeamName] = useState(teamData.name || "");
     const [users, setUsers] = useState(teamData.members || []);
     const [selectedDashboards, setSelectedDashboards] = useState(teamData.dashboard || []);
@@ -116,7 +116,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     }, [searchQuery, users]); // Added `users` as dependency to re-filter search results on changes
 
     useEffect(() => {
-        if (dashboardSearchQuery.trim() === "") {
+        if (disableDashboardInput || dashboardSearchQuery.trim() === "") {
             setFilteredDashboards([]);
             setShowDashboardDropdown(false);
             return;
@@ -131,7 +131,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
 
         setFilteredDashboards(filtered);
         setShowDashboardDropdown(true);
-    }, [dashboardSearchQuery, datasets, selectedDashboards]); // Added `selectedDashboards` as dependency
+    }, [dashboardSearchQuery, datasets, selectedDashboards, disableDashboardInput]); // Added `disableDashboardInput` as dependency
 
     useEffect(() => {
         if (teamData && teamData._id) {
@@ -185,13 +185,13 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                     errorMessage = "Team name is required";
                 }
                 break;
-                case 'users':
-                    if (users.filter(user => user.email !== loggedInUserEmail).length === 0) {
-                        errorMessage = "At least one user must be added";
-                    }
+            case 'users':
+                if (users.filter(user => user.email !== loggedInUserEmail).length === 0) {
+                    errorMessage = "At least one user must be added";
+                }
                 break;
             case 'dashboards':
-                if (value.length === 0) {
+                if (value.length === 0 && !disableDashboardInput) {
                     errorMessage = "At least one dashboard must be added";
                 }
                 break;
@@ -218,6 +218,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleDashboardSearchQueryChange = (e) => {
+        if (disableDashboardInput) return;
+
         setDashboardSearchQuery(e.target.value);
         setErrors(prev => ({ ...prev, dashboards: "" })); // Clear error immediately
     };
@@ -237,6 +239,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleRemoveDashboard = (dashboardToRemove) => {
+        if (disableDashboardInput) return;
+
         const updatedDashboards = selectedDashboards.filter((dashboard) => dashboard.id !== dashboardToRemove.id);
         setSelectedDashboards(updatedDashboards);
 
@@ -260,7 +264,9 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
         validateField('dashboards', selectedDashboards);
 
         // Check if there are any errors
-        if (!teamName.trim() || users.filter(user => user.email !== loggedInUserEmail).length === 0 || selectedDashboards.length === 0) {
+        if (!teamName.trim() ||
+            users.filter(user => user.email !== loggedInUserEmail).length === 0 ||
+            (!disableDashboardInput && selectedDashboards.length === 0)) {
             return; // Stop form submission if there are errors
         }
 
@@ -279,7 +285,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                 );
                 console.log(usersToUpdate);
 
-                // Now patch using the real idsuser
+                // Now patch using the real ids
                 await axios.patch(`http://localhost:3000/api/v1/teams/${teamData._id}/members`, {
                     members: usersToUpdate.map(user => user._id) // or user.id if returned that way
                 }, {
@@ -315,24 +321,22 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
 
                 // Update the teams state in parent component
                 console.log(users);
-                
-                    setTeams(prev =>
-                        prev.map(team =>
-                            team._id === teamData._id
-                                ? {
-                                    ...team, // Retain other properties
-                                    members: users.map((user) => ({
-                                        id: user.id, // Ensure only the necessary properties are included
-                                        username: user.name,
-                                        email: user.email,
-                                    })),
-                                    memberPermission: permission
-                                }
-                                : team
-                        )
-                    );
 
-              
+                setTeams(prev =>
+                    prev.map(team =>
+                        team._id === teamData._id
+                            ? {
+                                ...team, // Retain other properties
+                                members: users.map((user) => ({
+                                    id: user.id, // Ensure only the necessary properties are included
+                                    username: user.name,
+                                    email: user.email,
+                                })),
+                                memberPermission: permission
+                            }
+                            : team
+                    )
+                );
             } else {
                 // Create new team
                 const teamDataToSubmit = {
@@ -365,7 +369,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
             onClose();
         } catch (error) {
             console.error(`Error ${isEditing ? 'updating' : 'creating'} team:`, error);
-          
+
             setErrors(prev => ({ ...prev, teamName: error.response?.data?.message || "An error occurred" }));
         }
     };
@@ -388,6 +392,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleAddDashboard = (dashboard) => {
+        if (disableDashboardInput) return;
+
         if (!dashboard || !dashboard._id || !dashboard.dataset_name) {
             console.error("Invalid dashboard data:", dashboard);
             return;
@@ -572,15 +578,17 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                             </label>
                             <div className="relative" ref={dashboardSearchRef}>
                                 <div
-                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-white flex-wrap items-center gap-2`}
-                                    onClick={() => dashboardInputRef.current && dashboardInputRef.current.focus()}
+                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex ${disableDashboardInput ? 'bg-gray-100' : 'bg-white'} flex-wrap items-center gap-2`}
+                                    onClick={() => !disableDashboardInput && dashboardInputRef.current && dashboardInputRef.current.focus()}
                                 >
                                     {selectedDashboards.map((dashboard, index) => (
                                         <div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
                                             {dashboard.name}
-                                            <button onClick={() => handleRemoveDashboard(dashboard)} className="ml-1 text-purple-950">
-                                                <X size={14} />
-                                            </button>
+                                            {!disableDashboardInput && (
+                                                <button onClick={() => handleRemoveDashboard(dashboard)} className="ml-1 text-purple-950">
+                                                    <X size={14} />
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                     <div className="flex items-center flex-grow min-w-32">
@@ -591,8 +599,9 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                             onChange={handleDashboardSearchQueryChange}
                                             onBlur={() => handleBlur('dashboards')}
                                             placeholder={selectedDashboards.length > 0 ? "" : "Select Dashboards"}
-                                            className="outline-none w-full py-1 px-2"
-                                            onFocus={() => dashboardSearchQuery.trim() && setShowDashboardDropdown(true)}
+                                            className={`outline-none w-full py-1 px-2 ${disableDashboardInput ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                                            onFocus={() => !disableDashboardInput && dashboardSearchQuery.trim() && setShowDashboardDropdown(true)}
+                                            disabled={disableDashboardInput}
                                         />
                                     </div>
                                 </div>
@@ -600,7 +609,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                     <p className="text-red-500 text-sm mt-1">{errors.dashboards}</p>
                                 )}
 
-                                {showDashboardDropdown && (
+                                {!disableDashboardInput && showDashboardDropdown && (
                                     <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         {(dashboardSearchQuery.trim() === "" ? datasets : filteredDashboards)
                                             .filter(dashboard => dashboard && dashboard.dataset_name)

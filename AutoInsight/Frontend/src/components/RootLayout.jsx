@@ -11,8 +11,14 @@ const RootLayout = () => {
   const token = localStorage.getItem("token");
   useEffect(()=>{
     console.log(token);
-    
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    if(isAdmin){
+      dispatch(authActions.isAdmin())
+    }
+   if(!isAdmin)
+   {
     fetchUserProfile(token,authActions,dispatch);
+   }
   },[])
 
   return (

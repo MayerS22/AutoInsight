@@ -17,6 +17,7 @@ import JobIcon from "../../assets/Job.svg";
 import CreateTeamIcon from "../../assets/CreateTeamIcon.svg";
 import CreateTeamModal from "./CreateTeamModal";
 import Teams from "./Teams";
+import { useNavigate } from "react-router-dom";
 
 
 const DatasetPage = () => {
@@ -27,6 +28,7 @@ const DatasetPage = () => {
   const country = useSelector((state) => state.auth.country);
   const jobTitle = useSelector((state) => state.auth.jobTitle);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
@@ -103,7 +105,6 @@ const DatasetPage = () => {
   };
 
   const handleViewTeam = (teamId) => console.log("View team clicked:", teamId);
-  const handleChangePassword = () => console.log("Change password clicked");
 
   const handleViewPhoto = () => {
     if (profilePicture) window.open(profilePicture, "_blank");
@@ -141,7 +142,7 @@ const DatasetPage = () => {
                   value="••••••••••••••"
                 />
                 <button
-                  onClick={handleChangePassword}
+                  onClick={()=>{navigate("/forgot-password")}}
                   className="mt-2 sm:mt-0 bg-purple-950 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded flex items-center self-start sm:self-auto"
                 >
                   <img src={EditPasswordIcon} alt="Edit" className="h-3 w-3 mr-2" />
@@ -197,6 +198,7 @@ const DatasetPage = () => {
           onCreateTeam={handleCreateTeamSubmit}
           teamData={selectedTeam}
           setTeams={setTeams} 
+          disableDashboardInput={true}
         />
       )}
     </Allignment>

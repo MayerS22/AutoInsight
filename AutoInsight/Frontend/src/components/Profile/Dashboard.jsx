@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [availableForecastMonths, setAvailableForecastMonths] = useState([]);
   const [ownerId, setOwnerId] = useState(null);
   const [sharedUsernames, setSharedUsernames] = useState([]);
+  const [domain, setDomain] = useState("")
 
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
@@ -41,6 +42,9 @@ const Dashboard = () => {
       );
       if (response.data.body && response.data.body.dataset) {
         const dataset = response.data.body.dataset;
+        console.log(dataset.business_domain);
+        setDomain(dataset.business_domain)
+
         setDatasetName(dataset.dataset_name || "Unnamed Dataset");
         setCreationDate(
           dataset.createdAt
@@ -276,12 +280,14 @@ const Dashboard = () => {
             activeChartType === "histogram") &&
             availableBarFilters.length > 0 && (
               <div className="relative">
-                <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsBarFilterOpen(!isBarFilterOpen)}>
-                  Top {barChartFilter}
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isBarFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
-                  </svg>
-                </button>
+                {
+                  domain === "ecommerce" ? (<button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsBarFilterOpen(!isBarFilterOpen)}>
+                    Top {barChartFilter}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isBarFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
+                    </svg>
+                  </button>) : ""
+                }
                 {isBarFilterOpen && (
                   <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
                     {availableBarFilters.map((value) => (
@@ -317,14 +323,14 @@ const Dashboard = () => {
             {(userPermission === "owner" ||
               userPermission === "admin" ||
               userPermission === "edit") && (
-              <button
-                className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
-                <span className="text-sm font-medium">Permissions</span>
-              </button>
-            )}
+                <button
+                  className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
+                  <span className="text-sm font-medium">Permissions</span>
+                </button>
+              )}
           </div>
         </div>
       </div>
@@ -353,9 +359,7 @@ const Dashboard = () => {
                   </div>
                 ))
               ) : (
-                <div className="w-full h-64 sm:h-96 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600">
-                  No {chartType === "reports" ? "Report" : `${chartType.replace("_", " ")} Images`}
-                </div>
+               ""
               )}
             </div>
           </div>

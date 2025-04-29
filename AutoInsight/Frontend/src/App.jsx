@@ -62,10 +62,7 @@ function App() {
           path: "admin/reviews-analysis",
           element: <ReviewsAnalysis />
         }
-        
-
-        
-       
+      
       ],
     },
     {

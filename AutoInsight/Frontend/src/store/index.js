@@ -11,6 +11,8 @@ const initialAuthState = {
     country:"",
     jobTitle:"",
     isAdmin: false,
+    dateCreated:""
+    
 }
 
 const initialMarginState = {
@@ -62,6 +64,9 @@ const authSlice = createSlice({
         },
         addJobTitle(state,action){
             state.jobTitle=action.payload;
+        },
+        addDateCreated(state,action){
+            state.dateCreated=action.payload;
         },
         isAdmin(state){
             state.isAdmin = true;

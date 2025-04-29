@@ -3,6 +3,7 @@ const CountryFlag = ({ countryCode }) => {
     // Use the countryCode to create a URL to a flag image from a flag API
     const flagUrl = `https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`;
     
+    
     return (
       <div className="flex items-center">
         <img 

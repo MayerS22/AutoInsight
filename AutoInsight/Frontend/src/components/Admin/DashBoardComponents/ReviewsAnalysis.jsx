@@ -6,30 +6,25 @@ import {
   RadialBar,
   RadialBarChart,
   PolarRadiusAxis,
-  Label,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
 import { fetchReviewsCounts } from "../Services/Admin_API.js"; // adjust path as needed
 
 const ReviewsAnalysis = () => {
-  // Store raw counts fetched from backend
   const [rawData, setRawData] = useState({
     positive: 0,
     neutral: 0,
     negative: 0,
   });
-  // State for processed percentage data
   const [reviewData, setReviewData] = useState({
     positive: 0,
     neutral: 0,
     negative: 0,
   });
-  // Loading state
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch raw review data from backend upon component mount
   useEffect(() => {
     const getReviewData = async () => {
       try {
@@ -41,21 +36,14 @@ const ReviewsAnalysis = () => {
         setIsLoading(false);
       }
     };
-
     getReviewData();
   }, []);
 
-  // Convert raw counts to percentages once rawData is updated
   useEffect(() => {
     const { positive, neutral, negative } = rawData;
     const total = positive + neutral + negative;
-    // If total is zero, avoid division by zero
     if (total === 0) {
-      setReviewData({
-        positive: 0,
-        neutral: 0,
-        negative: 0,
-      });
+      setReviewData({ positive: 0, neutral: 0, negative: 0 });
     } else {
       setReviewData({
         positive: Math.round((positive / total) * 100),
@@ -65,7 +53,6 @@ const ReviewsAnalysis = () => {
     }
   }, [rawData]);
 
-  // Define the sentiment information based on percentage data
   const sentiments = {
     positive: {
       name: "Positive",
@@ -93,18 +80,22 @@ const ReviewsAnalysis = () => {
     },
   };
 
-  // Determine the dominant sentiment based on percentage values
-  const dominantSentimentKey = Object.keys(sentiments).reduce(
-    (maxKey, key) =>
-      sentiments[key].value > sentiments[maxKey].value ? key : maxKey,
-    Object.keys(sentiments)[0]
-  );
+  let dominantSentimentKey = "neutral";
+  const values = Object.values(sentiments).map((s) => s.value);
+  const allEqual = values.every((v) => v === values[0]);
+
+  if (!allEqual) {
+    dominantSentimentKey = Object.keys(sentiments).reduce(
+      (maxKey, key) =>
+        sentiments[key].value > sentiments[maxKey].value ? key : maxKey,
+      Object.keys(sentiments)[0]
+    );
+  }
+
   const dominantSentiment = sentiments[dominantSentimentKey];
 
-  // Wrap reviewData in an array for Recharts
   const chartData = [reviewData];
 
-  // Custom Tooltip for the chart, showing sentiment details and percentages
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const bars = payload.filter((item) => item.value > 0);
@@ -152,7 +143,7 @@ const ReviewsAnalysis = () => {
         </button>
       </div>
 
-      <div className="flex justify-center">
+      <div className="relative flex justify-center">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-[250px] h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
@@ -163,71 +154,41 @@ const ReviewsAnalysis = () => {
               endAngle={0}
             >
               <RechartsTooltip content={<CustomTooltip />} />
-              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                      return (
-                        <>
-                          <text
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            textAnchor="middle"
-                          >
-                            <tspan
-                              x={viewBox.cx}
-                              y={(viewBox.cy || 0) - 10}
-                              className="fill-foreground text-2xl font-bold"
-                            >
-                              {dominantSentiment.value}%
-                            </tspan>
-                          </text>
-                          <foreignObject
-                            x={viewBox.cx - 50}
-                            y={(viewBox.cy || 0) + 5}
-                            width="100"
-                            height="40"
-                          >
-                            <div className="flex items-center justify-center w-full h-full">
-                              <span
-                                className={`inline-flex items-center px-3 py-1 text-sm rounded-full ${dominantSentiment.bgColor} ${dominantSentiment.textColor}`}
-                                style={{ lineHeight: "1.5" }}
-                              >
-                                {dominantSentiment.emoji}
-                                <span className="ml-1">{dominantSentiment.name}</span>
-                              </span>
-                            </div>
-                          </foreignObject>
-                        </>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-              </PolarRadiusAxis>
+              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false} />
               <RadialBar
                 dataKey="negative"
                 stackId="a"
                 cornerRadius={5}
                 fill={sentiments.negative.color}
-                className="stroke-transparent stroke-2"
               />
               <RadialBar
                 dataKey="neutral"
                 stackId="a"
                 cornerRadius={5}
                 fill={sentiments.neutral.color}
-                className="stroke-transparent stroke-2"
               />
               <RadialBar
                 dataKey="positive"
                 stackId="a"
                 cornerRadius={5}
                 fill={sentiments.positive.color}
-                className="stroke-transparent stroke-2"
               />
             </RadialBarChart>
           </ResponsiveContainer>
+
+          {/* Custom center content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div className="text-2xl font-bold text-gray-900">
+              {dominantSentiment.value}%
+            </div>
+            <div
+              className={`mt-1 inline-flex items-center px-3 py-1 text-sm rounded-full ${dominantSentiment.bgColor} ${dominantSentiment.textColor}`}
+              style={{ lineHeight: "1.5" }}
+            >
+              {dominantSentiment.emoji}
+              <span className="ml-1">{dominantSentiment.name}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

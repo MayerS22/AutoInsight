@@ -173,13 +173,17 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
       "http://localhost:3000/api/v1/users/user-data",
       { headers: { Authorization: `Bearer ${token}` } }
     );
-
+   console.log(token);
+   
+   
+   
     dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
     dispatch(authActions.addUsername(response.data.body.username));
     dispatch(authActions.addEmail(response.data.body.email));
     dispatch(authActions.addID(response.data.body._id));
     dispatch(authActions.addCountry(response.data.body.country));
     dispatch(authActions.addJobTitle(response.data.body.job));
+    dispatch(authActions.addDateCreated(response.data.body.createdAt));
     
     localStorage.setItem("userId", response.data.body._id);    
   } catch (error) {

@@ -8,8 +8,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { fetchTopJobTitles } from "../Services/Admin_API";
 
-
-
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
@@ -22,11 +20,9 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-
 const TopJobTitles = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [chartData, setChartData] = useState([]);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,19 +51,16 @@ const TopJobTitles = () => {
     fetchData();
   }, []);
 
-
-
   return (
     <div className="bg-white rounded-lg">
-      <div>
+      <div className="mb-7">
         <h2 className="text-lg font-bold">Top Job Titles of Our Users</h2>
-        <p className="text-sm text-gray-500">January - June 2024</p>
       </div>
 
       <div className="flex justify-between items-center">
         {/* Chart Section - Left aligned */}
         <div className="flex-shrink-0">
-          <PieChart width={300} height={300}>
+          <PieChart width={300} height={250}> {/* Increased width and height */}
             <Tooltip content={<CustomTooltip />} />
             <Pie
               data={chartData}
@@ -75,12 +68,14 @@ const TopJobTitles = () => {
               nameKey="jobTitle"
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={80}
+              outerRadius={120} 
               strokeWidth={0}
               activeIndex={activeIndex}
               onMouseEnter={(_, index) => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
+              isAnimationActive={true} // Enable animation
+              animationDuration={800} // Set animation duration
             >
               {chartData.map((entry, index) => (
                 <Cell
@@ -98,10 +93,10 @@ const TopJobTitles = () => {
           {chartData.map((item) => (
             <div key={item.jobTitle} className="flex items-center">
               <div
-                className="w-3 h-3 rounded-full mr-3"
-                style={{ backgroundColor: "#8A70D6" }}
+                className={`w-4 h-4 rounded-full mr-3`}
+                style={{ backgroundColor: item.fill }} 
               />
-              <span className="text-lg font-medium flex-1">{item.jobTitle}</span>
+              <span className="text-lg font-bold flex-1">{item.jobTitle}</span>
               <span className="text-sm text-gray-500 ml-12">{item.users} Users</span>
             </div>
           ))}

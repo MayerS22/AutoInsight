@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { marginActions, authActions } from "../../store/index";
 import { NotLoggedIn } from "../NotLoggedIn";
@@ -19,13 +19,20 @@ import CreateTeamIcon from "../../assets/CreateTeamIcon.svg";
 import CreateTeamModal from "./CreateTeamModal";
 import Teams from "./Teams";
 import { useNavigate } from "react-router-dom";
+import ChangePasswordModal from "../Authentication/ChangePasswordModal.jsx";
 
 
 const DatasetPage = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
-  const email = useSelector((state) => state.auth.email);
+  const createdAt = useSelector((state) => state.auth.dateCreated);
+  const dateCreated = new Date(createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+  });
+    const email = useSelector((state) => state.auth.email);
   const country = useSelector((state) => state.auth.country);
   const jobTitle = useSelector((state) => state.auth.jobTitle);
   const token = localStorage.getItem("token");
@@ -39,6 +46,8 @@ const DatasetPage = () => {
   const [memberPermissions, setMemberPermissions] = useState({});
 
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+
 
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
@@ -63,22 +72,22 @@ const DatasetPage = () => {
   useEffect(() => {
     const fetchDatasets = async () => {
       setLoading(true);  // Set loading to true when fetch starts
-  
+
       try {
         const response = await getUserTeams(token);
         const teamsData = response.data.body;
         console.log("Fetched teams data:", teamsData);
-  
+
         const permissionsRef = {};  // Use useRef to store permissions
-  
+
         const teams = teamsData.map((team) => {
           const ownerEmail = team.owner.email;
-  
+
           // Filter out the logged-in user and owner from the team members
           const filteredMembers = team.members.filter(
             (member) => member.email !== ownerEmail && member.email !== loggedInUserEmail
           );
-  
+
           // Set permissions for the logged-in user
           if (team.owner.email === loggedInUserEmail) {
             permissionsRef[team._id] = "owner";
@@ -88,32 +97,32 @@ const DatasetPage = () => {
               permissionsRef[team._id] = team.memberPermission;
             }
           }
-  
+
           return {
             ...team,
             members: filteredMembers, // Include only relevant members
           };
         });
-  
+
         // Update the teams state
         setTeams(teams);
-  
+
         // Directly update the permissions without waiting for re-renders
-        setMemberPermissions(permissionsRef);  
-  
+        setMemberPermissions(permissionsRef);
+
       } catch (error) {
         console.error("Error fetching datasets:", error);
       } finally {
         setLoading(false);  // Set loading to false when fetch finishes
       }
     };
-  
+
     fetchDatasets();
   }, [token, loggedInUserEmail]);  // Dependency on token and logged-in user email
-  
-  
-  
-  
+
+
+
+
 
   const handleCreateTeam = () => {
     setShowCreateTeamModal(true);
@@ -149,6 +158,14 @@ const DatasetPage = () => {
     setShowProfileModal(false);
   };
 
+  const openChangePasswordModal = () => {
+    setIsChangePasswordModalOpen(true);
+  };
+
+  const closeChangePasswordModal = () => {
+    setIsChangePasswordModalOpen(false);
+  };
+
   if (!isLoggedIn) return <NotLoggedIn />;
 
   const accountCreatedDate = "March 01, 2025";
@@ -180,7 +197,7 @@ const DatasetPage = () => {
                   value="••••••••••••••"
                 />
                 <button
-                  onClick={() => { navigate("/forgot-password") }}
+                  onClick={openChangePasswordModal}
                   className="mt-2 sm:mt-0 bg-purple-950 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded flex items-center self-start sm:self-auto"
                 >
                   <img src={EditPasswordIcon} alt="Edit" className="h-3 w-3 mr-2" />
@@ -191,7 +208,7 @@ const DatasetPage = () => {
               <InfoField
                 icon={DateIcon}
                 label="Account Created"
-                value={accountCreatedDate}
+                value={dateCreated}
               />
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
@@ -240,6 +257,11 @@ const DatasetPage = () => {
           disableDashboardInput={true}
         />
       )}
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={closeChangePasswordModal}
+      />
     </Allignment>
   );
 };

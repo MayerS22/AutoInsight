@@ -1,29 +1,63 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import CountryFlag from "./CountryFlag";
-import countryNameToCode from "../../../services/countryCode";
+import { fetchTopCountries } from "../Services/Admin_API";
+import countries from "world-countries";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-// DUMMY ARRAY OF TOP COUNTRIES
-const topCountries = [
-  { id: "EGY", name: "Egypt", flagCode: "EG" },
-  { id: "ARE", name: "United Arab Emirates", flagCode: "AE" },
-  { id: "USA", name: "USA", flagCode: "US" },
-  { id: "CAN", name: "Canada", flagCode: "CA" },
-  { id: "RUS", name: "Russia", flagCode: "RU" },
-  { id: "ATA", name: "Antarctica", flagCode: "AQ" }, // Added Antarctica
-];
-
 const AudienceLocation = ({ setTooltipContent }) => {
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [errorLoadingCountries, setErrorLoadingCountries] = useState(false);
+  const [topCountries, setTopCountries] = useState([]);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const data = await fetchTopCountries();
+        const formattedCountries = countries.map((country) => ({
+          value: country.cca2,
+          label: country.name.common,
+          code: country.cca2.toLowerCase(),
+        }));
+
+        const cleaned = data
+          .filter((c) => c.country && c.country !== "not provided")
+          .map((c) => {
+            const matchedCountry = formattedCountries.find(
+              (fc) => fc.value === c.country.toUpperCase()
+            );
+            return {
+              code: c.country.toUpperCase(),
+              name: matchedCountry ? matchedCountry.label : c.country,
+              flagCode: c.country.toLowerCase(),
+              count: c.count,
+            };
+          });
+          console.log(cleaned);
+          
+
+        setTopCountries(cleaned);
+      } catch (error) {
+        const message = error?.response?.data?.message || error?.message || "Unknown error";
+        console.error("Error fetching top countries:", message);
+        setErrorLoadingCountries(true);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
   return (
     <div className="md:col-span-7 bg-white rounded-lg">
-      {/* Heading */}
       <h2 className="text-lg font-bold mb-4">Audience Location</h2>
 
       <div className="flex flex-col md:flex-row">
-        {/* Map container */}
         <div className="flex-grow">
           <ComposableMap
             projectionConfig={{ scale: 160 }}
@@ -34,16 +68,16 @@ const AudienceLocation = ({ setTooltipContent }) => {
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  const countryCode = countryNameToCode[geo.properties.name]; // ex: "USA"
+                  const isoCode = geo.properties.name;                      
                   const isHighlighted = topCountries.some(
-                    (c) => c.id === countryCode
-                  ); // is it one of our top?
+                    (c) => c.name === isoCode
+                  );
                   return (
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      data-tooltip-id="map-tooltip" // associate with Tooltip
-                      data-tooltip-content={geo.properties.name} // show name
+                      data-tooltip-id="map-tooltip"
+                      data-tooltip-content={geo.properties.name}
                       onMouseEnter={() => setTooltipContent(geo.properties.name)}
                       onMouseLeave={() => setTooltipContent("")}
                       style={{
@@ -69,14 +103,13 @@ const AudienceLocation = ({ setTooltipContent }) => {
           </ComposableMap>
         </div>
 
-        {/* Top Countries container */}
         <div className="w-full md:w-52 mt-28 ml-4">
           <h3 className="text-purple-800 font-bold mb-3">Top Countries</h3>
           <div className="space-y-3">
             {topCountries.map((country) => (
-              <div key={country.id} className="flex items-center">
+              <div key={country.code} className="flex items-center">
                 <CountryFlag countryCode={country.flagCode} />
-                <span className="ml-2">{country.name}</span>
+                <span className="ml-2">{country.name} </span>
               </div>
             ))}
           </div>

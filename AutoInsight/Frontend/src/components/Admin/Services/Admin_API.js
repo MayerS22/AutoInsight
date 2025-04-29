@@ -106,10 +106,8 @@ export const fetchDomainCount = async () => {
 // Fetch top job titles
 export const fetchTopJobTitles = async () => {
   try {
-    const config = createAuthConfig();
     const response = await axios.get(
       `${API_URL}/api/v1/users/jobs-count`,
-      config
     );
     return response.data?.body ?? [];
   } catch (error) {
@@ -137,6 +135,8 @@ export const fetchReviewsCounts = async () => {
     // If you need authentication headers, add them here. For simplicity, they are omitted.
     const response = await axios.get(`${API_URL}/api/v1/reviews/reviews_stats`);
     // Assuming the API returns the counts in the response.data.body
+    console.log(response.data.body);
+    
     return response.data?.body;
   } catch (error) {
     console.error("Error fetching review counts:", error);
@@ -152,7 +152,23 @@ export const fetchAllReviews = async (page = 1, limit = 10) => {
       `${API_URL}/api/v1/reviews?page=${page}&limit=${limit}`,
       config
     );
+    
     // Assuming the API returns reviews in response.data.body
+    return response.data?.body || [];
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    throw error;
+  }
+};
+
+
+export const fetchTopCountries = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/api/v1/users/country-count`,
+    );
+    // Assuming the API returns reviews in response.data.body
+    
     return response.data?.body || [];
   } catch (error) {
     console.error("Error fetching reviews:", error);

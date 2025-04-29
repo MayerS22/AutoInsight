@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useEffect } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
 import RecentAccounts from "./DashBoardComponents/RecentAccounts.jsx";
@@ -19,208 +16,121 @@ import {
   fetchTotalCleanedDatasets,
   fetchTotalGeneratedDashboards,
   fetchNumberOfUsers,
-  fetchRecentUsers
+  fetchRecentUsers,
+  fetchUserGrowthData
 } from "./Services/Admin_API.js";
 
 const AdminDashboard = () => {
-  const userGrowthData = [
-    { name: "Jan", value: 20 },
-    { name: "Feb", value: 40 },
-    { name: "Mar", value: 30 },
-    { name: "Apr", value: 45 },
-    { name: "May", value: 25 },
-    { name: "Jun", value: 38 },
-    { name: "Jul", value: 42 },
-  ];
-
-
   const [content, setContent] = useState("");
   const [totalCleanedDatasets, setTotalCleanedDatasets] = useState("0");
   const [totalGeneratedDashboards, setTotalGeneratedDashboards] = useState("0");
   const [totalUsersCount, setTotalUsersCount] = useState("0");
   const [recentAccounts, setRecentAccounts] = useState([]);
+  const [userGrowthData, setUserGrowthData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const isAdmin = useSelector((state) => state.auth.isAdmin);
 
-  // Updated transformUserData function for the AdminDashboard component
-
-const transformUserData = (users) => {
-  if (!users || (!Array.isArray(users) && typeof users !== 'object')) {
-    console.warn("Invalid user data received:", users);
-    return [];
-  }
-  
-  const userArray = Array.isArray(users) ? users : [users];
-  
-  return userArray.map(user => {
-    console.log("User data from API:", user);
-    
-    // Format the timestamp before sending to the component
-    const formatTimeAgo = (timestamp) => {
-      if (!timestamp) return "No timestamp";
-      
+  useEffect(() => {
+    const fetchDashboardData = async () => {
       try {
-        const date = new Date(timestamp);
-        if (isNaN(date.getTime())) return "Invalid date";
-        
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        if (diffMins < 1) return "Just now";
-        if (diffMins < 60) return `${diffMins} min ago`;
-        if (diffHours < 24) return `${diffHours} hr ago`;
-        if (diffDays === 1) return "Yesterday";
-        if (diffDays < 30) return `${diffDays} days ago`;
-        
-        return date.toLocaleDateString();
-      } catch (err) {
-        console.error("Error formatting date:", err, "for timestamp:", timestamp);
-        return "Date error";
-      }
-    };
-    
-    // Get the timestamp from the available fields
-    const timestamp = user.createdAt || user.created_at || user.timestamp;
-    
-    return {
-      // Use the username as the display name
-      name: user.username || user.name || "Unknown User",
-      
-      // Pre-format the time before passing to component
-      time: formatTimeAgo(timestamp),
-      
-      // Use the profile picture if provided
-      profilePic: user.profile_picture || user.profilePic || user.avatar || null,
-      
-      // Fallback initial uses the first letter of the username
-      initial: (user.username || user.name || "U").charAt(0).toUpperCase(),
-    };
-  });
-};
+        setIsLoading(true);
+        const [
+          cleanedDatasetsCount,
+          dashboardsCount,
+          usersCount,
+          recentUsersResponse,
+          userGrowthResponse
+        ] = await Promise.all([
+          fetchTotalCleanedDatasets(),
+          fetchTotalGeneratedDashboards(),
+          fetchNumberOfUsers(),
+          fetchRecentUsers(),
+          fetchUserGrowthData()
+        ]);
 
+        setTotalCleanedDatasets(String(cleanedDatasetsCount));
+        setTotalGeneratedDashboards(String(dashboardsCount));
+        setTotalUsersCount(String(usersCount));
 
- // Replace your useEffect in AdminDashboard.jsx with this updated version
+        let recentUsersData = recentUsersResponse;
+        if (recentUsersResponse?.body) {
+          recentUsersData = recentUsersResponse.body;
+        }
 
-useEffect(() => {
-  const fetchDashboardData = async () => {
-    try {
-      setIsLoading(true);
-      const [
-        cleanedDatasetsCount,
-        dashboardsCount,
-        usersCount,
-        recentUsersResponse
-      ] = await Promise.all([
-        fetchTotalCleanedDatasets(),
-        fetchTotalGeneratedDashboards(),
-        fetchNumberOfUsers(),
-        fetchRecentUsers()
-      ]);
+        const formattedRecentAccounts = recentUsersData.map(user => {
+          let timeDisplay = "No timestamp";
+          if (user.createdAt) {
+            try {
+              const date = new Date(user.createdAt);
+              const now = new Date();
+              const diffMs = now - date;
+              const diffMins = Math.floor(diffMs / 60000);
 
-      
-
-      setTotalCleanedDatasets(String(cleanedDatasetsCount));
-      setTotalGeneratedDashboards(String(dashboardsCount));
-      setTotalUsersCount(String(usersCount));
-
-      // Debug the raw response
-      console.log("Raw recent users response:", recentUsersResponse);
-      
-      // Handle different response structures
-      let recentUsersData = recentUsersResponse;
-      
-      // If the response is in { body: [...] } format (common in Express APIs)
-      if (recentUsersResponse && recentUsersResponse.body) {
-        recentUsersData = recentUsersResponse.body;
-        console.log("Extracted data from response body");
-      }
-      
-      console.log("Processed recent users data:", recentUsersData);
-      
-      // Even more robust user data transformation
-      const formattedRecentAccounts = recentUsersData.map(user => {
-        console.log("Processing user:", user);
-        
-        // Format timestamp directly
-        let timeDisplay = "No timestamp";
-        
-        if (user.createdAt) {
-          console.log("Found createdAt timestamp:", user.createdAt);
-          try {
-            const date = new Date(user.createdAt);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            
-            if (diffMins < 60) {
-              timeDisplay = diffMins <= 1 ? "Just now" : `${diffMins} min ago`;
-            } else {
-              const diffHours = Math.floor(diffMins / 60);
-              if (diffHours < 24) {
-                timeDisplay = `${diffHours} hr ago`;
+              if (diffMins < 60) {
+                timeDisplay = diffMins <= 1 ? "Just now" : `${diffMins} min ago`;
               } else {
-                const diffDays = Math.floor(diffHours / 24);
-                if (diffDays === 1) {
-                  timeDisplay = "Yesterday";
-                } else if (diffDays < 30) {
-                  timeDisplay = `${diffDays} days ago`;
+                const diffHours = Math.floor(diffMins / 60);
+                if (diffHours < 24) {
+                  timeDisplay = `${diffHours} hr ago`;
                 } else {
-                  timeDisplay = date.toLocaleDateString();
+                  const diffDays = Math.floor(diffHours / 24);
+                  if (diffDays === 1) {
+                    timeDisplay = "Yesterday";
+                  } else if (diffDays < 30) {
+                    timeDisplay = `${diffDays} days ago`;
+                  } else {
+                    timeDisplay = date.toLocaleDateString();
+                  }
                 }
               }
+            } catch (err) {
+              timeDisplay = new Date(user.createdAt).toLocaleString();
             }
-          } catch (err) {
-            console.error("Error formatting date:", err);
-            timeDisplay = new Date(user.createdAt).toLocaleString(); // Fallback
           }
-        } else {
-          console.warn("No createdAt timestamp found for user:", user);
-        }
-        
-        return {
-          name: user.username || "Unknown User",
-          time: timeDisplay,
-          profilePic: user.profile_picture || null,
-          initial: (user.username || "U").charAt(0).toUpperCase()
-        };
-      });
-      
-      console.log("Formatted accounts:", formattedRecentAccounts);
-      setRecentAccounts(formattedRecentAccounts);
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-      if (err.message && err.message.includes("No authentication token")) {
-        useStaticData();
-      } else if (err.response && err.response.status === 401) {
-        setError("Authentication failed. Please login again.");
-        useStaticData();
-      } else {
-        setError("Failed to load dashboard data");
-        useStaticData();
-      }
-    }
-  };
 
-  fetchDashboardData();
-}, []);
+          return {
+            name: user.username || "Unknown User",
+            time: timeDisplay,
+            profilePic: user.profile_picture || null,
+            initial: (user.username || "U").charAt(0).toUpperCase()
+          };
+        });
+
+        const monthNames = [
+          "Jan", "Feb", "Mar", "Apr", "May", "June",
+          "July", "Aug", "Sept", "Octr", "Nov", "Dec"
+        ];
+        
+        const formattedGrowthData = userGrowthResponse.map(item => ({
+          name: monthNames[item.month - 1], // Convert month number to name
+          value: item.count
+        }));
+        
+
+        setRecentAccounts(formattedRecentAccounts);
+        setUserGrowthData(formattedGrowthData);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data");
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="bg-purple-50 min-h-screen pt-20">
-      <div className="max-w-8xl mx-auto p-8">
-        <div className="flex gap-8 items-stretch">
+      <div className="container mx-auto px-2 sm:px-4 md:px-8 py-4">
+        <div className="flex flex-col gap-8 items-stretch lg:flex-row">
           {/* Left Column */}
-          <div className="flex-1 flex flex-col gap-6">
-            {/* Top Section: Cards & Recent Accounts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Cards Section */}
-              <div className="flex flex-col gap-4">
-                {/* Top Row: Two Cards side-by-side */}
-                <div className="grid grid-cols-2 gap-4">
+          <div className="flex-1 flex flex-col gap-6 w-full min-w-0">
+            {/* Top Cards and Recent Accounts */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-4 min-w-0">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Card
                     icon={totalUsers}
                     label="Total Users"
@@ -235,7 +145,6 @@ useEffect(() => {
                     error={error ? "Failed to load" : null}
                   />
                 </div>
-                {/* Second Row: Third Card spanning full width */}
                 <div>
                   <Card
                     icon={totalDashboard}
@@ -245,26 +154,25 @@ useEffect(() => {
                   />
                 </div>
               </div>
-              {/* Recent Accounts Section */}
-              <div className="bg-white p-4 rounded-lg shadow-md h-full">
+              <div className="bg-white p-4 rounded-lg shadow-md h-full mt-4 md:mt-0 min-w-0">
                 <RecentAccounts accounts={recentAccounts} />
               </div>
             </div>
-            {/* Bottom Section: Audience Location */}
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            {/* Audience Location */}
+            <div className="bg-white p-4 rounded-lg shadow-md mt-4 min-w-0">
               <AudienceLocation setTooltipContent={setContent} content={content} />
               <Tooltip id="map-tooltip">{content}</Tooltip>
             </div>
           </div>
+
           {/* Right Column */}
-          <div className="flex-1 flex flex-col gap-6">
-            {/* Top Section: Business Domain, Reviews Analysis, User Growth */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="flex-1 flex flex-col gap-6 w-full mt-8 lg:mt-0 min-w-0">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="bg-white p-4 rounded-lg shadow-md min-w-0">
                 <BusinessDomainChart />
               </div>
-              <div className="flex flex-col gap-2">
-                <div className="bg-white p-2 rounded-lg shadow-md">
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="bg-white p-2 rounded-lg shadow-md mb-2">
                   <ReviewsAnalysis />
                 </div>
                 <div className="bg-white p-2 rounded-lg shadow-md">
@@ -272,8 +180,7 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-            {/* Bottom Section: Top Job Titles */}
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            <div className="bg-white p-4 rounded-lg shadow-md mt-4 min-w-0">
               <TopJobTitles />
             </div>
           </div>

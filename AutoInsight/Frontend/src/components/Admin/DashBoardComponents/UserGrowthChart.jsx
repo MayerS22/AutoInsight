@@ -9,7 +9,6 @@ const UserGrowthChart = ({ data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            // Use a negative left margin to shift the chart further left
             margin={{ top: 10, right: 10, left: -40, bottom: 10 }}
           >
             <XAxis
@@ -17,7 +16,7 @@ const UserGrowthChart = ({ data }) => {
               tick={{ fontSize: 10 }}
               padding={{ left: 0, right: 0 }}
             />
-            <YAxis tick={{ fontSize: 10 }} domain={[0, 60]} />
+            <YAxis tick={{ fontSize: 10 }} domain={[0, "auto"]} />
             <Line
               type="monotone"
               dataKey="value"

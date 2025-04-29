@@ -19,7 +19,7 @@ const BusinessDomainChart = () => {
       try {
         setLoading(true);
         const data = await fetchDomainCount();
-        console.log("Domain data received:", data);
+        //console.log("Domain data received:", data);
         setDomainData(data);
         setFetchError(null);
       } catch (err) {

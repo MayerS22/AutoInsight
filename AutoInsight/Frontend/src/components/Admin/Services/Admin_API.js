@@ -2,12 +2,12 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000";
 
-// Get authentication token
+// Get token from localStorage or sessionStorage
 const getAuthToken = () => {
   return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
-// Create axios config with auth headers
+// Create axios config with Authorization header
 const createAuthConfig = () => {
   const token = getAuthToken();
   if (!token) throw new Error("No authentication token found.");
@@ -21,7 +21,7 @@ const createAuthConfig = () => {
   };
 };
 
-// Fetch total cleaned datasets count
+// Fetch total number of cleaned datasets
 export const fetchTotalCleanedDatasets = async () => {
   try {
     const config = createAuthConfig();
@@ -36,7 +36,7 @@ export const fetchTotalCleanedDatasets = async () => {
   }
 };
 
-// Fetch total generated dashboards count
+// Fetch total number of generated dashboards
 export const fetchTotalGeneratedDashboards = async () => {
   try {
     const config = createAuthConfig();
@@ -51,7 +51,7 @@ export const fetchTotalGeneratedDashboards = async () => {
   }
 };
 
-// Fetch total number of users  
+// Fetch total number of users
 export const fetchNumberOfUsers = async () => {
   try {
     const config = createAuthConfig();
@@ -66,45 +66,29 @@ export const fetchNumberOfUsers = async () => {
   }
 };
 
-
-// Updated fetchRecentUsers function - replace your current implementation with this
-
+// Fetch recent users (updated)
 export const fetchRecentUsers = async () => {
   try {
     const config = createAuthConfig();
-    const response = await axios.get(
-      `${API_URL}/api/v1/users/recent-4-users`,
-      config
-    );
-    
-    console.log("Recent users:", response);
-    
-    // Handle different API response structures
-    let userData;
-    
-    if (response.data && response.data.body) {
-      // If response has a body property (common pattern in Express APIs)
-      userData = response.data.body;
-    } else if (response.data && Array.isArray(response.data)) {
-      // If response data is directly an array
-      userData = response.data;
-    } else if (response.data) {
-      // If response data is something else
-      userData = response.data;
-    } else {
-      console.error("Unexpected API response structure:", response);
-      return [];
+    const response = await axios.get(`${API_URL}/api/v1/users/recent-4-users`, config);
+    //console.log("API Response:", response.data);  // still good for debug
+
+    let users = [];
+    if (response.data?.body && Array.isArray(response.data.body)) {
+      users = response.data.body;  // Correct: get users from body
     }
-    
-    console.log("Extracted user data:", userData);
-    return userData;
+
+    return users;
   } catch (error) {
-    console.error("Error fetching recent users:", error);
-    throw error;
+    console.error("Error fetching recent users:", error.response?.data || error.message);
+    return [];
   }
 };
 
-// Fetch domain counts for business domains from API
+
+
+
+// Fetch domain counts
 export const fetchDomainCount = async () => {
   try {
     const config = createAuthConfig();
@@ -114,15 +98,12 @@ export const fetchDomainCount = async () => {
     );
     return response.data?.body ?? { ecommerce: 0, education: 0 };
   } catch (error) {
-    console.error(
-      "Error fetching domain counts:",
-      error.response?.data || error.message
-    );
+    console.error("Error fetching domain counts:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// Fetch top job titles from API
+// Fetch top job titles
 export const fetchTopJobTitles = async () => {
   try {
     const config = createAuthConfig();
@@ -133,6 +114,18 @@ export const fetchTopJobTitles = async () => {
     return response.data?.body ?? [];
   } catch (error) {
     console.error("Error fetching top job titles:", error);
+    throw error;
+  }
+};
+
+export const fetchUserGrowthData = async () => {
+  try {
+    const config = createAuthConfig();
+    const response = await axios.get(`${API_URL}/api/v1/users/users-months`, config);
+    //console.log("API Response:", response.data);  // Log the response
+    return response.data?.body ?? [];
+  } catch (error) {
+    console.error("Error fetching user growth data:", error);
     throw error;
   }
 };

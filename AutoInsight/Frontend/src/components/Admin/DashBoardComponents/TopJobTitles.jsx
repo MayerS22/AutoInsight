@@ -32,7 +32,7 @@ const TopJobTitles = () => {
     const fetchData = async () => {
       try {
         const topJobTitles = await fetchTopJobTitles();
-        console.log(topJobTitles); // this is the object you showed
+        //console.log(topJobTitles); // this is the object you showed
 
         // Transform the topJobTitles object into an array
         const COLORS = ["#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD", "#DDD6FE", "#6366F1", "#4F46E5"];

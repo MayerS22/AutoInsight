@@ -129,3 +129,17 @@ export const fetchUserGrowthData = async () => {
     throw error;
   }
 };
+
+
+// Fetch the review counts
+export const fetchReviewsCounts = async () => {
+  try {
+    // If you need authentication headers, add them here. For simplicity, they are omitted.
+    const response = await axios.get(`${API_URL}/api/v1/reviews/reviews_stats`);
+    // Assuming the API returns the counts in the response.data.body
+    return response.data?.body;
+  } catch (error) {
+    console.error("Error fetching review counts:", error);
+    throw error;
+  }
+};

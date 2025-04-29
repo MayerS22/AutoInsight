@@ -143,3 +143,19 @@ export const fetchReviewsCounts = async () => {
     throw error;
   }
 };
+
+
+export const fetchAllReviews = async (page = 1, limit = 10) => {
+  try {
+    const config = createAuthConfig();
+    const response = await axios.get(
+      `${API_URL}/api/v1/reviews?page=${page}&limit=${limit}`,
+      config
+    );
+    // Assuming the API returns reviews in response.data.body
+    return response.data?.body || [];
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    throw error;
+  }
+};

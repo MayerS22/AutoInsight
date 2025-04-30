@@ -175,6 +175,7 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
     );
    console.log(token);
    
+   console.log(response.data.body.admin);
    
    
     dispatch(authActions.addProfilePicture(response.data.body.profile_picture));
@@ -184,6 +185,7 @@ export const fetchUserProfile = async (token,authActions,dispatch) => {
     dispatch(authActions.addCountry(response.data.body.country));
     dispatch(authActions.addJobTitle(response.data.body.job));
     dispatch(authActions.addDateCreated(response.data.body.createdAt));
+    dispatch(authActions.isAdmin(response.data.body.admin))
     
     localStorage.setItem("userId", response.data.body._id);    
   } catch (error) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import Card from "./DashBoardComponents/Card.jsx";
 import RecentAccounts from "./DashBoardComponents/RecentAccounts.jsx";
@@ -11,6 +12,7 @@ import totalUsers from "../../assets/totalUsers.svg";
 import totalDashboard from "../../assets/totalDashboard.svg";
 import { useSelector } from "react-redux";
 import { Tooltip } from "react-tooltip";
+import { Allignment } from "../Profile/Allignment.jsx";
 import "react-tooltip/dist/react-tooltip.css";
 import {
   fetchTotalCleanedDatasets,
@@ -101,12 +103,12 @@ const AdminDashboard = () => {
           "Jan", "Feb", "Mar", "Apr", "May", "June",
           "July", "Aug", "Sept", "Octr", "Nov", "Dec"
         ];
-        
+
         const formattedGrowthData = userGrowthResponse.map(item => ({
           name: monthNames[item.month - 1], // Convert month number to name
           value: item.count
         }));
-        
+
 
         setRecentAccounts(formattedRecentAccounts);
         setUserGrowthData(formattedGrowthData);
@@ -120,6 +122,20 @@ const AdminDashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  if (!isAdmin) {
+    return (
+      <>
+        <Allignment>
+          <div className="text-center p-8">
+            <h1 className="text-3xl font-bold text-red-600">403 - Unauthorized</h1>
+            <p className="text-lg mt-4">You do not have permission to view this page.</p>
+          </div>
+
+        </Allignment>
+      </>
+    )
+  }
 
   return (
     <div className="bg-purple-50 min-h-screen pt-20">

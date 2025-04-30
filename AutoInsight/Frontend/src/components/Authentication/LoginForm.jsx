@@ -18,7 +18,6 @@ import { useDispatch } from 'react-redux';
 import { authActions } from "../../store/index"
 import axios from "axios";
 
-
 const Login = ({ toggleForm, setUserName }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -52,12 +51,28 @@ const Login = ({ toggleForm, setUserName }) => {
     setEdited(prev => ({ ...prev, [identifier]: true }));
   };
 
+  const parseJwt = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  };
 
 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // Form validation
     if (!isEmailValid(formData.email) || !hasMinLength(formData.password, 8)) {
       setErrors({
         loginError: "Please fix the form errors before submitting."
@@ -65,24 +80,34 @@ const Login = ({ toggleForm, setUserName }) => {
       return;
     }
 
-   
     try {
+      // Send login request
       const response = await axios.post("http://localhost:3000/api/v1/auth/login", formData, {
         headers: { "Content-Type": "application/json" },
       });
 
       const { token } = response.data.body; // ✅ Extract token from response
-      console.log(response.data);
+      const decoded = parseJwt(token); // Decode the JWT token
+
+      console.log(decoded);
 
       const email = formData.email;
+      ;
+      
+      // If the user is an admin, navigate to the admin page
+      if (decoded.admin) {
+        navigate("/admin"); // Navigate to the admin page
+        dispatch(authActions.isAdmin(true))
+      } else {
+        navigate("/home"); // Navigate to the normal home page
+      }
 
       toast.success("Login successful");
       const redirectUrl = localStorage.getItem("redirectUrl") || "/";
       localStorage.removeItem("redirectUrl");
 
-      navigate("/home");
       dispatch(authActions.login({ email, token }));
-      console.log("Login Form token" + token);
+      console.log("Login Form token: " + token);
     } catch (error) {
       console.error("Login error:", error);
 
@@ -93,6 +118,7 @@ const Login = ({ toggleForm, setUserName }) => {
       }
     }
   };
+
 
   return (
     <>
@@ -136,7 +162,7 @@ const Login = ({ toggleForm, setUserName }) => {
             </p>
           </div>
         )}
-        <button onClick={() => { navigate("/forgot-password") }} className='text-purple-950 underline'>Forgot password?</button>
+        <button type='button' onClick={() => { navigate("/forgot-password") }} className='text-purple-950 underline'>Forgot password?</button>
         <div className="flex justify-center">
           <button className="w-2/3 bg-purple-900 text-white p-2 rounded-lg hover:bg-purple-800 mt-6 font-bold">
             Login

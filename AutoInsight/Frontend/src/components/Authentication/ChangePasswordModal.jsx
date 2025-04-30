@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import CloseIcon from "../../assets/Close.svg";
+import { toast } from "react-toastify";
 
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
@@ -16,6 +17,11 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const handleInputChange = (setter, field) => (e) => {
+        setter(e.target.value);
+        setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+    };
 
     // Reset form when modal closes
     const handleClose = () => {
@@ -115,20 +121,21 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             setNewPassword("");
             setConfirmPassword("");
 
-            // Auto close modal after successful password change (optional)
-            setTimeout(() => {
-                handleClose();
-            }, 2000);
+         
+            handleClose();
+            toast.success("Password changed sucessfully")
+          
         } catch (error) {
             const errorMessage = error.response?.data?.message ||
                 error.response?.message ||
                 "Password change failed. Please verify your current password and try again.";
 
-            setNotification({
-                show: true,
-                type: "error",
-                message: errorMessage
-            });
+             if(errorMessage.includes("Invalid credentials"))
+             {
+                const newErrors={}
+                newErrors.currentPassword = "the current password you entered is incorrect.";
+                setErrors(newErrors)
+             }
         } finally {
             setIsLoading(false);
         }
@@ -211,7 +218,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.currentPassword ? "border-red-500" : "border-gray-300"}`}
                                     placeholder="Enter current password"
                                     value={currentPassword}
-                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    onChange={handleInputChange(setCurrentPassword, "currentPassword")}
                                     disabled={isLoading}
                                 />
                                 <button
@@ -240,7 +247,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.newPassword ? "border-red-500" : "border-gray-300"}`}
                                     placeholder="Enter new password"
                                     value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    onChange={handleInputChange(setNewPassword, "newPassword")}
                                     disabled={isLoading}
                                 />
                                 <button
@@ -272,7 +279,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
                                     placeholder="Confirm new password"
                                     value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    onChange={handleInputChange(setConfirmPassword, "confirmPassword")}
                                     disabled={isLoading}
                                 />
                                 <button

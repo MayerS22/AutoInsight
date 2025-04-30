@@ -203,7 +203,7 @@ const Dashboard = () => {
           ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
           .map((chart) => chart.url) || [];
       filtered[activeChartType] = filteredCharts;
-    } else if (activeChartType === "forecast") {
+    } else if (activeChartType === "forecast" ) {
       const filteredCharts =
         insightsUrls["forecast_data"]
           ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
@@ -266,7 +266,11 @@ const Dashboard = () => {
                   All Graphs
                 </button>
                 {Object.keys(insightsUrls)
-                  .filter((key) => !key.includes("_data"))
+                  .filter((key) => 
+                    !key.includes("_data") && 
+                    (key !== "forecast" || domain !== "education") && 
+                    (key !== "bar_chart" || domain !== "education")
+                  )
                   .map((type) => (
                     <button key={type} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition capitalize text-purple-800 font-bold" onClick={() => selectChartType(type)}>
                       {type === "reports" ? "Report" : type.replace("_", " ")}
@@ -278,7 +282,7 @@ const Dashboard = () => {
           {(activeChartType === "all" ||
             activeChartType === "bar_chart" ||
             activeChartType === "histogram") &&
-            availableBarFilters.length > 0 && (
+            availableBarFilters.length > 0 && domain !== "education" && (
               <div className="relative">
                 {
                   domain === "ecommerce" ? (<button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsBarFilterOpen(!isBarFilterOpen)}>
@@ -300,7 +304,7 @@ const Dashboard = () => {
               </div>
             )}
           {(activeChartType === "all" || activeChartType === "forecast") &&
-            availableForecastMonths.length > 0 && (
+            availableForecastMonths.length > 0 && domain !== "education" && (
               <div className="relative">
                 <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}>
                   {forecastMonthsFilter} Months
@@ -344,26 +348,35 @@ const Dashboard = () => {
       </h3>
       <div className="mt-12">
         {Object.entries(filteredInsights).map(([chartType, urls]) => (
-          <div key={chartType} className="mb-10">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
-              {chartType === "reports" ? "Report" : `${chartType.replace("_", " ")} Insights`}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {urls.length > 0 ? (
-                urls.map((url, index) => (
-                  <div key={index} className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer" onClick={() => handleImageClick(url)}>
-                    <img src={url} alt={`${chartType} Insight ${index + 1}`} className="w-full h-full object-cover" />
+          urls.length > 0 && (
+            <div key={chartType} className="mb-10">
+              <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
+                {chartType === "reports"
+                  ? "Report"
+                  : `${chartType.replace("_", " ")} Insights`}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {urls.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => handleImageClick(url)}
+                  >
+                    <img
+                      src={url}
+                      alt={`${chartType} Insight ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white text-lg font-semibold">
                       Click to View Larger
                     </div>
                   </div>
-                ))
-              ) : (
-               ""
-              )}
+                ))}
+              </div>
             </div>
-          </div>
+          )
         ))}
+
       </div>
       {selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 sm:px-6 lg:px-8">

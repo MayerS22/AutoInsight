@@ -1,4 +1,5 @@
 import Header from "./HomePage/HomePageComponents/Header";
+
 import { Outlet } from "react-router-dom";
 import { fetchUserProfile } from "../services/Api_Services";
 import { useEffect } from "react";
@@ -10,14 +11,11 @@ const RootLayout = () => {
   const dispatch=useDispatch();
   const token = localStorage.getItem("token");
   useEffect(()=>{
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
-    if(isAdmin){
-      dispatch(authActions.isAdmin())
-    }
-   if(!isAdmin)
-   {
+   
+
+  
     fetchUserProfile(token,authActions,dispatch);
-   }
+
   },[])
 
   return (

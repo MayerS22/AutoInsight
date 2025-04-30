@@ -10,7 +10,7 @@ const initialAuthState = {
     datasetOwnerId:"",
     country:"",
     jobTitle:"",
-    isAdmin: false,
+    isAdmin: null,
     dateCreated:""
     
 }
@@ -68,8 +68,8 @@ const authSlice = createSlice({
         addDateCreated(state,action){
             state.dateCreated=action.payload;
         },
-        isAdmin(state){
-            state.isAdmin = true;
+        isAdmin(state,action){
+            state.isAdmin = action.payload;
 
         }
     }

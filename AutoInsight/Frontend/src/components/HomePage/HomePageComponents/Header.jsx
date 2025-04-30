@@ -19,6 +19,7 @@ export default function Header() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const username = useSelector((state) => state.auth.username);
+  const isAdmin = useSelector((state) => state.auth.isAdmin)
   const [isProfileLoading, setIsProfileLoading] = useState(false)
   const [userPhoto, setUserPhoto] = useState(null); // New state for user photo
   const margin = useSelector((state) => state.margin.margin);
@@ -49,6 +50,7 @@ export default function Header() {
   function handleLogout() {
     setIsMobileMenuOpen(false);
     dispatch(authActions.logout());
+    dispatch(authActions.isAdmin(false))
     const token = localStorage.getItem('token');
     console.log(token);
     navigate("/login");
@@ -100,244 +102,252 @@ export default function Header() {
         </div>
       </button>
 
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center space-x-6">
-        <button
-          onClick={() => {
-            handleNavigation("/home")
-            setActiveOption("home");
-          }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'home' ? "underline" : ""}`}
-        >
-          Home
-        </button>
-        {isLoggedIn && <button
-          onClick={() => {
-            handleNavigation("/dashboards")
-            setActiveOption("dashboards")
-          }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'dashboards' ? "underline" : ""}`}
-        >
-          Dashboards
-        </button>}
-        <button
-          onClick={() => {
-            handleNavigation("/about-us")
-            setActiveOption("about-us")
-          }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'about-us' ? "underline" : ""}`}
-        >
-          About Us
-        </button>
-        <button
-          onClick={() => {
-            handleNavigation("/reviews")
-            setActiveOption("reviews")
-          }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'reviews' ? "underline" : ""}`}
-        >
-          Reviews
-        </button>
-        <button
-          onClick={() => {
-            handleNavigation("/contact")
-            setActiveOption("contact")
-          }}
-          className={`text-purple-900 hover:text-purple-700 ${activeOption === 'contact' ? "underline" : ""}`}
-        >
-          Contact
-        </button>
+      {isAdmin ? <button
+        onClick={handleLogout}
+        className="flex items-center space-x-2 mt-3"
+      >
+        <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
 
-        {isLoggedIn ? (
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => handleNavigation("/notification")}
-              className="flex items-center space-x-2"
-            >
-              <img src={notificationLogo} alt="notification-logo" className="w-8 h-8"/>
-            </button>
-            <div className="relative flex items-center">
+      </button> : <>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <button
+            onClick={() => {
+              handleNavigation("/home")
+              setActiveOption("home");
+            }}
+            className={`text-purple-900 hover:text-purple-700 ${activeOption === 'home' ? "underline" : ""}`}
+          >
+            Home
+          </button>
+          {isLoggedIn && <button
+            onClick={() => {
+              handleNavigation("/dashboards")
+              setActiveOption("dashboards")
+            }}
+            className={`text-purple-900 hover:text-purple-700 ${activeOption === 'dashboards' ? "underline" : ""}`}
+          >
+            Dashboards
+          </button>}
+          <button
+            onClick={() => {
+              handleNavigation("/about-us")
+              setActiveOption("about-us")
+            }}
+            className={`text-purple-900 hover:text-purple-700 ${activeOption === 'about-us' ? "underline" : ""}`}
+          >
+            About Us
+          </button>
+          <button
+            onClick={() => {
+              handleNavigation("/reviews")
+              setActiveOption("reviews")
+            }}
+            className={`text-purple-900 hover:text-purple-700 ${activeOption === 'reviews' ? "underline" : ""}`}
+          >
+            Reviews
+          </button>
+          <button
+            onClick={() => {
+              handleNavigation("/contact")
+              setActiveOption("contact")
+            }}
+            className={`text-purple-900 hover:text-purple-700 ${activeOption === 'contact' ? "underline" : ""}`}
+          >
+            Contact
+          </button>
+
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-4">
               <button
-                onClick={() => {
-                  handleNavigation("/profile");
-                  setActiveOption("");
-                }}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
-                className="flex items-center"
-              >
-                {profilePicture ? (
-                  <img
-                    src={profilePicture}
-                    alt="User Photo"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src={ProfileLogo}
-                    alt="Profile Icon"
-                    className="w-8 h-8 cursor-pointer"
-                  />
-                )}
-
-                {/* Username appears when hovering */}
-                {isHovering && (
-                  <span className="ml-2 text-purple-900 font-bold text-md">
-                    {username}
-                  </span>
-                )}
-              </button>
-            </div>
-
-
-
-            {isAdded && (
-              <button
-                onClick={handleLogout}
+                onClick={() => handleNavigation("/notification")}
                 className="flex items-center space-x-2"
               >
-                <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
+                <img src={notificationLogo} alt="notification-logo" className="w-8 h-8" />
               </button>
-            )}
-            {!isAdded && (
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2"
-              >
-                <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleLoginClick}
-              className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
-            >
-              Login
-            </button>
-            <button
-              onClick={handleSignUpClick}
-              className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300"
-            >
-              SignUp
-            </button>
-          </div>
-        )}
-      </nav>
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => {
+                    handleNavigation("/profile");
+                    setActiveOption("");
+                  }}
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                  className="flex items-center"
+                >
+                  {profilePicture ? (
+                    <img
+                      src={profilePicture}
+                      alt="User Photo"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={ProfileLogo}
+                      alt="Profile Icon"
+                      className="w-8 h-8 cursor-pointer"
+                    />
+                  )}
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-purple-50 shadow-lg md:hidden">
-          <div className="flex flex-col p-4 space-y-4">
-            <button
-              onClick={() => {
-                handleNavigation("/home")
-                setActiveOption("home");
-              }}
-              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'home' ? "underline" : ""}`}
-            >
-              Home
-            </button>
-            {isLoggedIn && <button
-              onClick={() => {
-                handleNavigation("/dashboards")
-                setActiveOption("dashboards");
+                  {/* Username appears when hovering */}
+                  {isHovering && (
+                    <span className="ml-2 text-purple-900 font-bold text-md">
+                      {username}
+                    </span>
+                  )}
+                </button>
+              </div>
 
-              }}
-              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'dashboards' ? "underline" : ""}`}
-            >
-              Dashboards
-            </button>}
-            <button
-              onClick={() => {
-                handleNavigation("/about-us");
-                setActiveOption("about-us");
-              }}
-              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'about-us' ? "underline" : ""}`}
-            >
-              About Us
-            </button>
-            <button
-              onClick={() => {
-                handleNavigation("/reviews");
-                setActiveOption("reviews");
-              }}
-              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'reviews' ? "underline" : ""}`}
-            >
-              Reviews
-            </button>
-            <button
-              onClick={() => {
-                handleNavigation("/contact");
-                setActiveOption("contact");
-              }}
-              className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'contact' ? "underline" : ""}`}
-            >
-              Contact
-            </button>
 
-            {isLoggedIn ? (
-              <div>
-                <div className="relative group flex items-center space-x-2">
-                  <button
-                    onClick={() => handleNavigation("/profile")}
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    className="flex items-center"
-                  >
-                    {profilePicture ? (
-                      <img
-                        src={profilePicture}
-                        alt="User Photo"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <img
-                        src={ProfileLogo}
-                        alt="Profile Icon"
-                        className="w-8 h-8 cursor-pointer"
-                      />
-                    )}
 
-                    {/* Username appears when hovering (mobile) */}
-                    {isHovering && (
-                      <span className="ml-2 text-purple-900 font-bold text-md">
-                        {username}
-                      </span>
-                    )}
-                  </button>
-                </div>
-
+              {isAdded && (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 mt-3"
+                  className="flex items-center space-x-2"
                 >
                   <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
-                  <span className="text-purple-900 font-bold text-xs">
-                    Logout
-                  </span>
                 </button>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-2">
+              )}
+              {!isAdded && (
                 <button
-                  onClick={handleLoginClick}
-                  className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300 w-full"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2"
                 >
-                  Login
+                  <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
                 </button>
-                <button
-                  onClick={handleSignUpClick}
-                  className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300 w-full"
-                >
-                  SignUp
-                </button>
-              </div>
-            )}
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleLoginClick}
+                className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300"
+              >
+                Login
+              </button>
+              <button
+                onClick={handleSignUpClick}
+                className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300"
+              >
+                SignUp
+              </button>
+            </div>
+          )}
+        </nav>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-purple-50 shadow-lg md:hidden">
+            <div className="flex flex-col p-4 space-y-4">
+              <button
+                onClick={() => {
+                  handleNavigation("/home")
+                  setActiveOption("home");
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'home' ? "underline" : ""}`}
+              >
+                Home
+              </button>
+              {isLoggedIn && <button
+                onClick={() => {
+                  handleNavigation("/dashboards")
+                  setActiveOption("dashboards");
+
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'dashboards' ? "underline" : ""}`}
+              >
+                Dashboards
+              </button>}
+              <button
+                onClick={() => {
+                  handleNavigation("/about-us");
+                  setActiveOption("about-us");
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'about-us' ? "underline" : ""}`}
+              >
+                About Us
+              </button>
+              <button
+                onClick={() => {
+                  handleNavigation("/reviews");
+                  setActiveOption("reviews");
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'reviews' ? "underline" : ""}`}
+              >
+                Reviews
+              </button>
+              <button
+                onClick={() => {
+                  handleNavigation("/contact");
+                  setActiveOption("contact");
+                }}
+                className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'contact' ? "underline" : ""}`}
+              >
+                Contact
+              </button>
+
+              {isLoggedIn ? (
+                <div>
+                  <div className="relative group flex items-center space-x-2">
+                    <button
+                      onClick={() => handleNavigation("/profile")}
+                      onMouseEnter={() => setIsHovering(true)}
+                      onMouseLeave={() => setIsHovering(false)}
+                      className="flex items-center"
+                    >
+                      {profilePicture ? (
+                        <img
+                          src={profilePicture}
+                          alt="User Photo"
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={ProfileLogo}
+                          alt="Profile Icon"
+                          className="w-8 h-8 cursor-pointer"
+                        />
+                      )}
+
+                      {/* Username appears when hovering (mobile) */}
+                      {isHovering && (
+                        <span className="ml-2 text-purple-900 font-bold text-md">
+                          {username}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 mt-3"
+                  >
+                    <img src={LogoutLogo} alt="Logout Icon" className="w-8 h-8" />
+                    <span className="text-purple-900 font-bold text-xs">
+                      Logout
+                    </span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <button
+                    onClick={handleLoginClick}
+                    className="text-white border-2 border-purple-900 bg-purple-900 rounded-lg px-6 py-2 hover:bg-transparent hover:text-purple-900 transition duration-300 w-full"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={handleSignUpClick}
+                    className="text-purple-900 border-2 border-purple-900 rounded-lg px-6 py-2 hover:bg-purple-900 hover:text-white transition duration-300 w-full"
+                  >
+                    SignUp
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </>}
     </header>
   );
 }

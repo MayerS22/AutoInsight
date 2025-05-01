@@ -4,14 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import EditLogo from "../../assets/EditLogo.svg";
 import axios from "axios";
+import { LoadingSpinner } from "../LoadingSpinner";
 
-const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) => {
+const TeamItem = ({ team, onPermissionChange, onEditTeam, memberPermissions }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const dropdownRef = useRef(null);
-
-    
-  
 
     const getInitials = (name) => {
         return name
@@ -35,7 +33,7 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) =>
     }, []);
 
     const permissions = [
-        { label: 'Admin', value: 'admin' },
+        { label: 'Owner', value: 'admin' },
         { label: 'Can edit', value: 'edit' },
         { label: 'Can view', value: 'view' },
     ];
@@ -51,36 +49,24 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) =>
                 label = "Can view";
                 break;
             case 'admin':
-                label = "Admin";
+                label = "Owner";
                 break;
             default:
                 label = "Select";
         }
 
+        // Return null if not owner to prevent rendering the button at all
+        if (memberPermissions[team._id] !== "owner") {
+            return null;
+        }
+
         return (
             <button
-            className={`flex items-center gap-1 text-purple-950 font-medium px-3 py-1 border-2 rounded-md text-sm bg-purple-100 border-purple-950 ${memberPermissions[team._id]!== "owner" ? ' cursor-not-allowed' : ''}`}
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            disabled={memberPermissions[team._id] !== "owner"}
-          >
+                className="flex items-center gap-1 text-purple-950 font-medium px-3 py-1 border-2 rounded-md text-sm bg-purple-100 border-purple-950"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
                 {isUpdating ? (
-                    <div className="flex justify-center items-center ">
-                        <svg className="animate-spin h-6 w-6 text-purple-600" viewBox="0 0 24 24">
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            ></circle>
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8H4z"
-                            ></path>
-                        </svg>
-                    </div>
+                    <LoadingSpinner coordinates="w-4 h-4" />
                 ) : label}
                 {isUpdating ? "" : <ChevronDown size={14} className="ml-1" />}
             </button>
@@ -110,16 +96,18 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) =>
                     {getInitials(team.name)}
                 </div>
                 <span className="font-medium truncate max-w-[150px] sm:max-w-none">{team.name}</span>
-                <button
-                    className={`p-1 bg-purple-200  rounded-full ${memberPermissions[team._id]!== "owner" ? ' cursor-not-allowed' : ''}`}
-                    onClick={() => onEditTeam(team)}
-                    disabled={memberPermissions[team._id] !== "owner" } // Access the permission for the current team
-                    >
-                    <img src={EditLogo} alt="Edit" className="h-3 w-3" />
-                </button>
-            </div>
 
-            {/* Permission dropdown */}
+                {/* Only render the edit button if the user is an owner */}
+                {memberPermissions[team._id] === "owner" && (
+                    <button
+                        className="p-1 bg-purple-200 rounded-full"
+                        onClick={() => onEditTeam(team)}
+                    >
+                        <img src={EditLogo} alt="Edit" className="h-3 w-3" />
+                    </button>
+                )}
+            </div>
+            {/* Permission dropdown - only rendered if user is owner */}
             <div className="relative self-start sm:self-auto" ref={dropdownRef}>
                 {renderPermissionButton()}
 
@@ -147,11 +135,9 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam,memberPermissions }) =>
     );
 };
 
-const TeamsList = ({ teams, setTeams, onEditTeam, loading,memberPermissions }) => {
-
+const TeamsList = ({ teams, setTeams, onEditTeam, loading, memberPermissions }) => {
     const handlePermissionChange = async (teamId, newPermission) => {
         try {
-
             // Make the API call using axios
             const response = await axios.patch(
                 `http://localhost:3000/api/v1/teams/${teamId}/permission`,
@@ -162,7 +148,6 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading,memberPermissions }) =
                     }
                 }
             );
-
 
             setTeams(prev =>
                 prev.map(team =>
@@ -178,31 +163,19 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading,memberPermissions }) =
         }
     };
 
-
-    
+    // Only render loading spinner while loading, don't render anything else
+    if (loading || memberPermissions == null) {
+        return (
+            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
+                <LoadingSpinner coordinates="w-12 h-12" />
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
             <div className="space-y-3">
-                {loading ? (
-                    <div className="flex justify-center items-center ">
-                        <svg className="animate-spin h-8 w-8 text-purple-600" viewBox="0 0 24 24">
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            ></circle>
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8H4z"
-                            ></path>
-                        </svg>
-                    </div>
-                ) : teams.length > 0 ? (
+                {teams.length > 0 ? (
                     teams.map((team) => (
                         <TeamItem
                             key={team._id}

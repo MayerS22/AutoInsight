@@ -118,7 +118,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
           </div>
           {suggestions.length > 0 && (
             <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-              {suggestions.map((user) => (
+              {suggestions.map((user) => !(user.admin)&&(
                 <div
                   key={user._id}
                   className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"

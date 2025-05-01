@@ -1,26 +1,29 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { authActions } from "../../../store/index";
+import { authActions, marginActions } from "../../../store/index";
 import { fetchUserProfile } from "../../../services/Api_Services";
 import RobotImg from "../../../assets/Robot.svg";
 import LogoutLogo from "../../../assets/Logout.svg";
 import ProfileLogo from "../../../assets/Profile.svg";
 import notificationLogo from "../../../assets/notification.svg";
 import axios from "axios";
+import MobileNotification from "../MobileNotification";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const profilePicture = useSelector((state) => state.auth.profilePicture);
   const username = useSelector((state) => state.auth.username);
-  const isAdmin = useSelector((state) => state.auth.isAdmin)
-  const [isProfileLoading, setIsProfileLoading] = useState(false)
+  const isAdmin = useSelector((state) => state.auth.isAdmin);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null); // New state for user photo
   const margin = useSelector((state) => state.margin.margin);
   const color = useSelector((state) => state.margin.color);
@@ -30,12 +33,23 @@ export default function Header() {
   const [activeOption, setActiveOption] = useState("");
   const token = localStorage.getItem("token");
 
-
-
   // Call fetchUserProfile inside useEffect when the component mounts or user logs in
   useEffect(() => {
     fetchUserProfile(token, authActions, dispatch);
   }, [profilePicture]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (isNotificationOpen && !event.target.closest(".notification-dropdown")) {
+        setIsNotificationOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isNotificationOpen]);
 
   function handleLoginClick() {
     setIsMobileMenuOpen(false);
@@ -50,8 +64,8 @@ export default function Header() {
   function handleLogout() {
     setIsMobileMenuOpen(false);
     dispatch(authActions.logout());
-    dispatch(authActions.isAdmin(false))
-    const token = localStorage.getItem('token');
+    dispatch(authActions.isAdmin(false));
+    const token = localStorage.getItem("token");
     console.log(token);
     navigate("/login");
   }
@@ -113,7 +127,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-6">
           <button
             onClick={() => {
-              handleNavigation("/home")
+              handleNavigation("/home");
               setActiveOption("home");
             }}
             className={`text-purple-900 hover:text-purple-700 ${activeOption === 'home' ? "underline" : ""}`}
@@ -122,8 +136,8 @@ export default function Header() {
           </button>
           {isLoggedIn && <button
             onClick={() => {
-              handleNavigation("/dashboards")
-              setActiveOption("dashboards")
+              handleNavigation("/dashboards");
+              setActiveOption("dashboards");
             }}
             className={`text-purple-900 hover:text-purple-700 ${activeOption === 'dashboards' ? "underline" : ""}`}
           >
@@ -131,8 +145,8 @@ export default function Header() {
           </button>}
           <button
             onClick={() => {
-              handleNavigation("/about-us")
-              setActiveOption("about-us")
+              handleNavigation("/about-us");
+              setActiveOption("about-us");
             }}
             className={`text-purple-900 hover:text-purple-700 ${activeOption === 'about-us' ? "underline" : ""}`}
           >
@@ -140,8 +154,8 @@ export default function Header() {
           </button>
           <button
             onClick={() => {
-              handleNavigation("/reviews")
-              setActiveOption("reviews")
+              handleNavigation("/reviews");
+              setActiveOption("reviews");
             }}
             className={`text-purple-900 hover:text-purple-700 ${activeOption === 'reviews' ? "underline" : ""}`}
           >
@@ -149,8 +163,8 @@ export default function Header() {
           </button>
           <button
             onClick={() => {
-              handleNavigation("/contact")
-              setActiveOption("contact")
+              handleNavigation("/contact");
+              setActiveOption("contact");
             }}
             className={`text-purple-900 hover:text-purple-700 ${activeOption === 'contact' ? "underline" : ""}`}
           >
@@ -159,12 +173,33 @@ export default function Header() {
 
           {isLoggedIn ? (
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => handleNavigation("/notification")}
-                className="flex items-center space-x-2"
-              >
-                <img src={notificationLogo} alt="notification-logo" className="w-8 h-8" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    // if (location.pathname === "/notification") {
+                    //   handleNavigation('/');
+                    //   setIsNotificationOpen(prev => !prev);
+                    //   dispatch(marginActions.isMobile(false));
+                    // }
+                    // else {
+                    //   setIsNotificationOpen(prev => !prev);
+                    //   dispatch(marginActions.isMobile(false));
+                    // }
+                    handleNavigation("/notification")
+                    setActiveOption("")
+
+                  }}
+                  className="flex items-center"
+                >
+                  <img src={notificationLogo} alt="notification-logo" className="w-8 h-8" />
+                </button>
+                {/* <div className="notification-dropdown">
+                  <MobileNotification
+                    isOpen={isNotificationOpen}
+                    onClose={() => setIsNotificationOpen(false)}
+                  />
+                </div> */}
+              </div>
               <div className="relative flex items-center">
                 <button
                   onClick={() => {
@@ -197,8 +232,6 @@ export default function Header() {
                   )}
                 </button>
               </div>
-
-
 
               {isAdded && (
                 <button
@@ -238,10 +271,12 @@ export default function Header() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-purple-50 shadow-lg md:hidden">
+
             <div className="flex flex-col p-4 space-y-4">
+
               <button
                 onClick={() => {
-                  handleNavigation("/home")
+                  handleNavigation("/home");
                   setActiveOption("home");
                 }}
                 className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'home' ? "underline" : ""}`}
@@ -250,9 +285,8 @@ export default function Header() {
               </button>
               {isLoggedIn && <button
                 onClick={() => {
-                  handleNavigation("/dashboards")
+                  handleNavigation("/dashboards");
                   setActiveOption("dashboards");
-
                 }}
                 className={`text-purple-900 hover:text-purple-700 text-left ${activeOption === 'dashboards' ? "underline" : ""}`}
               >
@@ -286,11 +320,29 @@ export default function Header() {
                 Contact
               </button>
 
-              {isLoggedIn ? (
-                <div>
-                  <div className="relative group flex items-center space-x-2">
+              {isLoggedIn && (
+                <>
+                  <div className="relative">
                     <button
-                      onClick={() => handleNavigation("/profile")}
+                      onClick={() => {
+                        dispatch(marginActions.isMobile(true))
+                        handleNavigation("/notification")
+                        setIsNotificationOpen(prev => !prev);
+                        setActiveOption("");
+                      }}
+                      className="flex items-center space-x-2"
+                    >
+                      <img src={notificationLogo} alt="notification-logo" className="w-8 h-8" />
+                      <span className="text-purple-900 font-bold text-sm">Notifications</span>
+                    </button>
+                  </div>
+                  <div className="relative group flex items-center space-x-2">
+
+                    <button
+                      onClick={() => {
+                        handleNavigation("/profile");
+                        setActiveOption("");
+                      }}
                       onMouseEnter={() => setIsHovering(true)}
                       onMouseLeave={() => setIsHovering(false)}
                       className="flex items-center"
@@ -310,7 +362,7 @@ export default function Header() {
                       )}
 
                       {/* Username appears when hovering (mobile) */}
-                      {isHovering && (
+                      {(
                         <span className="ml-2 text-purple-900 font-bold text-md">
                           {username}
                         </span>
@@ -327,8 +379,9 @@ export default function Header() {
                       Logout
                     </span>
                   </button>
-                </div>
-              ) : (
+                </>
+              )}
+              {!isLoggedIn && (
                 <div className="flex flex-col space-y-2">
                   <button
                     onClick={handleLoginClick}

@@ -8,7 +8,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 // eslint-disable-next-line react/prop-types
-export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, setTeams, disableDashboardInput }) {
+export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
 
     const [teamName, setTeamName] = useState(teamData.name || "");
     const [users, setUsers] = useState(teamData.members || []);
@@ -24,6 +24,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     const [filteredDashboards, setFilteredDashboards] = useState([]);
     const [showDashboardDropdown, setShowDashboardDropdown] = useState(false);
     const [isEditing, setIsEditing] = useState(!!teamData._id);
+
 
 
 
@@ -92,6 +93,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                 setIsSearching(true);
                 const response = await searchUsers(searchQuery);
 
+
                 // Filter out users that are already in the team (based on their ID)
                 const results = response.data.data
                     .filter((user) => user._id !== loggedInUserID && !users.some((u) => u.id === user._id))
@@ -100,6 +102,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                         name: user.username,
                         profilePicture: user.profile_picture,
                         email: user.email,
+                        admin: user.admin
                     }));
 
                 setSearchResults(results);
@@ -116,7 +119,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     }, [searchQuery, users]); // Added `users` as dependency to re-filter search results on changes
 
     useEffect(() => {
-        if (disableDashboardInput || dashboardSearchQuery.trim() === "") {
+        if (dashboardSearchQuery.trim() === "") {
             setFilteredDashboards([]);
             setShowDashboardDropdown(false);
             return;
@@ -131,7 +134,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
 
         setFilteredDashboards(filtered);
         setShowDashboardDropdown(true);
-    }, [dashboardSearchQuery, datasets, selectedDashboards, disableDashboardInput]); // Added `disableDashboardInput` as dependency
+    }, [dashboardSearchQuery, datasets, selectedDashboards]);
 
     useEffect(() => {
         if (teamData && teamData._id) {
@@ -151,17 +154,19 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                     name: dataset.dataset_name,
                 })) || []
             );
+
             setPermissions(
                 teamData.memberPermission === "edit"
                     ? "Can edit"
                     : teamData.memberPermission === "view"
                         ? "Can view"
-                        : "Admin"
+                        : "Owner"
             );
         } else {
             setIsEditing(false);
         }
     }, [teamData]);
+
 
     // Validation logic
     useEffect(() => {
@@ -191,7 +196,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                 }
                 break;
             case 'dashboards':
-                if (value.length === 0 && !disableDashboardInput) {
+                if (value.length === 0) {
                     errorMessage = "At least one dashboard must be added";
                 }
                 break;
@@ -218,7 +223,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleDashboardSearchQueryChange = (e) => {
-        if (disableDashboardInput) return;
+
 
         setDashboardSearchQuery(e.target.value);
         setErrors(prev => ({ ...prev, dashboards: "" })); // Clear error immediately
@@ -239,7 +244,6 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleRemoveDashboard = (dashboardToRemove) => {
-        if (disableDashboardInput) return;
 
         const updatedDashboards = selectedDashboards.filter((dashboard) => dashboard.id !== dashboardToRemove.id);
         setSelectedDashboards(updatedDashboards);
@@ -266,7 +270,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
         // Check if there are any errors
         if (!teamName.trim() ||
             users.filter(user => user.email !== loggedInUserEmail).length === 0 ||
-            (!disableDashboardInput && selectedDashboards.length === 0)) {
+            (selectedDashboards.length === 0)) {
             return; // Stop form submission if there are errors
         }
 
@@ -295,6 +299,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                 });
 
                 // Update team datasets
+                console.log(selectedDashboards);
+
                 await axios.patch(`http://localhost:3000/api/v1/teams/${teamData._id}/datasets`, {
                     datasets: selectedDashboards.map(dashboard => dashboard.id)
                 }, {
@@ -327,24 +333,38 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                         team._id === teamData._id
                             ? {
                                 ...team, // Retain other properties
-                                members: users.map((user) => ({
-                                    id: user.id, // Ensure only the necessary properties are included
+                                members: users.map(user => ({
+                                    id: user.id,
                                     username: user.name,
                                     email: user.email,
                                 })),
-                                memberPermission: permission
+                                memberPermission: permission,
+
+                                datasets: selectedDashboards.map(dashboard => ({
+                                    ...team.datasets?.[0], // use first existing dataset as template
+                                    _id: dashboard.id,
+                                    dataset_name: dashboard.name,
+                                })),
                             }
                             : team
                     )
                 );
+
+                console.log(selectedDashboards);
+
             } else {
                 // Create new team
+
                 const teamDataToSubmit = {
                     name: teamName,
                     members: users.map(user => user.id), // Send only user IDs
                     datasets: selectedDashboards.map(dashboard => dashboard.id), // Send only dashboard IDs
                     memberPermission: permission
                 };
+                console.log(selectedDashboards);
+                console.log(teamDataToSubmit.datasets);
+
+
 
                 const response = await axios.post("http://localhost:3000/api/v1/teams/", teamDataToSubmit, {
                     headers: {
@@ -364,6 +384,9 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                     ...teamDataToSubmit,
                     _id: response.data.id || response.data._id || Date.now().toString()
                 }]);
+
+                console.log(teamDataToSubmit);
+                // Set permissions for the logged-in user
             }
 
             onClose();
@@ -400,7 +423,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
     };
 
     const handleAddDashboard = (dashboard) => {
-        if (disableDashboardInput) return;
+
 
         if (!dashboard || !dashboard._id || !dashboard.dataset_name) {
             console.error("Invalid dashboard data:", dashboard);
@@ -496,10 +519,10 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                                 Can view
                                             </div>
                                             <div
-                                                onClick={() => handlePermissionChange("Admin")}
+                                                onClick={() => handlePermissionChange("Owner")}
                                                 className="px-4 py-2 hover:bg-purple-100 cursor-pointer text-purple-950 font-medium"
                                             >
-                                                Admin
+                                                Owner
                                             </div>
                                         </div>
                                     )}
@@ -520,7 +543,6 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                         loggedInUserEmail === user.email ? null : (
                                             <div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
                                                 {user.name}
-                                                {user._id}
                                                 <button onClick={() => handleRemoveUser(user)} className="ml-1 text-purple-950">
                                                     <X size={14} />
                                                 </button>
@@ -546,8 +568,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                 )}
 
                                 {showDropdown && searchResults.length > 0 && (
-                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                        {searchResults.map((user) => (
+                                    <div className="absolute z-10 w-full mt-1 bg-white  border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        {searchResults.map((user) => !(user.admin) && (
                                             <div
                                                 key={user.id}
                                                 className="flex items-center p-3 hover:bg-purple-100 cursor-pointer gap-3"
@@ -586,17 +608,16 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                             </label>
                             <div className="relative" ref={dashboardSearchRef}>
                                 <div
-                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex ${disableDashboardInput ? 'bg-gray-100' : 'bg-white'} flex-wrap items-center gap-2`}
-                                    onClick={() => !disableDashboardInput && dashboardInputRef.current && dashboardInputRef.current.focus()}
+                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-white flex-wrap items-center gap-2`}
                                 >
                                     {selectedDashboards.map((dashboard, index) => (
                                         <div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
                                             {dashboard.name}
-                                            {!disableDashboardInput && (
-                                                <button onClick={() => handleRemoveDashboard(dashboard)} className="ml-1 text-purple-950">
-                                                    <X size={14} />
-                                                </button>
-                                            )}
+
+                                            <button onClick={() => handleRemoveDashboard(dashboard)} className="ml-1 text-purple-950">
+                                                <X size={14} />
+                                            </button>
+
                                         </div>
                                     ))}
                                     <div className="flex items-center flex-grow min-w-32">
@@ -607,9 +628,8 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                             onChange={handleDashboardSearchQueryChange}
                                             onBlur={() => handleBlur('dashboards')}
                                             placeholder={selectedDashboards.length > 0 ? "" : "Select Dashboards"}
-                                            className={`outline-none w-full py-1 px-2 ${disableDashboardInput ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
-                                            onFocus={() => !disableDashboardInput && dashboardSearchQuery.trim() && setShowDashboardDropdown(true)}
-                                            disabled={disableDashboardInput}
+                                            className={`outline-none w-full py-1 px-2 `}
+                                            onFocus={() => dashboardSearchQuery.trim() && setShowDashboardDropdown(true)}
                                         />
                                     </div>
                                 </div>
@@ -617,7 +637,7 @@ export default function CreateTeamModal({ onClose, onCreateTeam, teamData = {}, 
                                     <p className="text-red-500 text-sm mt-1">{errors.dashboards}</p>
                                 )}
 
-                                {!disableDashboardInput && showDashboardDropdown && (
+                                {showDashboardDropdown && (
                                     <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         {(dashboardSearchQuery.trim() === "" ? datasets : filteredDashboards)
                                             .filter(dashboard => dashboard && dashboard.dataset_name)

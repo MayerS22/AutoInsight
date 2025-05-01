@@ -26,7 +26,7 @@ const AudienceLocation = ({ setTooltipContent }) => {
 
         const cleaned = data
           .filter((c) => c.country && c.country !== "not provided")
-          .map((c) => {
+          .slice(0,4).map((c) => {
             const matchedCountry = formattedCountries.find(
               (fc) => fc.value === c.country.toUpperCase()
             );
@@ -68,9 +68,9 @@ const AudienceLocation = ({ setTooltipContent }) => {
             <Geographies geography={geoUrl}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  const isoCode = geo.properties.name;                      
+                  const name = geo.properties.name;                      
                   const isHighlighted = topCountries.some(
-                    (c) => c.name === isoCode
+                    (c) => c.name === name
                   );
                   return (
                     <Geography
@@ -106,10 +106,10 @@ const AudienceLocation = ({ setTooltipContent }) => {
         <div className="w-full md:w-52 mt-28 ml-4">
           <h3 className="text-purple-800 font-bold mb-3">Top Countries</h3>
           <div className="space-y-3">
-            {topCountries.map((country) => (
+            {topCountries.slice(0,4).map((country) => (
               <div key={country.code} className="flex items-center">
                 <CountryFlag countryCode={country.flagCode} />
-                <span className="ml-2">{country.name} </span>
+                <span className="ml-2">{country.name}  </span>
               </div>
             ))}
           </div>

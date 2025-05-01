@@ -12,11 +12,9 @@ const RootLayout = () => {
   const token = localStorage.getItem("token");
   useEffect(()=>{
    
-
-  
     fetchUserProfile(token,authActions,dispatch);
 
-  },[])
+  }, [dispatch, token])
 
   return (
     <div>

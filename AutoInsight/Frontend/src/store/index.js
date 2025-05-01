@@ -20,6 +20,7 @@ const initialMarginState = {
     color: "bg-purple-50",
     isRemoved:false,
     isAdded:false,
+    isMobile:false
 }
 
 
@@ -100,6 +101,10 @@ const marginSlice = createSlice({
         },
         removeLogoutIcon(state){
           state.isAdded=false;
+        },
+        isMobile(state,action)
+        {
+          state.isMobile=action.payload;
         }
     }
 });

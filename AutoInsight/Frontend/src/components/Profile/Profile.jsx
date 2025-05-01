@@ -32,7 +32,7 @@ const DatasetPage = () => {
     month: 'long',
     day: '2-digit',
   });
-    const email = useSelector((state) => state.auth.email);
+  const email = useSelector((state) => state.auth.email);
   const country = useSelector((state) => state.auth.country);
   const jobTitle = useSelector((state) => state.auth.jobTitle);
   const token = localStorage.getItem("token");
@@ -76,7 +76,6 @@ const DatasetPage = () => {
       try {
         const response = await getUserTeams(token);
         const teamsData = response.data.body;
-        console.log("Fetched teams data:", teamsData);
 
         const permissionsRef = {};  // Use useRef to store permissions
 
@@ -118,7 +117,7 @@ const DatasetPage = () => {
     };
 
     fetchDatasets();
-  }, [token, loggedInUserEmail]);  // Dependency on token and logged-in user email
+  }, [token, loggedInUserEmail, teams.length]);  // Dependency on token and logged-in user email
 
 
 
@@ -246,6 +245,7 @@ const DatasetPage = () => {
         <CreateTeamModal
           onClose={() => setShowCreateTeamModal(false)}
           setTeams={setTeams}
+
         />
       )}
       {selectedTeam && (
@@ -254,13 +254,13 @@ const DatasetPage = () => {
           onCreateTeam={handleCreateTeamSubmit}
           teamData={selectedTeam}
           setTeams={setTeams}
-          disableDashboardInput={true}
         />
       )}
       {/* Change Password Modal */}
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={closeChangePasswordModal}
+
       />
     </Allignment>
   );

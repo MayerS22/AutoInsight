@@ -16,7 +16,7 @@ const RecentAccounts = ({ accounts }) => {
                     className="w-8 h-8 rounded-full"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-purple-900 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm">{user.initial}</span>
                   </div>
                 )}

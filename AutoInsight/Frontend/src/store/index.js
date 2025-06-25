@@ -22,7 +22,9 @@ const initialMarginState = {
     isAdded:false,
     isMobile:false
 }
-
+const initialThemeState = {
+    mode: localStorage.getItem("theme") || 'light',
+  };
 
 const authSlice = createSlice({
     name: 'auth',
@@ -109,14 +111,27 @@ const marginSlice = createSlice({
     }
 });
 
+const themeSlice = createSlice({
+    name: 'theme',
+    initialState: initialThemeState,
+    reducers: {
+      toggleTheme(state, action) {
+        // optional: use action.payload to force a theme
+        state.mode=action.payload;
+        localStorage.setItem("theme", action.payload);
+      }
+    }
+  });
 
 export const authActions = authSlice.actions;
 export const marginActions = marginSlice.actions;
+export const themeActions= themeSlice.actions;
 
 const store = configureStore({
     reducer: {
         auth: authSlice.reducer,
-        margin: marginSlice.reducer
+        margin: marginSlice.reducer,
+        theme:themeSlice.reducer
     }
 });
 export default store;

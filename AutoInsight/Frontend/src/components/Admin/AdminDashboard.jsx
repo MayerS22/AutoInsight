@@ -138,7 +138,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="bg-purple-50 min-h-screen pt-20">
+    <div className="bg-purple-50 min-h-screen pt-20 mt-10">
       <div className="container mx-auto px-2 sm:px-4 md:px-8 py-4">
         <div className="flex flex-col gap-8 items-stretch lg:flex-row">
           {/* Left Column */}

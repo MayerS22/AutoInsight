@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global styles to ensure no white spaces */
+html, body, #root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+html.theme-dark,
+body.theme-dark,
+#root.theme-dark {
+  background-color: #13082B;
+  color: #E6D9F2;
+}
+
+html.theme-light,
+body.theme-light,
+#root.theme-light {
+  background-color: #F3F6F9;
+  color: #4A266A;
+}
+
+/* Ensure all pages fill at least the viewport height */
+.min-h-screen {
+  min-height: 100vh;
+}
+

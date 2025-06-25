@@ -5,11 +5,13 @@ import { ChevronDown } from "lucide-react";
 import EditLogo from "../../assets/EditLogo.svg";
 import axios from "axios";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { useSelector } from "react-redux";
 
 const TeamItem = ({ team, onPermissionChange, onEditTeam, memberPermissions }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const dropdownRef = useRef(null);
+    const theme = useSelector((state) => state.theme.mode);
 
     const getInitials = (name) => {
         return name
@@ -136,6 +138,8 @@ const TeamItem = ({ team, onPermissionChange, onEditTeam, memberPermissions }) =
 };
 
 const TeamsList = ({ teams, setTeams, onEditTeam, loading, memberPermissions }) => {
+    const theme = useSelector((state) => state.theme.mode);
+    
     const handlePermissionChange = async (teamId, newPermission) => {
         try {
             // Make the API call using axios
@@ -166,14 +170,14 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading, memberPermissions }) 
     // Only render loading spinner while loading, don't render anything else
     if (loading || memberPermissions == null) {
         return (
-            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
+            <div className={`rounded-lg p-4 border shadow-sm w-full ${theme === "light" ? "bg-white border-gray-200" : "bg-dark-background border-purple-800"}`}>
                 <LoadingSpinner coordinates="w-12 h-12" />
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mx-2 sm:mx-4">
+        <div className={`rounded-lg p-4 border shadow-sm w-full ${theme === "light" ? "bg-white border-gray-200" : "bg-dark-background border-purple-800"}`}>
             <div className="space-y-3">
                 {teams.length > 0 ? (
                     teams.map((team) => (
@@ -186,7 +190,7 @@ const TeamsList = ({ teams, setTeams, onEditTeam, loading, memberPermissions }) 
                         />
                     ))
                 ) : (
-                    <p className="text-gray-500 text-center py-4">No teams available</p>
+                    <p className={`text-center py-4 ${theme === "light" ? "text-gray-500" : "text-purple-400"}`}>No teams available</p>
                 )}
             </div>
         </div>

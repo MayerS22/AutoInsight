@@ -1,10 +1,12 @@
 /* eslint-disable react/prop-types */
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 // eslint-disable-next-line no-unused-vars
 const SetupSidebar = ({ steps, currentStep, processingOption = 'clean_and_generate' }) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(true); 
+  const theme = useSelector((state) => state.theme.mode);
   
   useEffect(() => {
     // Function to check window width and update visibility
@@ -43,7 +45,7 @@ const SetupSidebar = ({ steps, currentStep, processingOption = 'clean_and_genera
         return (
           <div
             key={step.number}
-            className={`flex w-[247px] items-center whitespace-nowrap ${step.number === currentStep ? 'bg-purple-100 rounded-lg' : ''}`}
+            className={`flex w-[247px] p-1 items-center whitespace-nowrap ${step.number === currentStep ? 'bg-purple-100 rounded-md' : ''}`}
           >
             <div
               className={`w-8 h-8 text-xl font-bold rounded-full flex items-center justify-center mr-3 
@@ -64,8 +66,8 @@ const SetupSidebar = ({ steps, currentStep, processingOption = 'clean_and_genera
             </div>
             <span className={`
               ${step.number < currentStep ? 'text-green-500' :
-                showAsOptional ? 'text-gray-600' :
-                  step.number === currentStep ? 'text-purple-900 font-bold' : 'text-gray-600'}
+                showAsOptional ? theme === "light" ? 'text-gray-600' : 'text-gray-300' :
+                  step.number === currentStep ? 'text-purple-900 font-bold' : theme === "light" ? 'text-gray-600' : 'text-gray-300'}
             `}>
               {step.title}
             </span>

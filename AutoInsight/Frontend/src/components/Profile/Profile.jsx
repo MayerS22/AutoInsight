@@ -67,6 +67,7 @@ const DatasetPage = () => {
       fetchUserProfile(token, authActions, dispatch);
     }
   }, [isLoggedIn, dispatch, token]);
+  
 
 
   useEffect(() => {
@@ -119,8 +120,7 @@ const DatasetPage = () => {
     fetchDatasets();
   }, [token, loggedInUserEmail, teams.length]);  // Dependency on token and logged-in user email
 
-
-
+  const theme = useSelector((state) => state.theme.mode);
 
 
   const handleCreateTeam = () => {
@@ -186,7 +186,7 @@ const DatasetPage = () => {
 
           {/* Right Column */}
           <div className="w-full lg:w-3/4 flex flex-col gap-4 sm:gap-6">
-            <div className="bg-white p-4 sm:p-6 flex flex-col gap-4 rounded-lg">
+            <div className={`p-4 sm:p-6 flex flex-col gap-4 rounded-lg ${theme === "light" ? "bg-white" : "bg-dark-background"}`}>
               <InfoField icon={EmailIcon} label="Email" value={email} />
               <InfoField icon={JobIcon} label="Job title" value={jobTitle} />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
@@ -227,7 +227,7 @@ const DatasetPage = () => {
             </div>
 
             {/* Teams Section with Proper Margin */}
-            <div className="mt-[-12px]">
+            <div className="mt-[-12px] ">
               <Teams
                 teams={teams}
                 setTeams={setTeams} // Pass setTeams to allow updating permissions

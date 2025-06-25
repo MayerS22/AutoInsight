@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+
 // eslint-disable-next-line react/prop-types
 export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
 
@@ -24,8 +25,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
     const [filteredDashboards, setFilteredDashboards] = useState([]);
     const [showDashboardDropdown, setShowDashboardDropdown] = useState(false);
     const [isEditing, setIsEditing] = useState(!!teamData._id);
-
-
+    const theme = useSelector((state) => state.theme.mode);
 
 
     // Form validation states
@@ -450,6 +450,8 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
         }
     };
 
+    
+
     const handlePermissionChange = (permission) => {
         setPermissions(permission);
         setShowPermissionsDropdown(false);
@@ -462,10 +464,10 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
 
     return (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-purple-50 rounded-lg w-full max-w-3xl shadow-lg">
+            <div className={` rounded-lg w-full max-w-3xl shadow-lg ${theme === "light" ? "bg-purple-50" : "bg-dark-background"}`}   >
                 <div className="p-6 pb-0">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">{isEditing ? "Edit Team" : "Create Team"}</h2>
+                        <h2 className={`text-2xl ${theme === "light" ? "text-purple-950" : "text-purple-200"} font-bold`}>{isEditing ? "Edit Team" : "Create Team"}</h2>
                         <button
                             onClick={onClose}
                             className="text-gray-700 hover:bg-purple-100 p-1 rounded-full mr-2"
@@ -480,7 +482,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                         )}
 
                         <div className="mb-6">
-                            <label className="block text-gray-800 text-md font-bold mb-2">
+                            <label className={`block ${theme === "light" ? "text-gray-800" : "text-gray-200"} text-md font-bold mb-2`}>
                                 Team Name
                             </label>
                             <div className="flex gap-4 items-start">
@@ -490,7 +492,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                                         value={teamName}
                                         onChange={handleTeamNameChange}
                                         onBlur={() => handleBlur('teamName')}
-                                        className={`border ${touched.teamName && errors.teamName ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 w-full`}
+                                        className={`border ${touched.teamName && errors.teamName ? 'border-red-500' : theme === "light" ? "border-gray-300" : "border-gray-300"} rounded-lg p-3 w-full ${theme === "light" ? "bg-white text-black" : "bg-dark-background text-white"}`}
                                         placeholder="Enter your team name"
                                     />
                                     {touched.teamName && errors.teamName && (
@@ -530,13 +532,13 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                             </div>
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-gray-800 text-md font-bold mb-2">
+                        <div className="mb-6 ">
+                            <label className={`block ${theme === "light" ? "text-gray-800" : "text-gray-200"} text-md font-bold mb-2`}>
                                 Users
                             </label>
-                            <div className="relative" ref={searchRef}>
+                            <div className="relative " ref={searchRef}>
                                 <div
-                                    className={`border ${touched.users && errors.users ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-white flex-wrap items-center gap-2`}
+                                    className={`border  ${touched.users && errors.users ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex ${theme === "light" ? "bg-white" : "bg-dark-background"} flex-wrap items-center gap-2`}
                                     onClick={() => inputRef.current && inputRef.current.focus()}
                                 >
                                     {users.map((user, index) => (
@@ -550,7 +552,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                                         )
                                     ))}
 
-                                    <div className="flex items-center flex-grow min-w-32">
+                                    <div className="flex items-center flex-grow min-w-32 ">
                                         <input
                                             ref={inputRef}
                                             type="text"
@@ -558,7 +560,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                                             onChange={handleSearchQueryChange}
                                             onBlur={() => handleBlur('users')}
                                             placeholder={`${users.filter(user => user.email !== loggedInUserEmail).length === 0 ? "Select Users" : ""}`}
-                                            className="outline-none w-full py-1 px-2"
+                                            className={`outline-none w-full py-1 px-2 ${theme === "light" ? "text-black bg-white" : "text-white bg-dark-background"}`}
                                             onFocus={() => searchQuery && setShowDropdown(true)}
                                         />
                                     </div>
@@ -603,12 +605,12 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
 
                         {/* Dashboard Selection Field with Validation */}
                         <div className="mb-8">
-                            <label className="block text-gray-800 text-md font-bold mb-2">
+                            <label className={`block ${theme === "light" ? "text-gray-800" : "text-gray-200"} text-md font-bold mb-2`}>
                                 Dashboards
                             </label>
                             <div className="relative" ref={dashboardSearchRef}>
                                 <div
-                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-white flex-wrap items-center gap-2`}
+                                    className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-${theme === "light" ? "bg-white" : "bg-dark-background"}  flex-wrap items-center gap-2`}
                                 >
                                     {selectedDashboards.map((dashboard, index) => (
                                         <div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-950 px-3 py-1 rounded-lg border-2 border-purple-950">
@@ -628,7 +630,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                                             onChange={handleDashboardSearchQueryChange}
                                             onBlur={() => handleBlur('dashboards')}
                                             placeholder={selectedDashboards.length > 0 ? "" : "Select Dashboards"}
-                                            className={`outline-none w-full py-1 px-2 `}
+                                            className={`outline-none w-full py-1 px-2 ${theme === "light" ? "text-black bg-white" : "text-white bg-dark-background"}`}
                                             onFocus={() => dashboardSearchQuery.trim() && setShowDashboardDropdown(true)}
                                         />
                                     </div>

@@ -26,6 +26,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
   const [updatingUserId, setUpdatingUserId] = useState(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
   const [currentUserPermission, setCurrentUserPermission] = useState(null);
+  const theme = useSelector((state) => state.theme.mode);
   
   // Refs for handling outside clicks
   const modalRef = useRef(null);
@@ -508,7 +509,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
       onClick={() => {
         setOpenDropdown(null);
         setOpenRoleDropdown(false);
@@ -517,25 +518,25 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
     >
       <div
         ref={modalRef}
-        className="bg-white p-6 rounded-md relative w-full max-w-lg"
+        className={`p-4 sm:p-6 rounded-md relative w-full max-w-lg max-h-[90vh] overflow-y-auto ${theme === "light" ? "bg-white" : "bg-dark-background"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+          className={`absolute top-2 right-2 ${theme === "light" ? "text-gray-600 hover:text-gray-900" : "text-gray-400 hover:text-gray-100"}`}
         >
-          <img src={CloseIcon} alt="close-icon" className="w-[25px]" />
+          <img src={CloseIcon} alt="close-icon" className="w-[20px] sm:w-[25px]" />
         </button>
 
         {/* Modal title */}
-        <h2 className="text-2xl font-bold text-purple/500 mb-2">
+        <h2 className={`text-xl sm:text-2xl font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"} mb-2 pr-8`}>
           Permissions
         </h2>
 
         {/* Success Message */}
         {successMessage && (
-          <div className="flex items-center justify-center bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md mb-4">
+          <div className={`flex items-center justify-center bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md mb-4 ${theme === "light" ? "bg-green-100 border-green-400 text-green-700" : "bg-green-950 border-green-400 text-green-200"}`}>
             <CheckCircle className="w-5 h-5 mr-2" />
             <span>{successMessage}</span>
           </div>
@@ -543,7 +544,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
 
         {/* Error Message */}
         {errorMessage && (
-          <div className="flex items-center justify-center bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4">
+          <div className={`flex items-center justify-center bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4 ${theme === "light" ? "bg-red-100 border-red-400 text-red-700" : "bg-red-950 border-red-400 text-red-200"}`}>
             <XCircle className="w-5 h-5 mr-2" />
             <span>{errorMessage}</span>
           </div>
@@ -551,41 +552,41 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
 
         {/* Search and Add Section - Only visible to users who can add permissions */}
         {canAddUsers && (
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
             {/* User search input */}
             <div className="relative flex-1 search-container">
               <div className="relative w-full">
                 <img
                   src={SearchIcon}
                   alt="Search"
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
                 />
                 <input
                   type="text"
                   placeholder="Enter username"
                   value={searchQuery}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
+                  className="w-full text-black pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
                 />
               </div>
 
               {/* Search results dropdown */}
               {suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
                   {suggestions.map((user) => !(user.admin)&&(
                     <div
                       key={user._id}
-                      className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className="flex items-center px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleSelectUser(user)}
                     >
-                      <div className="flex-shrink-0 mr-3">
+                      <div className="flex-shrink-0 mr-2 sm:mr-3">
                         {renderUserAvatar(user)}
                       </div>
-                      <div className="w-full">
-                        <span className="font-medium text-gray-900">
+                      <div className="w-full min-w-0">
+                        <span className="font-medium text-gray-900 truncate block">
                           {user.username || "No Name"}
                         </span>
-                        <span className="block text-sm text-gray-500">
+                        <span className="block text-sm text-gray-500 truncate">
                           {user.email || "No Email"}
                         </span>
                       </div>
@@ -602,14 +603,14 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                   e.stopPropagation();
                   setOpenRoleDropdown((prev) => !prev);
                 }}
-                className="flex items-center justify-between bg-purple-100 border border-purple-900 font-bold text-purple-900 rounded-md px-4 py-1 text-sm"
+                className="w-full sm:w-auto flex items-center justify-between bg-purple-100 border border-purple-900 font-bold text-purple-900 rounded-md px-3 sm:px-4 py-2 text-sm"
               >
                 <span>{permissionLabels[selectedPermission]}</span>
                 <ChevronDown size={16} />
               </button>
 
               {openRoleDropdown && (
-                <div className="absolute right-0 mt-1 w-32 bg-purple-100 border font-bold text-purple-900 border-gray-200 rounded-md shadow-lg z-10">
+                <div className="absolute right-0 mt-1 w-full sm:w-32 bg-purple-100 border font-bold text-purple-900 border-gray-200 rounded-md shadow-lg z-10">
                   {getAvailablePermissions().map((value) => (
                     <button
                       key={value}
@@ -618,7 +619,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                         setSelectedPermission(value);
                         setOpenRoleDropdown(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                      className="block w-full text-left px-3 sm:px-4 py-2 text-sm hover:bg-purple-200"
                     >
                       {permissionLabels[value]}
                     </button>
@@ -631,7 +632,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
             <button
               onClick={handleAddUser}
               disabled={!selectedUser || isAddingUser}
-              className="bg-purple-900 text-white px-8 py-2 rounded-md hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-purple-900 text-white px-4 sm:px-8 py-2 rounded-md hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isAddingUser ? "Adding..." : "Add"}
             </button>
@@ -652,28 +653,28 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
             {users.map((user) => (
               <div
                 key={user._id}
-                className="flex items-center justify-between pb-4 border-b border-gray-300"
+                className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-300 gap-2 sm:gap-4"
               >
                 {/* User info */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 min-w-0">
                   {renderUserAvatar(user)}
-                  <div>
-                    <p className="font-medium text-gray-900">
+                  <div className="min-w-0">
+                    <p className={`font-medium truncate ${theme === "light" ? "text-gray-900" : "text-gray-200"}`}>
                       {user.username || "No Name"}
                       {user._id === uploaderId && " (Owner)"}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className={`text-sm truncate ${theme === "light" ? "text-gray-500" : "text-gray-300"}`}>
                       {user.email || "No Email"}
                     </p>
                   </div>
                 </div>
 
                 {/* Permission controls */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-end">
                   {/* Permission dropdown */}
                   <div className="relative" ref={openDropdown === user._id ? dropdownRef : null}>
                     {updatingUserId === user._id ? (
-                      <div className="flex items-center justify-center bg-purple-100 border border-purple-300 rounded-md px-4 py-1 text-sm">
+                      <div className="flex items-center justify-center bg-purple-100 border border-purple-300 rounded-md px-3 sm:px-4 py-1 text-sm text-purple-950">
                         <Loader size={16} className="animate-spin"/>
                       </div>
                     ) : (
@@ -684,7 +685,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                             setOpenDropdown(openDropdown === user._id ? null : user._id);
                           }
                         }}
-                        className={`flex items-center justify-between bg-purple-100 border border-purple-900 font-bold text-purple-900 rounded-md px-4 py-1 text-sm ${
+                        className={`flex items-center justify-between bg-purple-100 border border-purple-900 font-bold text-purple-900 rounded-md px-3 sm:px-4 py-1 text-sm ${
                           !canEditSpecificUserPermission(user) ? "opacity-70 cursor-not-allowed" : ""
                         }`}
                       >
@@ -696,7 +697,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                     )}
 
                     {openDropdown === user._id && canEditSpecificUserPermission(user) && updatingUserId !== user._id && (
-                      <div className="absolute right-0 mt-1 w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10 font-bold text-purple-900">
+                      <div className="absolute right-0 mt-1 w-full sm:w-32 bg-purple-100 border border-gray-200 rounded-md shadow-lg z-10 font-bold text-purple-900">
                         {getAvailablePermissionsForUser(user).map(([value, label]) => (
                           <button
                             key={value}
@@ -705,7 +706,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                               toggleAccess(user._id, value);
                               setOpenDropdown(null);
                             }}
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-purple-200"
+                            className="block w-full text-left px-3 sm:px-4 py-2 text-sm hover:bg-purple-200"
                           >
                             {label}
                           </button>
@@ -727,7 +728,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
                       {deletingUserId === user._id ? (
                         <Loader size={16} className="animate-spin" />
                       ) : (
-                        <img src={TrashLogo} />
+                        <img src={TrashLogo} className="w-5 h-5" />
                       )}
                     </button>
                   )}
@@ -741,7 +742,7 @@ const PermissionModal = ({ onClose, datasetId, uploaderId }) => {
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className="bg-purple-900 text-white px-8 py-2 rounded-md hover:bg-purple-800"
+            className="w-full sm:w-auto bg-purple-900 text-white px-4 sm:px-8 py-2 rounded-md hover:bg-purple-800"
           >
             Close
           </button>

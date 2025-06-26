@@ -40,7 +40,7 @@ export default function Home() {
                   setShowUploadingDashboard={setShowUploadingDashboard}
                   setShowCleaningDashboard={setShowCleaningDashboard}
                   actionType="clean"
-                  className={`bg-transparent ml-2 border border-purple-800 text-purple-800 px-6 py-3 rounded hover:bg-purple-600 hover:text-white ${theme === "light" ? "text-purple-900" : "text-purple-300"}`}
+                  className={`bg-transparent ml-2 border   px-6 py-3 rounded hover:bg-purple-600 hover:text-white ${theme === "light" ? "text-purple-900 border-purple-800" : "text-purple-300 border-purple-300"}`}
                 >
                   Clean Dataset
                 </DatasetsButton>

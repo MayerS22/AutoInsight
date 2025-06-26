@@ -93,7 +93,7 @@ export default function Header() {
 
   return (
     <header
-      className={`w-full py-5 px-4 md:px-24 flex justify-between items-center fixed top-0 left-0 ${theme === "light" ? color : "bg-dark-background"} z-50`}
+      className={`w-full py-10 px-4 md:px-24 flex justify-between items-center fixed top-0 left-0 ${theme === "light" ? color : "bg-dark-background"} z-50`}
     >
       <button onClick={() => {
         navigate("/home")

@@ -604,11 +604,11 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
                         </div>
 
                         {/* Dashboard Selection Field with Validation */}
-                        <div className="mb-8">
+                        <div className="mb-8 ">
                             <label className={`block ${theme === "light" ? "text-gray-800" : "text-gray-200"} text-md font-bold mb-2`}>
                                 Dashboards
                             </label>
-                            <div className="relative" ref={dashboardSearchRef}>
+                            <div className="relative bg-white" ref={dashboardSearchRef}>
                                 <div
                                     className={`border ${touched.dashboards && errors.dashboards ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2 min-h-14 flex bg-${theme === "light" ? "bg-white" : "bg-dark-background"}  flex-wrap items-center gap-2`}
                                 >
@@ -622,7 +622,7 @@ export default function CreateTeamModal({ onClose, teamData = {}, setTeams}) {
 
                                         </div>
                                     ))}
-                                    <div className="flex items-center flex-grow min-w-32">
+                                    <div className="flex items-center flex-grow min-w-32 ">
                                         <input
                                             ref={dashboardInputRef}
                                             type="text"

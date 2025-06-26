@@ -157,6 +157,7 @@ export const fetchAllReviews = async (page = 1, limit = 10) => {
     );
     
     // Assuming the API returns reviews in response.data.body
+    console.log(response.data.body);
     return response.data?.body || [];
   } catch (error) {
     console.error("Error fetching reviews:", error);

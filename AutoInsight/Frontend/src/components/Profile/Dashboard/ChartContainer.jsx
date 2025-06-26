@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import 'chartjs-chart-matrix';
 import { MatrixController, MatrixElement } from 'chartjs-chart-matrix';
-
+import { useSelector } from 'react-redux';
 // Register matrix components
 Chart.register(MatrixController, MatrixElement);
 
@@ -11,9 +11,24 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const chartId = useRef(`chart-${Math.random().toString(36).substring(2, 9)}`);
+  const theme = useSelector((state) => state.theme.mode);
+
+  // Utility to get theme-aware colors from Redux theme
+  const getThemeColors = () => {
+    const isDark = theme === 'dark';
+    return {
+      background: isDark ? '#18181b' : '#fff',
+      grid: isDark ? '#27272a' : '#e5e7eb',
+      text: isDark ? '#f3f4f6' : '#18181b',
+      tooltipBg: isDark ? '#27272a' : '#fff',
+      tooltipText: isDark ? '#f3f4f6' : '#18181b',
+    };
+  };
 
   useEffect(() => {
     // Clear any existing chart before doing anything
+    // console.log("data", data);
+    
     if (chartInstance.current) {
       chartInstance.current.destroy();
       chartInstance.current = null;
@@ -67,6 +82,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
       const lightness = 70 - (index * 30 / data.categories.length); // From lighter to darker
       return `hsla(${hue}, 70%, ${lightness}%, 0.8)`;
     });
+
+    const themeColors = getThemeColors();
 
     chartInstance.current = new Chart(ctx, {
       type: 'bar',
@@ -132,7 +149,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
                 
                 return tooltipLines;
               }
-            }
+            },
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1
           },
           legend: {
             display: false
@@ -146,13 +168,21 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Count'
+              text: 'Count',
+              color: themeColors.text
+            },
+            grid: {
+              color: themeColors.grid
             }
           },
           x: {
             title: {
               display: true,
-              text: data.column
+              text: data.column,
+              color: themeColors.text
+            },
+            grid: {
+              color: themeColors.grid
             }
           }
         }
@@ -172,6 +202,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
       const lightness = 75 - (index * 50 / data.categories.length); // From lighter to darker
       return `hsla(${hue}, 70%, ${lightness}%, 0.8)`;
     });
+
+    const themeColors = getThemeColors();
 
     chartInstance.current = new Chart(ctx, {
       type: 'pie',
@@ -196,7 +228,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
                 const percentage = ((value / total) * 100).toFixed(1);
                 return `${context.label}: ${value} (${percentage}%)`;
               }
-            }
+            },
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1
           },
           legend: {
             position: 'right',
@@ -204,6 +241,9 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               boxWidth: 15
             }
           }
+        },
+        layout: {
+          backgroundColor: themeColors.background
         }
       }
     });
@@ -222,6 +262,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
       bins.push(`${Math.round(binStart)} - ${Math.round(binEnd)}`);
     }
 
+    const themeColors = getThemeColors();
+
     chartInstance.current = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -239,6 +281,11 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
         maintainAspectRatio: false,
         plugins: {
           tooltip: {
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1,
             callbacks: {
               title: (context) => context[0].label,
               label: (context) => {
@@ -280,25 +327,42 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
           },
           legend: {
             display: false
+          },
+          title: {
+            display: false
           }
+        },
+        layout: {
+          backgroundColor: themeColors.background
         },
         scales: {
           y: {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Frequency'
+              text: 'Frequency',
+              color: themeColors.text
+            },
+            grid: {
+              color: themeColors.grid
+            },
+            ticks: {
+              color: themeColors.text
             }
           },
           x: {
             title: {
               display: true,
-              text: data.column // Remove the bins count from the title
+              text: data.column,
+              color: themeColors.text
+            },
+            grid: {
+              color: themeColors.grid
             },
             ticks: {
-              // Show fewer ticks for readability
               maxTicksLimit: 10,
-              autoSkip: true
+              autoSkip: true,
+              color: themeColors.text
             }
           }
         }
@@ -323,6 +387,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
     // Format x values to be approximate
     const formattedXValues = data.x_values.map(val => parseFloat(val).toFixed(1));
     
+    const themeColors = getThemeColors();
+
     chartInstance.current = new Chart(ctx, {
       type: 'line',
       data: {
@@ -345,7 +411,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
             callbacks: {
               title: (context) => `${data.column} = ${parseFloat(context[0].label)}`,
               label: (context) => `Density: ${context.raw.toFixed(4)}`
-            }
+            },
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1
           },
           legend: {
             display: false
@@ -356,13 +427,15 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Density'
+              text: 'Density',
+              color: themeColors.text
             }
           },
           x: {
             title: {
               display: true,
-              text: data.column
+              text: data.column,
+              color: themeColors.text
             },
             ticks: {
               // Display fewer x-axis ticks with rounded values
@@ -370,7 +443,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               callback: function(value) {
                 // Round values to 1 decimal place
                 return parseFloat(this.getLabelForValue(value)).toFixed(1);
-              }
+              },
+              color: themeColors.text
             }
           }
         }
@@ -454,6 +528,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
       return gradient;
     };
 
+    const themeColors = getThemeColors();
+
     chartInstance.current = new Chart(ctx, {
       type: 'matrix',
       data: {
@@ -513,7 +589,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
                 
                 return tooltipLines;
               }
-            }
+            },
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1
           },
           legend: {
             display: false
@@ -577,10 +658,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               font: {
                 weight: 'bold',
                 size: 11
-              }
+              },
+              color: themeColors.text
             },
             grid: {
-              display: false
+              display: false,
+              color: themeColors.grid
             },
             title: {
               display: true,
@@ -590,7 +673,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               },
               padding: {
                 top: 10
-              }
+              },
+              color: themeColors.text
             }
           },
           y: {
@@ -603,10 +687,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               font: {
                 weight: 'bold',
                 size: 11
-              }
+              },
+              color: themeColors.text
             },
             grid: {
-              display: false
+              display: false,
+              color: themeColors.grid
             },
             title: {
               display: true,
@@ -616,7 +702,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
               },
               padding: {
                 bottom: 10
-              }
+              },
+              color: themeColors.text
             }
           }
         }
@@ -670,6 +757,8 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
     // Calculate the split point between historical and forecast data
     const historicalLength = historicalDates.length;
     
+    const themeColors = getThemeColors();
+
     chartInstance.current = new Chart(ctx, {
       type: 'line',
       data: {
@@ -745,7 +834,12 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
                 
                 return tooltipLines;
               }
-            }
+            },
+            backgroundColor: themeColors.tooltipBg,
+            titleColor: themeColors.tooltipText,
+            bodyColor: themeColors.tooltipText,
+            borderColor: themeColors.grid,
+            borderWidth: 1
           },
           legend: {
             labels: {
@@ -757,23 +851,27 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
           y: {
             title: {
               display: true,
-              text: data.column
+              text: data.column,
+              color: themeColors.text
             },
             ticks: {
               // Round y-axis values
               callback: function(value) {
                 return Math.round(value);
-              }
+              },
+              color: themeColors.text
             }
           },
           x: {
             title: {
               display: true,
-              text: 'Date'
+              text: 'Date',
+              color: themeColors.text
             },
             ticks: {
               maxTicksLimit: 12, // Show fewer x-axis date labels
-              autoSkip: true
+              autoSkip: true,
+              color: themeColors.text
             }
           }
         }
@@ -830,7 +928,7 @@ const ChartContainer = ({ title, type, data, className = '' }) => {
   };
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-100 overflow-hidden ${className}`}>
+    <div className={` ${theme === "light" ? "bg-white" : "bg-dark-background"} rounded-lg border border-gray-100 overflow-hidden ${className}`}>
       <div className="p-4 ">
         <h3 className="text-lg font-semibold">{title}</h3>
         {type === 'bar' && data.top_category && (

@@ -351,15 +351,14 @@ const Chatbot = ({ open, setOpen }) => {
                 />
                 <input
                   type="text"
-                  style={{backgroundColor:  "" , color: "#4A266A"}}
-                  className="flex-1 p-3 text-sm bg-purple-100 focus:outline-none placeholder-gray-600"
+                  className={`flex-1 p-3 text-sm ${theme === "light" ? "bg-purple-100 " : "bg-dark-background text-white"} focus:outline-none placeholder-gray-600`}
                   placeholder="Message AI-Sight..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                 />
                 <button
-                  className={`p-3 bg-purple-100  ${theme === "light" ? "text-purple-900" : "text-purple-400"} disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`p-3   ${theme === "light" ? "text-purple-900" : "text-purple-400 "} disabled:opacity-50 disabled:cursor-not-allowed`}
                   onClick={sendMessage}
                   disabled={loading}
                   style={{backgroundColor:""  }}

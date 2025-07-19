@@ -16,6 +16,7 @@ const ProfilePictureComponent = ({
   const dispatch = useDispatch();
   const profileInputRef = useRef(null);
   const username = useSelector((state) => state.auth.username);
+  const theme = useSelector((state) => state.theme.mode);
   // Helper function to get initials from name
   const getInitials = (name) => {
     if (!name) return "";
@@ -133,7 +134,7 @@ const ProfilePictureComponent = ({
           accept="image/jpeg, image/png"
         />
       </div>
-      <h2 className="text-xl font-bold mt-3 text-purple-900 text-center">{username}</h2>
+      <h2 className={`text-xl font-bold mt-3 ${theme === "light" ? "text-purple-900" : "text-dark-text"} text-center`}>{username}</h2>
     </div>
   );
 };

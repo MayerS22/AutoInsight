@@ -19,6 +19,7 @@ const Chatbot = ({ open, setOpen }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [typingDots, setTypingDots] = useState("");
   const [expandedImage, setExpandedImage] = useState(null);
+  const theme = useSelector((state) => state.theme.mode);
 
   const email = localStorage.getItem("email");
   const sessionId = useRef(Date.now().toString());
@@ -202,17 +203,17 @@ const Chatbot = ({ open, setOpen }) => {
         <div className="fixed bottom-3 right-4 z-[10000] flex flex-col items-end">
           {/* Chat window container */}
           <div
-            className={`${isFullscreen ? "fixed inset-0" : "w-full md:w-[490px] h-[550px]"
-              } bg-chatbot-bg-color shadow-lg flex flex-col border border-gray-300 transition-all duration-300 ${isFullscreen ? "rounded-none" : "rounded-xl"
+            className={`${isFullscreen ? "fixed inset-0" : "w-full md:w-[490px] h-[550px] mr-7"
+              } ${theme==="light" ? "bg-purple-100   " : "bg-dark-background shadow-black"} shadow-lg  flex flex-col   transition-all  duration-300 ${isFullscreen ? "rounded-none" : "rounded-xl"
               }`}
           >
             {/* Header */}
-            <div className="bg-chatbot-bg-color text-black p-3 flex justify-between items-center rounded-t-xl">
-              <span className="text-lg font-bold">AI-Sight</span>
+            <div className={`${theme==="light" ? "bg-chatb  ot-bg-color text-black" : "bg-dark-background text-white"} p-3 flex justify-between items-center rounded-t-xl`}>
+              <span className={`text-lg font-bold ${theme==="light" ? "text-purple-950" : "text-dark-text"}`}>AI-Sight</span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="text-gray-700 p-1 hover:bg-[#d8b4fe] rounded-lg"
+                  className={`${theme==="light" ? "text-purple-950" : "text-purple-300"} p-1  rounded-lg`}
                 >
                   {isFullscreen ? (
                     <Minimize2 size={20} />
@@ -222,9 +223,9 @@ const Chatbot = ({ open, setOpen }) => {
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="text-gray-700 p-[3px] border rounded-3xl bg-purple-950 hover:bg-[#d8b4fe]"
+                  className={`text-gray-700 p-[3px]  rounded-3xl ${theme==="light" ? "bg-purple-950 " : "bg-purple-300 hover:bg-[#d8b4fe]"}`}
                 >
-                  <X size={20} color="white" />
+                  <X size={20} color={theme==="light" ? "white" : "black"} />
                 </button>
               </div>
             </div>
@@ -279,10 +280,11 @@ const Chatbot = ({ open, setOpen }) => {
                       )}
                       {/* Message text */}
                       <div
-                        className={`text-sm rounded-lg ${msg.sender === "user"
+                        className={`text-sm rounded-lg ${
+                          msg.sender === "user"
                             ? "bg-purple-200 text-purple-950 shadow-lg"
-                            : "bg-transparent text-purple-950 shadow-xl"
-                          } break-words px-4 py-2`}
+                            : ` ${theme === "light" ? "text-purple-950 bg-transparent" : "text-purple-300 bg-purple-950"} shadow-xl`
+                        } break-words px-4 py-2 `}
                       >
                         {msg.isTyping ? (
                           <span>Typing{typingDots}</span>
@@ -332,7 +334,7 @@ const Chatbot = ({ open, setOpen }) => {
                   ))}
                 </div>
               )}
-              <div className="flex items-center gap-2 border border-gray-400 rounded-lg bg-transparent overflow-hidden">
+              <div className={`flex items-center gap-2 border  rounded-lg overflow-hidden`} style={{backgroundColor: "" }}>
                 <label
                   htmlFor="imageUpload"
                   className="cursor-pointer flex items-center justify-center pl-2"
@@ -349,16 +351,17 @@ const Chatbot = ({ open, setOpen }) => {
                 />
                 <input
                   type="text"
-                  className="flex-1 p-3 text-sm focus:outline-none bg-transparent placeholder-gray-500"
+                  className={`flex-1 p-3 text-sm ${theme === "light" ? "bg-purple-100 " : "bg-dark-background text-white"} focus:outline-none placeholder-gray-600`}
                   placeholder="Message AI-Sight..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                 />
                 <button
-                  className="p-3 text-purple-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-50"
+                  className={`p-3   ${theme === "light" ? "text-purple-900" : "text-purple-400 "} disabled:opacity-50 disabled:cursor-not-allowed`}
                   onClick={sendMessage}
                   disabled={loading}
+                  style={{backgroundColor:""  }}
                 >
                   <img src={SendIcon} alt="send-button" className="size-5" />
                 </button>
@@ -366,7 +369,7 @@ const Chatbot = ({ open, setOpen }) => {
             </div>
           </div>
           {/* Static robot image at the bottom of the open chat */}
-          <div className="bg-purple-100 rounded-full shadow-md">
+          <div className={`p-3 mt-2 rounded-full shadow-md ${theme === "light" ? "bg-purple-100" : "bg-dark-background"}`}>
             <img src={ChatbotIcon} alt="Cute Robot" className="size-16" />
           </div>
         </div>

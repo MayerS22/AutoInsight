@@ -16,6 +16,7 @@ import { saveAs } from "file-saver";
 import { useDispatch } from "react-redux";
 import { authActions } from "../../store";
 import { getUserData, generateInsights } from "../../services/Api_Services";
+import { useSelector } from "react-redux";
 
 const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,6 +32,7 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   const [isCleaning, setIsCleaning] = useState("")
   const [users, setUsers] = useState([]);
   const [success, setSuccess] = useState(false)
+  const theme = useSelector((state) => state.theme.mode);
 
 
 
@@ -212,8 +214,8 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
   return (
     <>
       {showCleaningDashboard ? (
-        <div className="relative bg-white rounded-lg w-full max-w-5xl p-4 md:p-12">
-          <button
+        <div className={`relative rounded-lg w-full max-w-5xl p-4 md:p-12 ${theme === "light" ? "bg-white" : "bg-dark-background"}`}>
+          <button 
             onClick={handleClose}
             className={`absolute top-4 right-4 ${isProcessing
               ? "text-gray-400 cursor-not-allowed"
@@ -241,12 +243,12 @@ const DashboardSetupFlow = ({ onClose, onUploadSuccess, showCleaningDashboard })
           />
         </div>
       ) : (
-        <div className="relative bg-white rounded-lg w-full max-w-5xl p-4 md:p-12">
+        <div className={`relative rounded-lg w-full max-w-5xl p-4 md:p-12 ${theme === "light" ? "bg-white" : "bg-dark-background"}`}>
           <button
             onClick={handleClose}
             className={`absolute top-4 right-4 ${isProcessing
               ? "text-gray-400 cursor-not-allowed"
-              : " rounded-xl text-white hover:text-purple-900 border-none"
+              : " rounded-xl hover:text-purple-900 border-none"
               }`}
             disabled={isProcessing}
           >

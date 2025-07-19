@@ -15,6 +15,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
   const userId = useSelector((state) => state.auth.id);
+  const theme = useSelector((state) => state.theme.mode);
 
   const handleInputChange = async (e) => {
     const query = e.target.value;
@@ -88,10 +89,10 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+      <h2 className={`text-2xl font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"} mb-2`}>
         Grant Access to Users
       </h2>
-      <p className="text-sm text-orig/600 mb-6">
+      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"} mb-6`}>
         Securely share your dashboard by inviting team members and assigning specific permissions.
       </p>
 
@@ -113,7 +114,7 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
               placeholder="Enter user name"
               value={searchQuery}
               onChange={handleInputChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 bg-purple-200"
             />
           </div>
           {suggestions.length > 0 && (
@@ -183,8 +184,8 @@ const GrantAccessContent = ({ onNext, onPrevious, users,setUsers}) => {
                 </div>
               )}
               <div>
-                <p className="font-medium text-gray-900">{user.username}</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                <p className={`font-medium ${theme === "light" ? "text-gray-900" : "text-gray-300"}`}>{user.username}</p>
+                <p className={`text-sm ${theme === "light" ? "text-gray-500" : "text-gray-300"}`}>{user.email}</p>
               </div>
             </div>
 

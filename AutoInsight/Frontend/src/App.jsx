@@ -17,6 +17,7 @@ import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import ReviewsAnalysis from "./components/Admin/ReviewAnalysisTable.jsx";
 import DesktopNotification from "./components/HomePage/DesktopNotifiation.jsx";
 import SocialLoginSuccess from "./components/Authentication/SocialLoginSuccess.jsx";
+import "@theme-toggles/react/css/Within.css"
 
 function App() {
 
@@ -85,6 +86,7 @@ function App() {
 
   return (
     <>
+      
       <RouterProvider router={router} />
       <ToastContainer />
     </>

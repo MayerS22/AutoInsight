@@ -3,6 +3,7 @@ import UploadImage from "../../assets/UploadImage.svg";
 import AutomatedImage from "../../assets/AutomatedImage.svg";
 import ExploreImage from "../../assets/ExploreImage.svg";
 import DownloadImage from "../../assets/DownloadImage.svg";
+import { useSelector } from "react-redux";
 
 export default function HowItWorks() {
     const steps = [
@@ -43,11 +44,12 @@ export default function HowItWorks() {
           reverse: true,
         },
       ];
-    
+
+      const theme = useSelector((state) => state.theme.mode);
       return (
-        <section className="bg-white py-20">
+        <section className={`${theme === "light" ? "bg-white" : "bg-dark-text-secondary"} py-20`}>
           <div className="max-w-6xl mx-auto px-8 text-left">
-            <h2 className="text-4xl font-bold text-purple-900 mb-10 text-center">
+            <h2 className={`text-4xl font-bold ${theme === "light" ? "text-purple-900" : "text-purple-300"} mb-10 text-center`}>
               How it works
             </h2>
             <div className="space-y-16">

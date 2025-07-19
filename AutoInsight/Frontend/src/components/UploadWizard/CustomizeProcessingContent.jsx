@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { processOptions } from "./../../services/Api_Services"; 
+import { useSelector } from "react-redux";
 
 const CustomizeProcessingContent = ({
   processingOption,
@@ -13,6 +14,7 @@ const CustomizeProcessingContent = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const theme = useSelector((state) => state.theme.mode);
 
   // When Next is clicked, send the request using the API service.
   const handleNextClick = async () => {
@@ -41,10 +43,10 @@ const CustomizeProcessingContent = ({
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+      <h2 className={`text-2xl font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"} mb-2`}>
         Customize Your Processing
       </h2>
-      <p className="text-sm text-orig/600 mb-6">
+      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"} mb-6`}>
         Choose your data processing intent. You can either clean the dataset for
         manual review or clean it while generating a dashboard with key
         insights.
@@ -61,8 +63,8 @@ const CustomizeProcessingContent = ({
             className="mt-1 accent-purple/500"
           />
           <div>
-            <p className="font-bold text-orig/500">Clean Only</p>
-            <p className="text-sm text-orig/600">
+            <p className={`font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>Clean Only</p>
+            <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
               Choose this option if you prefer to focus solely on preparing your
               data. Our cleaning process will address inconsistencies, handle
               missing values, and standardize your data, ensuring a robust
@@ -83,10 +85,10 @@ const CustomizeProcessingContent = ({
             title={businessDomain === "HR" ? "This option is disabled for HR" : ""}
           />
           <div>
-            <p className="font-bold text-orig/500">
+            <p className={`font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>
               Clean & Generate Dashboard
             </p>
-            <p className="text-sm text-orig/600">
+            <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
               Choose this option to not only clean your dataset but also to
               automatically generate a fully dashboard. This option provides
               immediate visual insights by transforming your data into
@@ -105,7 +107,7 @@ const CustomizeProcessingContent = ({
             onChange={onDownloadToggle}
             className="accent-purple/500"
           />
-          <span className="text-orig/500">Download after creating</span>
+          <span className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>Download after creating</span>
         </label>
       </div>
 

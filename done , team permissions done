@@ -1,0 +1,144 @@
+[33ma5d6b13[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Initial commit with Frontend, Backend, and AI folders
+[33m6b040f6[m notifications done , team permissions done
+[33m8f5f9c4[m admin authorization , change password done
+[33m8373fa9[m countries done , change password ui only , account created done
+[33m1c61b29[m Review Analysis Tabel
+[33maf480ce[m Review Analysis
+[33m991a35f[m users growth and recent users
+[33me4224ab[m notifications without testing
+[33m59a95c3[m admin
+[33mac89729[m admin
+[33m7282ae3[m sss
+[33m1dc880b[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33m096c1db[m Recent Accounts
+[33mdb573cd[m top job titles integeration
+[33maf8fd48[m social login
+[33md261650[m Business domain chart
+[33mda61902[m google facebook github login(was working but crashed again)
+[33m7938987[m Update Frontend: added Notification component(not working yet) and updated other components
+[33m1492d43[m Fix merge and update frontend components
+[33m91f3aa4[m profile integeration (dashboards missing not done in backend)
+[33m5fc59b3[m Numbers of Users,Datasets, Dashboard and the admin_Api file
+[33m58b875c[m review analysis table modification
+[33m7a2349e[m review analysis table
+[33m83c9a91[m graphs is completed
+[33me306a24[m react tooltip country name hovering
+[33m7885d6a[m graph not completed
+[33mda2e164[m Components
+[33maec4167[m audience location and sign up update
+[33m9d3fac7[m AdminDashboard
+[33m8d40cb8[m profile picture immediate effect
+[33mf33be34[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33md7e1fe4[m new profile page
+[33mb103694[m Update README.md
+[33mbe65337[m Update README.md
+[33mb314a03[m Update README.md
+[33m6b737a5[m Update README.md
+[33m12d29cd[m Update README.md
+[33m93ec475[m Update README.md
+[33m0ca3cde[m Update README.md
+[33m0c01329[m Update README.md
+[33m8835ac1[m Update README.md
+[33m1ed2926[m Update README.md
+[33m7cbc9ae[m Update README.md
+[33m294b3a0[m Update README.md
+[33mc23c99f[m dashboard generation failed message
+[33ma66da67[m permissions done!
+[33mcecbff2[m permissions 3
+[33m42b70d7[m filters
+[33mbcaafca[m permissions 2
+[33mffa45a5[m permission
+[33m19fbb77[m edit role
+[33mcc6d07f[m grant access error , add drop box at dashboard and remove you from render
+[33m21a55a7[m months filter and top filter done!
+[33m657afac[m top filter for specific graphs!
+[33mdc78ca3[m permission modal
+[33m85822dc[m permission modal
+[33m1c06916[m permission loading
+[33m9597959[m forget and reset password done!
+[33mc2ba1c5[m permission button visibilty!
+[33m52d4719[m edited multistage, disabled clean and generate for HR domain!
+[33m29c6d0e[m admin permissions
+[33mb274c87[m permission profile bug
+[33ma409b25[m Cleaned Datasets Bug
+[33mf40def0[m header active option navigation , new set up summary in mulistage dataset uploading!
+[33mfcd64c4[m optional access granting
+[33m3eb281e[m cleaned dashboard
+[33m295c32e[m clean only
+[33m0ba0238[m clean only
+[33mdb1902a[m RenderDashboardList
+[33m4f4ef83[m role access
+[33m38153a0[m actions for deleting and adding
+[33m814ad34[m add , list and delete permissions
+[33mcc91217[m chatbot api service
+[33m390870c[m Api for Uploading data
+[33m949e580[m grant user access!
+[33m4975efc[m search users
+[33m84802e5[m changing the name of a dashboard
+[33m7437f31[m adding report and cleaned tab
+[33me03c2a0[m downloading options
+[33m9800eaa[m cleaned dataset tab
+[33m65c5c8f[m download after finshing
+[33m94f15b5[m upload data wizard done!
+[33mb20820a[m uploading and sumarry ui
+[33m248bf56[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33m96a31e1[m grant acess permission and sumarry
+[33m91bd3a1[m uploaded file perisists across renders done!
+[33mfeebf46[m uploadDataSet and Customize UI Pages
+[33m82b609e[m Slider and Business Domain ui
+[33m9a02f18[m customize content endpoint done!
+[33m34cc6e6[m Customize processing -not working-
+[33m9d9d879[m upload done!
+[33m8a77c79[m business domain done!
+[33ma256d07[m upload dataset wizard ui!
+[33m954adcb[m dashboard conflict solved!
+[33me02c433[m dashboard tab in navbar!
+[33mce4afea[m Fixing Chatbot UI
+[33m466f23a[m tabs and home ui
+[33mef8ceb3[m Dashboard Tabs
+[33mf4e9446[m dashboard name added!
+[33m7b62115[m dashboardf
+[33mc46992e[m permssion granting and revoking
+[33ma622088[m permssion granting and revoking
+[33m8fa5e3b[m Fixing permission model ui
+[33mc4cbb16[m Permission
+[33mada5da7[m downloading insights
+[33mdfec549[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33md062d3b[m changes
+[33mc3095d1[m insights done
+[33m19b12d7[m handle emty dataset
+[33mc5c3d22[m deleting node modules
+[33m3e4bddc[m chatbot image upload!
+[33m9b58754[m Breaking dataset -not working yet-
+[33mc7f5358[m Download and delete dataset
+[33ma50a5ed[m list all datasets from the database
+[33mb4b0c5a[m chatbot texting
+[33m82ed6c8[m chatbot texting
+[33m72497db[m Review without logged in
+[33maeee658[m fixing Review when loggedIn
+[33m2b87313[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33m9da414e[m chatbot and profile picture in the header done
+[33m9285672[m Fixing Header
+[33m7b5e792[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33mf3695e3[m DashBoard and Permission Module
+[33m13a324a[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33mba14fd9[m profile picture and upload dataset done
+[33m545cac9[m DashBoard and Permission Module
+[33mb42ce8c[m upload dataset done
+[33m7f02fe5[m FAQ
+[33mdddd81f[m Add Review ui fixed
+[33m0e5f155[m Merging
+[33mcc8c4ba[m Merge branch 'main' of https://github.com/MayerS22/AutoInsight
+[33m0737dfd[m Profile Done (responsive)
+[33mad0ad84[m Add Review ui fixed
+[33me57e63e[m redux for global state management added
+[33m6d3ea13[m UploadData
+[33ma333ee3[m Add Review
+[33mb963b32[m Contact
+[33m673eb14[m Reviews scrolling
+[33m37c43c7[m Reviews
+[33m1bb9441[m header bug fixed
+[33mc8776aa[m home page and authentication integeration (uncomplete)
+[33m005b3d6[m Routes
+[33mb0da720[m HomePage part 1
+[33md8023ed[m Initial commit

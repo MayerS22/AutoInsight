@@ -1,10 +1,11 @@
 import  { useState } from "react";
 import openedFAQ from '../../assets/openedFAQ.svg'
 import closedFAQ from '../../assets/closedFAQ.svg'
+import { useSelector } from "react-redux";
 
 export default function FAQ() {
   const [activeQuestion, setActiveQuestion] = useState(null);
-
+  const theme = useSelector((state) => state.theme.mode);
   const toggleQuestion = (index) => {
     setActiveQuestion(activeQuestion === index ? null : index);
   };
@@ -45,7 +46,7 @@ export default function FAQ() {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header Section */}
         <div className="text-left mb-12">
-          <h2 className="text-4xl font-extrabold text-purple-900 mb-4">
+          <h2 className={`text-4xl font-extrabold ${theme === "light" ? "text-purple-900" : "text-purple-300"} mb-4`}>
             Frequently Asked Questions
           </h2>
         </div>
@@ -55,7 +56,7 @@ export default function FAQ() {
           {questions.map((item, index) => (
             <div
               key={index}
-              className="bg-purple-50 rounded-lg shadow-md p-6 cursor-pointer transition duration-300 hover:shadow-lg "
+              className="bg-purple-100 rounded-lg  p-6 cursor-pointer transition duration-300 hover:shadow-lg "
               onClick={() => toggleQuestion(index)}
             >
               {/* Question */}

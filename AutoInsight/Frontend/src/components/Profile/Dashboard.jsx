@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { NotLoggedIn } from "../NotLoggedIn.jsx";
@@ -7,389 +8,407 @@ import { authActions, marginActions } from "../../store/index";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { fetchUserProfile } from "../../services/Api_Services.js";
+import ChartContainer from "./Dashboard/ChartContainer.jsx";
+import LoadingSpinner from "./Dashboard/LoadingSpinner.jsx";
+import EmptyState from "./Dashboard/EmptyState.jsx";
+import SummaryReport from "./Dashboard/SummaryReport.jsx";
 
 const Dashboard = () => {
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [insightsUrls, setInsightsUrls] = useState({});
-  const [filteredInsights, setFilteredInsights] = useState({});
   const [datasetName, setDatasetName] = useState("Loading...");
   const [creationDate, setCreationDate] = useState("");
-  const [activeChartType, setActiveChartType] = useState("all");
+  const [activeChartType, setActiveChartType] = useState("bar_graph");
   const [isGraphTypesOpen, setIsGraphTypesOpen] = useState(false);
-  const [isBarFilterOpen, setIsBarFilterOpen] = useState(false);
-  const [isMonthsFilterOpen, setIsMonthsFilterOpen] = useState(false);
   const [barChartFilter, setBarChartFilter] = useState(10);
   const [forecastMonthsFilter, setForecastMonthsFilter] = useState(12);
   const [userPermission, setUserPermission] = useState(null);
-  const [availableBarFilters, setAvailableBarFilters] = useState([]);
-  const [availableForecastMonths, setAvailableForecastMonths] = useState([]);
+  const [availableBarFilters, setAvailableBarFilters] = useState([5, 10, 15, 20]);
+  const [availableForecastMonths, setAvailableForecastMonths] = useState([6, 9, 12, 18, 24]);
   const [ownerId, setOwnerId] = useState(null);
   const [sharedUsernames, setSharedUsernames] = useState([]);
-  const [domain, setDomain] = useState("")
-
-  const dispatch = useDispatch();
+  const [domain, setDomain] = useState("");
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [histogramFilter, setHistogramFilter] = useState(10);
+  const [availableHistogramFilters, setAvailableHistogramFilters] = useState([5, 10, 15, 20]);
+  const theme = useSelector((state) => state.theme.mode);
   const token = localStorage.getItem("token");
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const loggedInUserId = useSelector((state) => state.auth.id);
+  const dispatch = useDispatch();
+  const [correlationUrl, setCorrelationUrl] = useState(null);
 
-  const fetchDatasetDetails = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/v1/datasets/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (response.data.body && response.data.body.dataset) {
-        const dataset = response.data.body.dataset;
-        console.log(dataset.business_domain);
-        setDomain(dataset.business_domain)
-
-        setDatasetName(dataset.dataset_name || "Unnamed Dataset");
-        setCreationDate(
-          dataset.createdAt
-            ? new Date(dataset.createdAt).toLocaleDateString()
-            : "Unknown"
-        );
-        setOwnerId(dataset.user_id);
-        setSharedUsernames(dataset.shared_usernames || []);
-
-        // If the logged-in user is the owner, set permission to "owner"
-        if (dataset.user_id === loggedInUserId) {
-          setUserPermission("owner");
-        }
-
-        const processedUrls = {
-          bar_chart: [],
-          pie_chart: dataset.insights_urls?.pie_chart || [],
-          histogram: [],
-          kde: dataset.insights_urls?.kde || [],
-          correlation: dataset.insights_urls?.correlation || [],
-          forecast: dataset.insights_urls?.forecast || [],
-          reports: dataset.insights_urls?.others || [],
-        };
-        if (dataset.insights_urls?.bar_chart) {
-          const filterNumbers = new Set(
-            dataset.insights_urls.bar_chart.map((item) => item.filterNumber)
-          );
-          const filters = Array.from(filterNumbers).sort((a, b) => a - b);
-          setAvailableBarFilters(filters);
-          if (filters.includes(10)) {
-            setBarChartFilter(10);
-          } else if (filters.length > 0) {
-            setBarChartFilter(filters[0]);
-          }
-          processedUrls.bar_chart = dataset.insights_urls.bar_chart.map(
-            (chart) => chart.url
-          );
-          processedUrls.bar_chart_data = dataset.insights_urls.bar_chart;
-        }
-        if (dataset.insights_urls?.histogram) {
-          const filterNumbers = new Set(
-            dataset.insights_urls.histogram.map((item) => item.filterNumber)
-          );
-          const filters = Array.from(filterNumbers).sort((a, b) => a - b);
-          if (!availableBarFilters.length) {
-            setAvailableBarFilters(filters);
-            if (filters.includes(10)) {
-              setBarChartFilter(10);
-            } else if (filters.length > 0) {
-              setBarChartFilter(filters[0]);
-            }
-          }
-          processedUrls.histogram = dataset.insights_urls.histogram.map(
-            (chart) => chart.url
-          );
-          processedUrls.histogram_data = dataset.insights_urls.histogram;
-        }
-        if (dataset.insights_urls?.forecast) {
-          const monthFilters = new Set(
-            dataset.insights_urls.forecast.map((item) => item.filterNumber)
-          );
-          const months = Array.from(monthFilters).sort((a, b) => a - b);
-          setAvailableForecastMonths(months);
-          if (months.includes(12)) {
-            setForecastMonthsFilter(12);
-          } else if (months.length > 0) {
-            setForecastMonthsFilter(months[0]);
-          }
-          processedUrls.forecast_data = dataset.insights_urls.forecast;
-        }
-        setInsightsUrls(processedUrls);
-        setFilteredInsights(processedUrls);
-      } else {
-        console.error("Invalid API response structure:", response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching dataset details:", error);
-    }
-  };
-
-  const fetchPermissionForUser = async () => {
-    if (!token) return;
-
-    // If the user is the owner, skip fetching permissions
-    if (ownerId === loggedInUserId) {
-      console.log("User is owner; skipping share permissions fetch.");
-      setUserPermission("owner");
-      return;
-    }
-
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/v1/datasets/${id}/share`, // Use datasetId in the endpoint
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log(response.data.body);
-
-      // Check if the user has permissions for this dataset
-      const permissions = response.data.body;
-      const currentUserPermission = permissions.find(
-        (p) => p.user_id === loggedInUserId
-      )?.permission;
-      console.log(currentUserPermission);
-
-      setUserPermission(currentUserPermission);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchDatasetDetails();
-    fetchUserProfile(token, authActions, dispatch);
-  }, [loggedInUserId, id]);
-
-  useEffect(() => {
-    if (!ownerId) return;
-
-    // If the user is the owner, set permission to "owner"
-    if (ownerId === loggedInUserId) {
-      console.log("User is owner; skipping share permissions fetch.");
-      setUserPermission("owner");
-    } else {
-      // Otherwise, fetch permissions for the specific dataset
-      fetchPermissionForUser();
-    }
-  }, [loggedInUserId, id, ownerId, sharedUsernames]);
-
-  useEffect(() => {
-    const filtered = {};
-    if (activeChartType === "all") {
-      Object.keys(insightsUrls).forEach((type) => {
-        if (type === "bar_chart" || type === "histogram") {
-          const filteredCharts =
-            insightsUrls[`${type}_data`]
-              ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
-              .map((chart) => chart.url) || [];
-          filtered[type] = filteredCharts;
-        } else if (type === "forecast") {
-          const filteredCharts =
-            insightsUrls["forecast_data"]
-              ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
-              .map((chart) => chart.url) || [];
-          filtered[type] = filteredCharts;
-        } else if (
-          type !== "bar_chart_data" &&
-          type !== "histogram_data" &&
-          type !== "forecast_data"
-        ) {
-          filtered[type] = insightsUrls[type] || [];
-        }
-      });
-    } else if (activeChartType === "bar_chart" || activeChartType === "histogram") {
-      const filteredCharts =
-        insightsUrls[`${activeChartType}_data`]
-          ?.filter((chart) => chart.filterNumber === parseInt(barChartFilter))
-          .map((chart) => chart.url) || [];
-      filtered[activeChartType] = filteredCharts;
-    } else if (activeChartType === "forecast" ) {
-      const filteredCharts =
-        insightsUrls["forecast_data"]
-          ?.filter((chart) => chart.filterNumber === parseInt(forecastMonthsFilter))
-          .map((chart) => chart.url) || [];
-      filtered[activeChartType] = filteredCharts;
-    } else {
-      filtered[activeChartType] = insightsUrls[activeChartType] || [];
-    }
-    setFilteredInsights(filtered);
-  }, [activeChartType, insightsUrls, barChartFilter, forecastMonthsFilter]);
 
   useEffect(() => {
     dispatch(marginActions.setColor("bg-white"));
+    dispatch(marginActions.removeUserName());
+    dispatch(marginActions.addLogoutIcon());
+
     return () => {
+      dispatch(marginActions.setMargin(""));
       dispatch(marginActions.setColor("bg-purple-50"));
+      dispatch(marginActions.addUserName());
+      dispatch(marginActions.removeLogoutIcon());
     };
   }, [dispatch]);
 
-  if (!isLoggedIn) return <NotLoggedIn />;
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUserProfile(token, authActions, dispatch);
+    }
+  }, [isLoggedIn, dispatch, token]);
 
-  const handleImageClick = (url) => setSelectedImage(url);
-  const closeModal = () => setSelectedImage(null);
-  const selectChartType = (type) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const datasetResponse = await axios.get(`http://localhost:3000/api/v1/datasets/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+
+
+        const datasetDetails = datasetResponse.data.body;
+        console.log("correlation", datasetDetails.dataset.insights_urls.correlation);
+        setCorrelationUrl(datasetResponse.data.body.dataset.insights_urls.correlation);
+
+
+        if (datasetDetails) {
+          setDatasetName(datasetDetails.dataset?.dataset_name || "Unnamed Dataset");
+          setCreationDate(new Date(datasetDetails.dataset?.createdAt).toLocaleDateString());
+          setOwnerId(datasetDetails.dataset?.user_id);
+          setDomain(datasetDetails.dataset?.business_domain || "");
+          setInsightsUrls(datasetDetails.dataset?.insights_urls || {});
+        }
+
+        // Fetch chart data
+        const chartResponse = await axios.get(`http://localhost:3000/api/v1/datasets/${id}/chart-data`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const chartDataResponse = chartResponse.data.body;
+
+        // Check if the new extracted_data field exists
+        if (chartDataResponse.extracted_data) {
+          // Use the new structured data format
+          setChartData({
+            bar_graph: chartDataResponse.extracted_data.bar_graph || [],
+            pie_chart: chartDataResponse.extracted_data.pie_chart || [],
+            histogram: chartDataResponse.extracted_data.histogram || [],
+            kde: chartDataResponse.extracted_data.kde || [],
+            correlation: datasetDetails.dataset.insights_urls.correlation || null,
+            forecast: chartDataResponse.extracted_data.forecast || [],
+            summary_report: chartDataResponse.summary_report || null
+          });
+          console.log("Using extracted chart data:", chartDataResponse.extracted_data);
+        } else {
+          // Fall back to the old format
+          setChartData(chartDataResponse.chartData);
+
+          console.log("Using legacy chart data format");
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load dashboard data");
+        setLoading(false);
+      }
+    };
+
+    if (token && id) {
+      fetchData();
+    }
+  }, [id, token]);
+
+  // Handle chart type selection
+  const handleChartTypeChange = (type) => {
     setActiveChartType(type);
     setIsGraphTypesOpen(false);
   };
-  const handleBarFilterChange = (value) => {
-    setBarChartFilter(value);
-    setIsBarFilterOpen(false);
-  };
-  const handleMonthsFilterChange = (value) => {
-    setForecastMonthsFilter(value);
-    setIsMonthsFilterOpen(false);
+
+  // Filter bar chart data based on the selected filter
+  const getFilteredBarChartData = (chart) => {
+    if (!chart || !chart.categories) return chart;
+
+    // Create a copy of the chart data
+    const filteredChart = { ...chart };
+
+    // Sort the data by values in descending order
+    const sortedIndices = chart.values
+      .map((value, index) => ({ value, index }))
+      .sort((a, b) => b.value - a.value)
+      .map(item => item.index);
+
+    // Get the top N categories and values based on the filter
+    filteredChart.categories = sortedIndices
+      .slice(0, barChartFilter)
+      .map(index => chart.categories[index]);
+
+    filteredChart.values = sortedIndices
+      .slice(0, barChartFilter)
+      .map(index => chart.values[index]);
+
+    return filteredChart;
   };
 
-  const getActiveChartTypeDisplay = () => {
-    if (activeChartType === "all") return "All Graphs";
-    if (activeChartType === "reports") return "Report";
-    return activeChartType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  // Filter forecast data based on the selected month count
+  const getFilteredForecastData = (chart) => {
+    if (!chart || !chart.forecast_dates) return chart;
+
+    const filteredChart = { ...chart };
+
+    // Calculate the historical data length
+    const historicalLength = chart.dates.length;
+
+    // Calculate how many months to show in total (historical + forecast)
+    const totalMonthsToShow = historicalLength + forecastMonthsFilter;
+
+    // Trim forecast data to the selected number of months
+    filteredChart.forecast_dates = chart.forecast_dates.slice(0, totalMonthsToShow);
+    filteredChart.forecast_values = chart.forecast_values.slice(0, totalMonthsToShow);
+    filteredChart.forecast_lower = chart.forecast_lower.slice(0, totalMonthsToShow);
+    filteredChart.forecast_upper = chart.forecast_upper.slice(0, totalMonthsToShow);
+
+    return filteredChart;
   };
+
+  // Filter histogram data based on the selected filter 
+  const getFilteredHistogramData = (chart) => {
+    if (!chart || !chart.frequencies) return chart;
+    // Just slice the first N bins/frequencies, do NOT sort
+    const filteredChart = { ...chart };
+    filteredChart.frequencies = chart.frequencies.slice(0, histogramFilter);
+    filteredChart.bins = chart.bins.slice(0, histogramFilter + 1);
+    return filteredChart;
+  };
+
+  if (!isLoggedIn) {
+    return <NotLoggedIn />;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-24 mt-10">
+        <LoadingSpinner message="Loading dashboard data..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-24 mt-10">
+        <div className="text-red-500 text-center">{error}</div>
+      </div>
+    );
+  }
+
+  if (!chartData) {
+    return (
+      <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-24 mt-10">
+        <EmptyState message="No chart data available for this dataset." />
+      </div>
+    );
+  }
+
+  // Available chart types based on what we have in the data
+  const availableChartTypes = [];
+  if (chartData.bar_graph?.length > 0) availableChartTypes.push("bar_graph");
+  if (chartData.pie_chart?.length > 0) availableChartTypes.push("pie_chart");
+  if (chartData.histogram?.length > 0) availableChartTypes.push("histogram");
+  if (chartData.kde?.length > 0) availableChartTypes.push("kde");
+  if (chartData.correlation?.columns?.length > 0) availableChartTypes.push("correlation");
+  // Only add forecast for ecommerce domain
+  if (domain === 'ecommerce' && chartData.forecast?.length > 0) availableChartTypes.push("forecast");
 
   return (
-    <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-16">
-      <div className="flex flex-col sm:flex-row justify-between items-center w-full">
-        <h2 className="text-3xl font-bold text-purple-900 mb-4 sm:mb-0">{datasetName} Dashboard</h2>
-        <div className="flex flex-wrap gap-3 items-center">
+    <div className="flex flex-col pt-28 px-8 sm:px-12 lg:px-24 mt-10">
+      {/* Header section */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold">{datasetName}</h1>
+          <p className="text-gray-500">Created on {creationDate}</p>
+          <p className="text-gray-500">Domain: {domain}</p>
+        </div>
+
+        <div className="flex items-center space-x-3">
+          {/* Graph Type Filter */}
           <div className="relative">
-            <button
-              className="bg-white border text-purple-800 font-bold border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[150px]"
-              onClick={() => setIsGraphTypesOpen(!isGraphTypesOpen)}
+            <select
+              className="px-3 py-2 border-2 text-purple-900 font-semibold border-purple-900  rounded-md bg-white shadow-sm"
+              value={activeChartType}
+              onChange={(e) => setActiveChartType(e.target.value)}
             >
-              {getActiveChartTypeDisplay()}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isGraphTypesOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
-              </svg>
-            </button>
-            {isGraphTypesOpen && (
-              <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full text-purple-800 font-bold">
-                <button className="w-full text-left px-4 py-2 hover:bg-purple-50 transition" onClick={() => selectChartType("all")}>
-                  All Graphs
-                </button>
-                {Object.keys(insightsUrls)
-                  .filter((key) => 
-                    !key.includes("_data") && 
-                    (key !== "forecast" || domain !== "education") && 
-                    (key !== "bar_chart" || domain !== "education")
-                  )
-                  .map((type) => (
-                    <button key={type} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition capitalize text-purple-800 font-bold" onClick={() => selectChartType(type)}>
-                      {type === "reports" ? "Report" : type.replace("_", " ")}
-                    </button>
-                  ))}
-              </div>
-            )}
+              {availableChartTypes.map(type => (
+                <option key={type} value={type}>
+                  {type === 'bar_graph' ? 'Bar Charts' :
+                    type === 'pie_chart' ? 'Pie Charts' :
+                      type === 'histogram' ? 'Histograms' :
+                        type === 'kde' ? 'KDE Plots' :
+                          type === 'correlation' ? 'Correlation' :
+                            type === 'forecast' ? 'Forecasts' : type}
+                </option>
+              ))}
+              <option value="reports">Reports</option>
+            </select>
           </div>
-          {(activeChartType === "all" ||
-            activeChartType === "bar_chart" ||
-            activeChartType === "histogram") &&
-            availableBarFilters.length > 0 && domain !== "education" && (
-              <div className="relative">
-                {
-                  domain === "ecommerce" ? (<button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsBarFilterOpen(!isBarFilterOpen)}>
-                    Top {barChartFilter}
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isBarFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
-                    </svg>
-                  </button>) : ""
-                }
-                {isBarFilterOpen && (
-                  <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
-                    {availableBarFilters.map((value) => (
-                      <button key={value} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold" onClick={() => handleBarFilterChange(value)}>
-                        Top {value}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+
+          {/* Bar Chart Top Filter */}
+          {(activeChartType === 'all' || activeChartType === 'bar_graph') &&
+            chartData.bar_graph?.length > 0 &&
+            domain !== 'education' && (
+              <select
+                className="px-3 py-2 border text-purple-900 font-semibold border-purple-900 rounded-md bg-white shadow-sm"
+                value={barChartFilter}
+                onChange={(e) => setBarChartFilter(Number(e.target.value))}
+              >
+                {availableBarFilters.map(count => (
+                  <option key={`bar-filter-${count}`} value={count}>
+                    Top {count}
+                  </option>
+                ))}
+              </select>
             )}
-          {(activeChartType === "all" || activeChartType === "forecast") &&
-            availableForecastMonths.length > 0 && domain !== "education" && (
-              <div className="relative">
-                <button className="bg-white border border-purple-800 px-4 py-2.5 rounded-lg flex items-center justify-between gap-2 hover:bg-gray-50 transition min-w-[140px] text-purple-800 font-bold" onClick={() => setIsMonthsFilterOpen(!isMonthsFilterOpen)}>
-                  {forecastMonthsFilter} Months
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMonthsFilterOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}></path>
-                  </svg>
-                </button>
-                {isMonthsFilterOpen && (
-                  <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-full">
-                    {availableForecastMonths.map((value) => (
-                      <button key={value} className="w-full text-left px-4 py-2 hover:bg-purple-50 transition text-purple-800 font-bold" onClick={() => handleMonthsFilterChange(value)}>
-                        {value} Months
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+
+          {/* Histogram Top Filter */}
+          {(activeChartType === 'all' || activeChartType === 'histogram') &&
+            chartData.histogram?.length > 0 &&
+            domain !== 'education' && (
+              <select
+                className="px-3 py-2 border text-purple-900 font-semibold border-purple-900 rounded-md bg-white shadow-sm"
+                value={histogramFilter}
+                onChange={(e) => setHistogramFilter(Number(e.target.value))}
+              >
+                {availableHistogramFilters.map(count => (
+                  <option key={`histogram-filter-${count}`} value={count}>
+                    Top {count}
+                  </option>
+                ))}
+              </select>
             )}
-          <div className="flex gap-4">
-            {(userPermission === "owner" ||
-              userPermission === "admin" ||
-              userPermission === "edit") && (
-                <button
-                  className="bg-purple-900 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-purple-800 transition"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  <img src={AddIcon} alt="Add Icon" className="w-5 h-5" />
-                  <span className="text-sm font-medium">Permissions</span>
-                </button>
-              )}
-          </div>
+
+          {/* Forecast Months Filter */}
+          {domain === 'ecommerce' && (activeChartType === 'all' || activeChartType === 'forecast') && chartData.forecast?.length > 0 && (
+            <select
+              className="px-3 py-2 border rounded-md text-purple-900 font-semibold border-purple-900 bg-white shadow-sm"
+              value={forecastMonthsFilter}
+              onChange={(e) => setForecastMonthsFilter(Number(e.target.value))}
+            >
+              {availableForecastMonths.map(count => (
+                <option key={`forecast-month-${count}`} value={count}>
+                  {count} Months
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Add Permissions Button */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center px-4 py-2 bg-purple-900 text-white rounded-md hover:bg-purple-700 transition"
+          >
+            <img src={AddIcon} alt="Add" className="w-4 h-4 mr-2" />
+            Add Permissions
+          </button>
         </div>
       </div>
-      <h3 className="text-sm text-gray-600 mt-2">
-        Date Created:{" "}
-        {new Date(creationDate).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </h3>
-      <div className="mt-12">
-        {Object.entries(filteredInsights).map(([chartType, urls]) => (
-          urls.length > 0 && (
-            <div key={chartType} className="mb-10">
-              <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
-                {chartType === "reports"
-                  ? "Report"
-                  : `${chartType.replace("_", " ")} Insights`}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {urls.map((url, index) => (
-                  <div
-                    key={index}
-                    className="relative group w-full h-64 sm:h-96 rounded-lg shadow-md overflow-hidden cursor-pointer"
-                    onClick={() => handleImageClick(url)}
-                  >
-                    <img
-                      src={url}
-                      alt={`${chartType} Insight ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white text-lg font-semibold">
-                      Click to View Larger
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        ))}
 
-      </div>
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 sm:px-6 lg:px-8">
-          <div className="relative w-full max-w-4xl mx-auto">
-            <div className="relative border-4 border-white rounded-lg">
-              <button onClick={closeModal} className="absolute top-0 right-0 text-white w-9 h-9 text-3xl bg-black bg-opacity-50 rounded-full">
-                &times;
-              </button>
-              <img src={selectedImage} alt="Selected Insight" className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
+      {/* Summary Report Section - Show in reports view and all charts view */}
+      {(activeChartType === 'reports') && (
+        <SummaryReport chartData={chartData} domain={domain} />
+      )}
+
+      {/* Charts section */}
+      {activeChartType !== 'reports' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mt-8">
+          {/* Bar Charts */}
+          {(activeChartType === 'all' || activeChartType === 'bar_graph') && chartData.bar_graph?.length > 0 &&
+            chartData.bar_graph.map((chart, index) => (
+              <ChartContainer
+                key={`bar-${index}-${barChartFilter}`}
+                title={domain === 'ecommerce'
+                  ? `${chart.column} Distribution (Top ${barChartFilter})`
+                  : `${chart.column} Distribution`}
+                type="bar"
+                data={getFilteredBarChartData(chart)}
+                className="col-span-1"
+              />
+            ))
+          }
+
+          {/* Pie Charts */}
+          {(activeChartType === 'all' || activeChartType === 'pie_chart') && chartData.pie_chart?.length > 0 &&
+            chartData.pie_chart.map((chart, index) => (
+              <ChartContainer
+                key={`pie-${index}`}
+                title={`${chart.column} Distribution`}
+                type="pie"
+                data={chart}
+                className="col-span-1"
+              />
+            ))
+          }
+
+          {/* Histograms */}
+          {(activeChartType === 'all' || activeChartType === 'histogram') && chartData.histogram?.length > 0 &&
+            chartData.histogram.map((chart, index) => (
+              <ChartContainer
+                key={`histogram-${index}-${histogramFilter}`}
+                title={`${chart.column} Distribution (Top ${histogramFilter})`}
+                type="histogram"
+                data={getFilteredHistogramData(chart)}
+                className="col-span-1"
+              />
+            ))
+          }
+
+          {/* KDE Plots */}
+          {(activeChartType === 'all' || activeChartType === 'kde') && chartData.kde?.length > 0 &&
+            chartData.kde.map((chart, index) => (
+              <ChartContainer
+                key={`kde-${index}`}
+                title={`${chart.column} Density`}
+                type="kde"
+                data={chart}
+                className="col-span-1"
+              />
+            ))
+          }
+
+          {/* Correlation Matrix */}
+         {/* Correlation Matrix */}
+         {(activeChartType === 'all' || activeChartType === 'correlation') && correlationUrl && (
+            <div className="col-span-1 md:col-span-2 lg:col-span-2 flex justify-center items-center my-4">
+              <img
+                src={correlationUrl}
+                className="rounded border max-w-full h-auto"
+                alt="Correlation Chart"
+              />
             </div>
-          </div>
+          )}
+
+
+          {/* Forecast Charts - Only for ecommerce domain */}
+          {domain === 'ecommerce' && (activeChartType === 'all' || activeChartType === 'forecast') && chartData.forecast?.length > 0 &&
+            chartData.forecast.map((chart, index) => (
+              <ChartContainer
+                key={`forecast-${index}-${forecastMonthsFilter}`}
+                title={`${chart.column} Forecast (${forecastMonthsFilter} Months)`}
+                type="forecast"
+                data={getFilteredForecastData(chart)}
+                className="col-span-1 md:col-span-2 lg:col-span-2"
+              />
+            ))
+          }
         </div>
       )}
+
       {isModalOpen && (
         <PermissionModal
           setIsModalOpen={setIsModalOpen}

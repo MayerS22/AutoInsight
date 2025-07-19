@@ -7,6 +7,7 @@ import OptionIcon from "../../assets/Option.svg";
 import DatasetIcon from "../../assets/DatasetName.svg";
 import DomainIcon from "../../assets/Domain.svg";
 import SuccessMessage from "./SuccessMessage.jsx"
+import { useSelector } from "react-redux";
 
 const SetupSummaryContent = ({
   businessDomain,
@@ -19,7 +20,7 @@ const SetupSummaryContent = ({
   success,
   showError
 }) => {
-
+  const theme = useSelector((state) => state.theme.mode);
   if (isProcessing) {
     return <SuccessMessage header={processingOption==="clean_only"?"Cleaning...":"Analyzing..."} lucide="analyzing"/>
 
@@ -41,7 +42,7 @@ const SetupSummaryContent = ({
         <p className="text-lg text-red-600 mt-2 font-bold">
           Dashboard generation Failed!
         </p>
-        <p className="text-sm text-gray-500">
+        <p className={`text-sm ${theme === "light" ? "text-gray-500" : "text-gray-300"}`}>
           Please try again or check your file.
         </p>
       </div>
@@ -72,24 +73,24 @@ const SetupSummaryContent = ({
 
   return (
     <div className="w-full max-w-full">
-      <h2 className="text-xl md:text-2xl font-bold text-purple/500 mb-2">Dashboard Setup Summary</h2>
-      <p className="text-xs md:text-sm text-orig/600 mb-4 md:mb-6">Review all your selections and configurations before finalizing your dashboard creation. This summary report consolidates your choices from each step so you can confirm that everything is set up exactly as you need.</p>
+      <h2 className={`text-xl md:text-2xl font-bold ${theme === "light" ? "text-purple-950" : "text-purple-200"} mb-2`}>Dashboard Setup Summary</h2>
+      <p className={`text-xs md:text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"} mb-4 md:mb-6`}>Review all your selections and configurations before finalizing your dashboard creation. This summary report consolidates your choices from each step so you can confirm that everything is set up exactly as you need.</p>
       
       <div className="text-bold mb-3 md:mb-4 flex flex-row items-center flex-wrap">
         <img src={DomainIcon} alt="Domain Icon" className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
-        <strong className="text-purple/500">Business Domain: </strong>  
+        <strong className={`${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>Business Domain: </strong>  
         <span className="ml-1 md:ml-2 break-all">{businessDomain==="ecommerce"?"Ecommerce":"Education"}</span>
       </div>
 
       <div className="mb-3 md:mb-4 flex flex-row items-center flex-wrap">
         <img src={DatasetIcon} alt="Dataset Icon" className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6 flex-shrink-0" />
-        <strong className="text-purple/500">Dataset:</strong> 
+        <strong className={`${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>Dataset:</strong> 
         <span className="ml-1 md:ml-2 break-all overflow-hidden text-ellipsis">{uploadedFile ? uploadedFile.name : "No dataset uploaded"}</span>
       </div>
 
       <div className="mb-3 md:mb-4 flex flex-row items-center flex-wrap">
         <img src={OptionIcon} alt="Processing Option Icon" className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
-        <strong className="text-purple/500">Processing Option:</strong>
+        <strong className={`${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>Processing Option:</strong>
         <span className="ml-1 md:ml-2">{processingOption==="clean_and_generate"?"Clean & Generate Dashboard":"Clean only"}</span>
       </div>
 
@@ -97,11 +98,11 @@ const SetupSummaryContent = ({
         <div className="mb-5 md:mb-6">
           <div className="mb-2 md:mb-4 flex flex-row items-center">
             <img src={UsersIcon} alt="Users with Access Icon" className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
-            <strong className="text-purple/500">User Access:</strong>
+            <strong className={`${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>User Access:</strong>
           </div>
           
           {users && users.length > 0 ? (
-            <div className="bg-white rounded-lg p-3 md:p-4 border border-gray-200 ml-2 md:ml-9 overflow-x-auto">
+            <div className={`${theme === "light" ? "border-gray-200" : "border-gray-600"} rounded-lg p-3 md:p-4 border ml-2 md:ml-9 overflow-x-auto`}>
               <div className={`${hasScrollableUsers ? "max-h-80 overflow-y-auto pr-2" : ""}`}>
                 {users.map((user) => (
                   <div key={user._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 last:mb-0 gap-2 pb-3 border-b border-gray-100 last:border-b-0 last:pb-0">
@@ -118,8 +119,8 @@ const SetupSummaryContent = ({
                         )}
                       </div>
                       <div className="overflow-hidden">
-                        <p className="font-medium text-gray-900 text-sm md:text-base truncate max-w-[200px] sm:max-w-none">{user.username}</p>
-                        <p className="text-xs md:text-sm text-gray-500 truncate max-w-[200px] sm:max-w-none">{user.email}</p>
+                        <p className={`font-medium ${theme === "light" ? "text-gray-900" : "text-gray-100"} text-sm md:text-base truncate max-w-[200px] sm:max-w-none`}>{user.username}</p>
+                        <p className={`text-xs md:text-sm ${theme === "light" ? "text-gray-500" : "text-gray-300"} truncate max-w-[200px] sm:max-w-none`}>{user.email}</p>
                       </div>
                     </div>
                     

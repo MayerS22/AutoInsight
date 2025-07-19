@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 // import { useNavigate } from "react-router-dom";
 import { FaStar, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import AddReview from "./AddReview";
@@ -8,6 +9,7 @@ import axios from "axios";
 
 const Reviews = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const theme = useSelector((state) => state.theme.mode);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
   const containerRef = useRef(null);
@@ -58,13 +60,17 @@ const Reviews = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-52 px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 text-center sm:text-left">
+      <motion.div 
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="flex flex-col sm:flex-row justify-between items-center mb-8 text-center sm:text-left"
+      >
         <div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-purple-900">
+          <h2 className={`text-3xl sm:text-4xl font-bold ${theme === "light" ? "text-purple-900" : "text-purple-300"}`}>
             What Our Customers Say
           </h2>
-          <p className="text-lg sm:text-xl text-purple-700 mt-2">
+          <p className={`text-lg sm:text-xl ${theme === "light" ? "text-purple-700" : "text-purple-300"} mt-2`}>
             We Want To Hear From You Too
           </p>
         </div>
@@ -74,10 +80,14 @@ const Reviews = () => {
         >
           Add Review
         </button>
-      </div>
+      </motion.div>
 
-      {/* Reviews Section */}
-      <div className="flex items-center mt-8">
+      <motion.div 
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="flex items-center mt-8"
+      >
         {/* Left Scroll Button */}
         <button
           onClick={scrollLeft}
@@ -112,7 +122,7 @@ const Reviews = () => {
                         : "U"}
                     </div>
                   )}
-                  <h4 className="font-semibold text-base sm:text-lg">
+                  <h4 className="font-semibold text-base sm:text-lg text-purple-900">
                     {review.user?.username || "Anonymous"}
                   </h4>
                 </div>
@@ -140,7 +150,7 @@ const Reviews = () => {
         >
           <FaChevronRight />
         </button>
-      </div>
+      </motion.div>
 
       {isModalOpen && (
         <AddReview

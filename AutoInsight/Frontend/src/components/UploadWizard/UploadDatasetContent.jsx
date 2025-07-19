@@ -7,7 +7,7 @@ import CloseIcon from "../../assets/Close.svg"
 import { uploadDataset } from "../../services/Api_Services";
 import axios from "axios";
 import SuccessMessage from "./SuccessMessage.jsx"
-
+import { useSelector } from "react-redux";
 
 const UploadDatasetContent = ({
   onNext,
@@ -27,6 +27,7 @@ const UploadDatasetContent = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dropAnimation, setDropAnimation] = useState(false);
   const [cleaningError, setCleaningError] = useState(false);
+  const theme = useSelector((state) => state.theme.mode);
 
   // Helper function to format file sizes to MB with two decimals
   const formatFileSize = (sizeInBytes) => {
@@ -179,10 +180,10 @@ const UploadDatasetContent = ({
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-purple/500 mb-2">
+      <h2 className={`text-2xl font-bold mb-2 ${theme === "light" ? "text-purple-950" : "text-purple-200"}`}>
         Upload Dataset
       </h2>
-      <p className="text-sm text-orig/600 mb-6">
+      <p className={`text-sm mb-6 ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
         Securely upload your data file to start building your dashboard. Our
         platform supports multiple file formats (CSV, Excel, JSON, etc.). Preview
         your data to ensure accuracy before moving forward.
@@ -202,7 +203,7 @@ const UploadDatasetContent = ({
         onDrop={handleDrop}
       >
         <img src={CloudAdd} alt="Cloud Add" className="h-14 w-14" />
-        <p className="font-poppins text-orig/500 text-base md:text-lg text-center pt-2 mb-2">
+        <p className={`font-poppins  text-base md:text-lg text-center pt-2 mb-2 ${theme === "light" ? "text-purple-700" : "text-purple-300"}`}>
           Choose a file or drag & drop it here
         </p>
         <p className="text-xs md:text-sm text-gray-400 mb-4">
@@ -247,7 +248,7 @@ const UploadDatasetContent = ({
                 )}
               </div>
               <div className="flex flex-wrap items-center space-x-4">
-                <span className="font-medium text-sm md:text-base">
+                <span className="font-medium text-sm md:text-base text-gray-500">
                   {uploadedDataset.name}
                 </span>
                 <span className="text-xs md:text-sm text-gray-500">
@@ -279,7 +280,7 @@ const UploadDatasetContent = ({
         {!showCleaningDashboard && (
           <button
             onClick={onPrevious}
-            className={`border bg-purple/500  text-white px-4 py-2 rounded-md flex items-center 
+            className={` bg-purple/500  text-white px-4 py-2 rounded-md flex items-center 
           ${uploadedDataset && !uploadComplete ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={uploadedDataset && !uploadComplete} // Disable only while uploading
           >
